@@ -1,0 +1,2 @@
+all:
+	clang++ readfile.cc
