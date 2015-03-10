@@ -38,7 +38,8 @@ vector<structure> readallstruct (const std::string& fileName) {
 	coord3d sphere; //sphere refers to 1 'atom'
 	string line;
 	vector<structure> allKissingSpheres; //this vector stores all read in structures
-	//double while loop, inner loop goes over all coordinates of one structure, outer loop goes over all structures till eof
+	//double while loop, inner loop goes over all coordinates of one structure, outer loop goes over all 
+	//structures till eof
 	while (true) {
 	    structure kissingSphere; //kissingSphere refers to 1 cluster of kissing Spheres
 	    while (true) {
@@ -46,13 +47,15 @@ vector<structure> readallstruct (const std::string& fileName) {
 	        //cout << line << endl;
 	        if(justempty(line) || infile.eof()) break;
 	        else {
-	    	    stringstream lineStream(line); //string can't be read into coord3d object, convert to stringstream first
+	    	    stringstream lineStream(line); //string can't be read into coord3d object, convert to 
+				                               //stringstream first
 	    	    lineStream >> sphere;
 	            kissingSphere.push_back(sphere);
 	            //cout << sphere << endl;
 	        }
 	    }
-		if (infile.eof()) break; //does last line has to be blank? break works for files with blank line at the end
+		if (infile.eof()) break; //does last line has to be blank? break works for files with blank line at 
+		                         //the end
 		else {
 		    allKissingSpheres.push_back(kissingSphere);
             //cout << "Strucuture has been read." << endl;
