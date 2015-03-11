@@ -36,7 +36,31 @@ struct coord3d {
 
 };
 
+
 class structure:public vector<coord3d> {    
+    //
+    //function to calculate LJ Energy, needs rij,rm and epsilon
+    //
+    double LJEnergy (const double distance, const double epsilon,const double rm) {
+        return epsilon * ( (pow (rm / distance, 12)) - 2 * (pow (rm / distance, 6)) );
+    }
+
+public:   
+    //
+    //function to sum over all sphere interactions, change later to work with different potentials
+    //
+   	double sumOverAllInteractions () {
+        double totalEnergy = 0;
+        //iterate over double index ij, where N>j>i and N>i
+    	for (structure::const_iterator iter = this->begin(); iter != this->end(); ++iter) { 
+    		for (structure::const_iterator jter = iter + 1; jter != this->end(); ++jter) {
+    			//cout << "iter is " << *iter << endl;
+    			//cout << "jter is " << *jter << endl;
+                totalEnergy += LJEnergy (coord3d::dist (*iter,*jter),1,0.5);
+            }
+    	}
+    	return totalEnergy;
+    }
 };
 
 #endif

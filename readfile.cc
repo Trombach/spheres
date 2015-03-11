@@ -73,28 +73,6 @@ vector<structure> readallstruct (const std::string& fileName) {
 }
 
 //
-//function to calculate LJ Energy, needs rij,rm and epsilon
-//
-double LJEnergy (const double distance,const double epsilon,const double rm) {
-    return epsilon * ( (pow (rm / distance, 12)) - 2 * (pow (rm / distance, 6)) );
-}
-
-//
-//function to sum over all sphere interactions, change later to work with different potentials
-//
-double sumOverAllInteractions (structure kissingSphere) {
-    double totalEnergy = 0;
-	for (structure::iterator iter = kissingSphere.begin(); iter != kissingSphere.end(); ++iter) { 
-		for (structure::iterator jter = iter + 1; jter != kissingSphere.end(); ++jter) {
-			//cout << "iter is " << *iter << endl;
-			//cout << "jter is " << *jter << endl;
-            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter),1,0.5);
-        }
-	}
-	return totalEnergy;
-}
-
-//
 //MAIN FUNCTION BEGINS HERE
 //
 
@@ -130,11 +108,10 @@ int main (int argc, char *argv[]) {
 //
 //READ IN ALL STRUCTURES AT ONCE AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE
 //
-    //iterate over double index ij, where N>j>i and N>i
     vector<structure> allKissingSpheres = readallstruct(fileName);
 	vector<double> allEnergies;
     for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
-	    allEnergies.push_back(sumOverAllInteractions(allKissingSpheres[i]));
+	    allEnergies.push_back( allKissingSpheres[i].sumOverAllInteractions() );
 	}
 
     cout << "Number of Energies is " << allEnergies.size() << endl;	
