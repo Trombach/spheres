@@ -45,6 +45,16 @@ class structure:public vector<coord3d> {
         return epsilon * ( (pow (rm / distance, 12)) - 2 * (pow (rm / distance, 6)) );
     }
 
+	//
+	//function to calculate LJ Gradient, needs rij,rm and epsilon
+	//
+	coord3d LJGradient(const coord3d ri, const coord3d rj, const double epsilon, const double rm) {
+		double distance = coord3d::dist (ri , rj);
+		coord3d distanceVector = rj - ri;
+		double LJGradientValue = ( 12 * epsilon / rm ) * ( (pow (rm / distance, 13)) - (pow (rm / distance, 7)) );
+		return distanceVector / distanceVector.norm() * LJGradientValue;
+	}
+
 public:   
     //
     //function to sum over all sphere interactions, change later to work with different potentials
@@ -56,11 +66,27 @@ public:
     		for (structure::const_iterator jter = iter + 1; jter != this->end(); ++jter) {
     			//cout << "iter is " << *iter << endl;
     			//cout << "jter is " << *jter << endl;
-                totalEnergy += LJEnergy (coord3d::dist (*iter,*jter),1,0.5);
+                totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), 1, 0.5);
             }
     	}
     	return totalEnergy;
     }
+	//
+	//function to sum over all gradients to get gradient for each sphere
+	//
+	vector<coord3d> sumOverAllGradients () {
+		vector<coord3d> gradients(this->size(), coord3d());
+		coord3d force;
+    	for (structure::size_type i = 0; i < this->size(); ++i) { 
+    		for (structure::size_type j = i + 1; j < this->size(); ++j) {
+			    coord3d twoBodyGradient = LJGradient ((*this)[i], (*this)[j], 1, 0.5);
+                gradients[i] += twoBodyGradient;
+				gradients[j] -= twoBodyGradient;
+            }
+    	}
+	    return gradients;
+	}
+
 };
 
 #endif

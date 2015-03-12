@@ -118,6 +118,19 @@ int main (int argc, char *argv[]) {
 	for (vector<double>::size_type i=0; i < allEnergies.size(); ++i) {
 	    cout << "Total LJ-Energy or structure " << i + 1 << " is " << allEnergies[i] << endl;
     }
+
+//
+//CALCULATE GRADIENTS
+//
+    vector<coord3d> gradients = allKissingSpheres[0].sumOverAllGradients();
+	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
+		cout << "Gradient for Atom " << i + 1 << ": " << gradients[i] << endl;
+	}
+    coord3d sum(0,0,0);
+	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
+		sum += allKissingSpheres[0][i];
+	}
+	cout << "Sum over all Forces is : " << sum << endl;
     return 0;  
 
 }
