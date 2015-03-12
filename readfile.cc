@@ -116,21 +116,24 @@ int main (int argc, char *argv[]) {
 
     cout << "Number of Energies is " << allEnergies.size() << endl;	
 	for (vector<double>::size_type i=0; i < allEnergies.size(); ++i) {
-	    cout << "Total LJ-Energy or structure " << i + 1 << " is " << allEnergies[i] << endl;
+	    cout << "Total LJ-Energy for structure " << i + 1 << " is " << allEnergies[i] << endl;
     }
 
 //
 //CALCULATE GRADIENTS
 //
-    vector<coord3d> gradients = allKissingSpheres[0].sumOverAllGradients();
-	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
-		cout << "Gradient for Atom " << i + 1 << ": " << gradients[i] << endl;
+	vector< vector<coord3d> > allGradients;
+    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
+        vector<coord3d> gradients = allKissingSpheres[i].sumOverAllGradients();
+        allGradients.push_back(gradients);
 	}
-    coord3d sum;
-	for (structure::size_type i = 0; i < gradients.size(); ++i) {
-		sum += gradients[i];
+    for (vector< vector<coord3d> >::size_type i = 0; i < allGradients.size(); ++i) { 
+        coord3d sum(0,0,0);
+	    for (structure::size_type j = 0; j < allGradients[i].size(); ++j) {
+	    	sum += allGradients[i][j];
+	    }
+	    cout << "Sum over all Forces for Structure " << i << " is : " << sum << endl;
 	}
-	cout << "Sum over all Forces is : " << sum << endl;
     return 0;  
 
 }
