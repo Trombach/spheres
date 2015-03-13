@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include "gsl/gsl_vector.h"
+#include "gsl/gsl_multiset.h"
 
 using namespace std;
 
@@ -41,9 +43,29 @@ class structure:public vector<coord3d> {
     //
     //function to calculate LJ Energy, needs rij,rm and epsilon
     //
-    double LJEnergy (const double distance, const double epsilon,const double rm) {
+    double LJEnergy (const double distance, const double epsilon, const double rm) {
         return epsilon * ( (pow (rm / distance, 12)) - 2 * (pow (rm / distance, 6)) );
     }
+    
+    //
+	//function for gsl multimin, returns f(x, params) value
+	//
+	double LJEnergy_gsl (const gsl_vector *v, void *params) {
+		structure kissingSphere;
+		for (size_t i = 0; i < v->size / 3; ++i) {
+            coord3d sphere(gsl_vector_get (v, 3i), gsl_vector_get (v, 3i + 1), gsl_vector_get (v, 3i + 2));
+			kissingSphere.push_back(sphere);
+		}
+        double totalEnergy = 0;
+    	for (structure::const_iterator iter = kissingSphere.begin(); iter != kissingSphere.end(); ++iter) { 
+    		for (structure::const_iterator jter = iter + 1; jter != kissingSphere.end(); ++jter) {
+    			//cout << "iter is " << *iter << endl;
+    			//cout << "jter is " << *jter << endl;
+                totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), params[0], params[1]);
+            }
+    	}
+    	return totalEnergy;
+	}
 
 	//
 	//function to calculate LJ Gradient, needs rij,rm and epsilon

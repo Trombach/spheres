@@ -132,7 +132,7 @@ int main (int argc, char *argv[]) {
 	    for (structure::size_type j = 0; j < allGradients[i].size(); ++j) {
 	    	sum += allGradients[i][j];
 	    }
-	    cout << "Sum over all Forces for Structure " << i << " is : " << sum << endl;
+	    cout << "Sum over all Forces for Structure " << i + 1 << " is : " << sum << endl;
 	}
     return 0;  
 
