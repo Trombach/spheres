@@ -7,7 +7,6 @@
 #include "gsl/gsl_vector.h"
 #include "gsl/gsl_multiset.h"
 
-using namespace std;
 
 struct coord3d {
     double x[3];
@@ -33,13 +32,13 @@ struct coord3d {
     double norm() const { return sqrt(dot(*this)); }
     static double dist(const coord3d& x, const coord3d& y){ return (x-y).norm(); }
 
-    friend ostream& operator<<(ostream &s, const coord3d& x){ s << fixed << "{" << x[0] << "," << x[1] << "," << x[2]<< "}"; return s; }
-    friend istream& operator>>(istream &s, coord3d& x){ for(int i=0;i<3;i++){ s >> x[i]; } return s; }
+    friend std::ostream& operator<<(std::ostream &s, const coord3d& x){ s << std::fixed << "{" << x[0] << "," << x[1] << "," << x[2]<< "}"; return s; }
+    friend std::istream& operator>>(std::istream &s, coord3d& x){ for(int i=0;i<3;i++){ s >> x[i]; } return s; }
 
 };
 
 
-class structure:public vector<coord3d> {    
+class structure:public std::vector<coord3d> {    
     //
     //function to calculate LJ Energy, needs rij,rm and epsilon
     //
@@ -47,28 +46,10 @@ class structure:public vector<coord3d> {
         return epsilon * ( (pow (rm / distance, 12)) - 2 * (pow (rm / distance, 6)) );
     }
     
-    //
-	//function for gsl multimin, returns f(x, params) value
-	//
-	double LJEnergy_gsl (const gsl_vector *v, void *params) {
-		structure kissingSphere;
-		for (size_t i = 0; i < v->size / 3; ++i) {
-            coord3d sphere(gsl_vector_get (v, 3i), gsl_vector_get (v, 3i + 1), gsl_vector_get (v, 3i + 2));
-			kissingSphere.push_back(sphere);
-		}
-        double totalEnergy = 0;
-    	for (structure::const_iterator iter = kissingSphere.begin(); iter != kissingSphere.end(); ++iter) { 
-    		for (structure::const_iterator jter = iter + 1; jter != kissingSphere.end(); ++jter) {
-    			//cout << "iter is " << *iter << endl;
-    			//cout << "jter is " << *jter << endl;
-                totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), params[0], params[1]);
-            }
-    	}
-    	return totalEnergy;
-	}
 
-	//
-	//function to calculate LJ Gradient, needs rij,rm and epsilon
+
+    //
+	//function to calculate LJ Gradient, needs rij,rm and epsilon; returns gradient for 1 sphere pair
 	//
 	coord3d LJGradient(const coord3d ri, const coord3d rj, const double epsilon, const double rm) {
 		double distance = coord3d::dist (ri , rj);
@@ -76,6 +57,7 @@ class structure:public vector<coord3d> {
 		double LJGradientValue = ( 12 * epsilon / rm ) * ( (pow (rm / distance, 13)) - (pow (rm / distance, 7)) );
 		return distanceVector / distanceVector.norm() * LJGradientValue;
 	}
+	
 
 public:   
     //
@@ -109,6 +91,39 @@ public:
 	    return gradients;
 	}
 
+    //
+	//function for gsl multimin, returns f(x, params) value
+	//
+	double LJEnergy_gsl (const gsl_vector *v, void *params) {
+		structure kissingSphere;
+		for (size_t i = 0; i < v->size / 3; ++i) {
+            coord3d sphere(gsl_vector_get (v, 3i), gsl_vector_get (v, 3i + 1), gsl_vector_get (v, 3i + 2));
+			kissingSphere.push_back(sphere);
+		}
+        double totalEnergy = 0;
+		double *p = static_cast<double*>(params);
+    	for (structure::const_iterator iter = kissingSphere.begin(); iter != kissingSphere.end(); ++iter) { 
+    		for (structure::const_iterator jter = iter + 1; jter != kissingSphere.end(); ++jter) {
+    			//cout << "iter is " << *iter << endl;
+    			//cout << "jter is " << *jter << endl;
+                totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), p[0], p[1]);
+            }
+    	}
+    	return totalEnergy;
+	}
+	
+	//
+	//function for gsl multimin, returns gradient of f
+	//
+	void LJGradient_gsl (const gsl_vector *v, void *params, gsl_vector *df) {
+		structure kissingSphere;
+		for (size_t i = 0; i < v->size / 3; ++i) {
+            coord3d sphere(gsl_vector_get (v, 3i), gsl_vector_get (v, 3i + 1), gsl_vector_get (v, 3i + 2));
+			kissingSphere.push_back(sphere);
+		}
+		double *p = static_cast<double*>(params);
+	        
+	}
 };
 
 #endif
