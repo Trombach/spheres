@@ -6,13 +6,7 @@
 #include "spheres.h"
 
 
-using std::cout;
-using std::cin;
-using std::endl;
-using std::string;
-using std::ifstream;
-using std::stringstream;
-using std::vector;
+using namespace std; 
 string fileName;
 
 //
@@ -128,18 +122,18 @@ int main (int argc, char *argv[]) {
 //
 //CALCULATE GRADIENTS
 //
-	vector< vector<coord3d> > allGradients;
-    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
-        vector<coord3d> gradients = allKissingSpheres[i].sumOverAllGradients();
-        allGradients.push_back(gradients);
-	}
-    for (vector< vector<coord3d> >::size_type i = 0; i < allGradients.size(); ++i) { 
-        coord3d sum(0,0,0);
-	    for (structure::size_type j = 0; j < allGradients[i].size(); ++j) {
-	    	sum += allGradients[i][j];
-	    }
-	    cout << "Sum over all Forces for Structure " << i + 1 << " is : " << sum << endl;
-	}
+//	vector< vector<coord3d> > allGradients;
+//    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
+//        vector<coord3d> gradients = allKissingSpheres[i].sumOverAllGradients();
+//        allGradients.push_back(gradients);
+//	}
+//    for (vector< vector<coord3d> >::size_type i = 0; i < allGradients.size(); ++i) { 
+//        coord3d sum(0,0,0);
+//	    for (structure::size_type j = 0; j < allGradients[i].size(); ++j) {
+//	    	sum += allGradients[i][j];
+//	    }
+//	    cout << "Sum over all Forces for Structure " << i + 1 << " is : " << sum << endl;
+//	}
     return 0;  
 
 }

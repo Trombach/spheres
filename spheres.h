@@ -6,6 +6,7 @@
 #include <math.h>
 #include "gsl/gsl_vector.h"
 #include "gsl/gsl_multiset.h"
+#include "gsl/gsl_multimin.h"
 
 
 struct coord3d {
@@ -39,7 +40,8 @@ struct coord3d {
 
 
 class structure:public std::vector<coord3d> {    
-    //
+    
+	//
     //function to calculate LJ Energy, needs rij,rm and epsilon
     //
     double LJEnergy (const double distance, const double epsilon, const double rm) {
@@ -58,39 +60,6 @@ class structure:public std::vector<coord3d> {
 		return distanceVector / distanceVector.norm() * LJGradientValue;
 	}
 	
-
-public:   
-    //
-    //function to sum over all sphere interactions, change later to work with different potentials
-    //
-   	double sumOverAllInteractions () {
-        double totalEnergy = 0;
-        //iterate over double index ij, where N>j>i and N>i
-    	for (structure::const_iterator iter = this->begin(); iter != this->end(); ++iter) { 
-    		for (structure::const_iterator jter = iter + 1; jter != this->end(); ++jter) {
-    			//cout << "iter is " << *iter << endl;
-    			//cout << "jter is " << *jter << endl;
-                totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), 1, 0.5);
-            }
-    	}
-    	return totalEnergy;
-    }
-	//
-	//function to sum over all gradients to get gradient for each sphere
-	//
-	vector<coord3d> sumOverAllGradients () {
-		vector<coord3d> gradients(this->size(), coord3d());
-		coord3d force;
-    	for (structure::size_type i = 0; i < this->size(); ++i) { 
-    		for (structure::size_type j = i + 1; j < this->size(); ++j) {
-			    coord3d twoBodyGradient = LJGradient ((*this)[i], (*this)[j], 1, 0.5);
-                gradients[i] += twoBodyGradient;
-				gradients[j] -= twoBodyGradient;
-            }
-    	}
-	    return gradients;
-	}
-
     //
 	//function for gsl multimin, returns f(x, params) value
 	//
@@ -122,7 +91,70 @@ public:
 			kissingSphere.push_back(sphere);
 		}
 		double *p = static_cast<double*>(params);
-	        
+		vector<coord3d> gradients = kissingSphere.sumOverAllGradients(p);
+        for (vector<coord3d>::size_type i = 0; i < gradients.size(); ++i) {
+			for (int j=0; j <= 2; ++j) {
+				gsl_vector_set(df, i+j, gradients[i][j]);
+			}
+		}
+	}
+    
+
+	//
+	//function for gsl multimin, compute f and df together
+	//
+	void LJEnergyAndGradient_gsl (const gsl_vector *x, void *params, double *f, gsl_vector *df) {
+		*f = LJEnergy_gsl(x, params);
+		LJGradient_gsl(x, params, df);
+	}
+
+public:   
+
+    //
+    //function to sum over all sphere interactions, change later to work with different potentials
+    //
+   	double sumOverAllInteractions () {
+        double totalEnergy = 0;
+        //iterate over double index ij, where N>j>i and N>i
+    	for (structure::const_iterator iter = this->begin(); iter != this->end(); ++iter) { 
+    		for (structure::const_iterator jter = iter + 1; jter != this->end(); ++jter) {
+    			//cout << "iter is " << *iter << endl;
+    			//cout << "jter is " << *jter << endl;
+                totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), 1, 0.5);
+            }
+    	}
+    	return totalEnergy;
+    }
+
+	//
+	//function to sum over all gradients to get gradient for each sphere
+	//
+	vector<coord3d> sumOverAllGradients (const double *p) {
+		vector<coord3d> gradients(this->size(), coord3d());
+		coord3d force;
+    	for (structure::size_type i = 0; i < this->size(); ++i) { 
+    		for (structure::size_type j = i + 1; j < this->size(); ++j) {
+			    coord3d twoBodyGradient = LJGradient ((*this)[i], (*this)[j], p[0], p[1]);
+                gradients[i] += twoBodyGradient;
+				gradients[j] -= twoBodyGradient;
+            }
+    	}
+	    return gradients;
+	}
+    
+	//
+	//initialize gsl minimizer function
+	//
+	void optimize () {
+		gsl_multimin_function_fdf min_function;
+
+		double p[2] = { 1.0, 0.5 };
+
+		min_function.n = (this->size()) * 3;
+        min_function.f = &structure::LJEnergy_gsl;
+		min_function.df = &LJGradient_gsl;
+		min_function.fdf = &LJEnergyAndGradient_gsl;
+		min_function.params = static_cast<void*>(p);
 	}
 };
 
