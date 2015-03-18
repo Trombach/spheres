@@ -1,2 +1,2 @@
 all:
-	clang++ readfile.cc
+	clang++ -lgsl -lgslcblas  readfile.cc spheres.cc
