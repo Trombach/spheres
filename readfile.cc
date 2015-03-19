@@ -7,7 +7,6 @@
 
 
 using namespace std; 
-string fileName;
 
 //
 //function for determining if a line in the input is emtpy
@@ -94,7 +93,7 @@ int main (int argc, char *argv[]) {
 //CHECK IF FILE EXISTS
 //
 
-    fileName = argv[ argc -1 ]; //safe input file name
+    string fileName = argv[ argc -1 ]; //safe input file name
     cout << fileName << endl;
     
     if (fexists(fileName)) {
@@ -134,6 +133,12 @@ int main (int argc, char *argv[]) {
 //	    }
 //	    cout << "Sum over all Forces for Structure " << i + 1 << " is : " << sum << endl;
 //	}
+//
+//
+//OPTIMIZE STRUCTURE
+//
+    allKissingSpheres[0].optimize();    
+
     return 0;  
 
 }

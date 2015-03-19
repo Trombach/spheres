@@ -56,7 +56,7 @@ vector<coord3d> structure::sumOverAllGradients (const double *p) {
 double LJEnergy_gsl (const gsl_vector *v, void *params) {
 	structure kissingSphere;
 	for (size_t i = 0; i < v->size / 3; ++i) {
-        coord3d sphere(gsl_vector_get (v, 3i), gsl_vector_get (v, 3i + 1), gsl_vector_get (v, 3i + 2));
+        coord3d sphere(gsl_vector_get (v, 3 * i), gsl_vector_get (v, 3 * i + 1), gsl_vector_get (v, 3 * i + 2));
 		kissingSphere.push_back(sphere);
 	}
     double totalEnergy = 0;
@@ -77,7 +77,7 @@ double LJEnergy_gsl (const gsl_vector *v, void *params) {
 void LJGradient_gsl (const gsl_vector *v, void *params, gsl_vector *df) {
 	structure kissingSphere;
 	for (size_t i = 0; i < v->size / 3; ++i) {
-        coord3d sphere(gsl_vector_get (v, 3i), gsl_vector_get (v, 3i + 1), gsl_vector_get (v, 3i + 2));
+        coord3d sphere(gsl_vector_get (v, 3 * i), gsl_vector_get (v, 3 * i + 1), gsl_vector_get (v, 3 * i + 2));
 		kissingSphere.push_back(sphere);
 	}
 	double *p = static_cast<double*>(params);
@@ -103,6 +103,12 @@ void LJEnergyAndGradient_gsl (const gsl_vector *x, void *params, double *f, gsl_
 //initialize gsl minimizer function
 //
 void structure::optimize () {
+	int status;
+
+	const gsl_multimin_fdfminimizer_type *T;
+	gsl_multimin_fdfminimizer *s;
+    
+	gsl_vector *x;
 	gsl_multimin_function_fdf min_function;
 
 	double p[2] = { 1.0, 0.5 };
@@ -112,4 +118,44 @@ void structure::optimize () {
 	min_function.df = &LJGradient_gsl;
 	min_function.fdf = &LJEnergyAndGradient_gsl;
 	min_function.params = static_cast<void*>(p);
+
+	x = gsl_vector_alloc ( (this->size()) *3 );
+    for (structure::size_type i = 0; i < this->size(); ++i) {
+	    for (int j = 0; j<=2; ++j) {
+	        gsl_vector_set(x, i+j, (*this)[i][j]);
+		}
+	}
+
+	T = gsl_multimin_fdfminimizer_conjugate_fr;
+	s = gsl_multimin_fdfminimizer_alloc (T, (this->size()) * 3);
+
+	gsl_multimin_fdfminimizer_set (s, &min_function, x, 0.01, 1e-4);
+
+	size_t i = 0;
+	do {
+		i++;
+		status = gsl_multimin_fdfminimizer_iterate (s);
+
+		if (status)
+			break;
+
+		status = gsl_multimin_test_gradient (s->gradient, 1e-3);
+
+		if (status == GSL_SUCCESS)
+			cout << "Minimum found at:\n" << endl;
+
+		//create structure for optimized geometry
+    	structure kissingSphere;
+    	for (size_t i = 0; i < x->size / 3; ++i) {
+            coord3d sphere(gsl_vector_get (s->x, 3 * i), gsl_vector_get (s->x, 3 * i + 1), gsl_vector_get (s->x, 3 * i + 2));
+			cout << sphere << s->f << endl;
+    		kissingSphere.push_back(sphere);
+    	}
+
+	}
+	while (status == GSL_CONTINUE && i < 100);
+
+    gsl_multimin_fdfminimizer_free (s);
+	gsl_vector_free (x);
+
 }
