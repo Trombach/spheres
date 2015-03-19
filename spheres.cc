@@ -30,7 +30,7 @@ double structure::sumOverAllInteractions () {
 		for (structure::const_iterator jter = iter + 1; jter != this->end(); ++jter) {
 			//cout << "iter is " << *iter << endl;
 			//cout << "jter is " << *jter << endl;
-            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), 1, 0.5);
+            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), 1.0, 1.0);
         }
 	}
 	return totalEnergy;
@@ -84,7 +84,7 @@ void LJGradient_gsl (const gsl_vector *v, void *params, gsl_vector *df) {
 	vector<coord3d> gradients = kissingSphere.sumOverAllGradients(p);
     for (vector<coord3d>::size_type i = 0; i < gradients.size(); ++i) {
 		for (int j=0; j <= 2; ++j) {
-			gsl_vector_set(df, i+j, gradients[i][j]);
+			gsl_vector_set(df, 3 * i + j, gradients[i][j]);
 		}
 	}
 }
@@ -111,7 +111,7 @@ void structure::optimize () {
 	gsl_vector *x;
 	gsl_multimin_function_fdf min_function;
 
-	double p[2] = { 1.0, 0.5 };
+	double p[2] = { 1.0, 1.0 };
 
 	min_function.n = (this->size()) * 3;
     min_function.f = &LJEnergy_gsl;
@@ -122,17 +122,18 @@ void structure::optimize () {
 	x = gsl_vector_alloc ( (this->size()) *3 );
     for (structure::size_type i = 0; i < this->size(); ++i) {
 	    for (int j = 0; j<=2; ++j) {
-	        gsl_vector_set(x, i+j, (*this)[i][j]);
+	        gsl_vector_set(x, 3 * i + j, (*this)[i][j]);
 		}
 	}
 
-	T = gsl_multimin_fdfminimizer_conjugate_fr;
+	T = gsl_multimin_fdfminimizer_vector_bfgs2;
 	s = gsl_multimin_fdfminimizer_alloc (T, (this->size()) * 3);
 
 	gsl_multimin_fdfminimizer_set (s, &min_function, x, 0.01, 1e-4);
 
 	size_t i = 0;
 	do {
+		cout << "-----------------------------------------------" << endl;
 		i++;
 		status = gsl_multimin_fdfminimizer_iterate (s);
 
@@ -148,10 +149,10 @@ void structure::optimize () {
     	structure kissingSphere;
     	for (size_t i = 0; i < x->size / 3; ++i) {
             coord3d sphere(gsl_vector_get (s->x, 3 * i), gsl_vector_get (s->x, 3 * i + 1), gsl_vector_get (s->x, 3 * i + 2));
-			cout << sphere << s->f << endl;
+			cout << sphere <<  endl;
     		kissingSphere.push_back(sphere);
     	}
-
+    cout << s->f << endl;
 	}
 	while (status == GSL_CONTINUE && i < 100);
 

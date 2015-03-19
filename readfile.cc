@@ -60,7 +60,7 @@ vector<structure> readallstruct (const std::string& fileName) {
             //cout << "Strucuture has been read." << endl;
 	    }
 	}
-
+    infile.close();
 	cout << "Number of structures is " << allKissingSpheres.size() << endl;
 	//cout << allKissingSpheres[0][3] << endl;
 	//cout << allKissingSpheres[1][3] << endl;
@@ -114,10 +114,14 @@ int main (int argc, char *argv[]) {
 	}
 
     cout << "Number of Energies is " << allEnergies.size() << endl;	
-	for (vector<double>::size_type i=0; i < allEnergies.size(); ++i) {
+	for (vector<double>::size_type i=0; i < 1; ++i) {
 	    cout << "Total LJ-Energy for structure " << i + 1 << " is " << allEnergies[i] << endl;
     }
-
+    
+	cout << "Structure is:" << endl;
+	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
+		cout << allKissingSpheres[0][i] << endl;
+	}
 //
 //CALCULATE GRADIENTS
 //
