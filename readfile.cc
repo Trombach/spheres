@@ -72,6 +72,18 @@ vector<structure> readallstruct (const std::string& fileName) {
 }
 
 //
+//function for reading and processing the settings file
+//
+void readSettings () {
+    ifstream infile("settings");
+	string line;
+	
+	while (infile >> line) {
+        cout << line << endl;   
+	    	
+    }
+}	
+//
 //MAIN FUNCTION BEGINS HERE
 //
 
@@ -103,7 +115,14 @@ int main (int argc, char *argv[]) {
         cout << "File " << fileName << " does not exist." << endl;
         return 1;
     }
-    
+    if (fexists("settings")) {
+		cout << "Settings file found." << endl;
+	}
+	else {
+		cout << "No settings file in working directory" << endl;
+		return 1;
+	}
+
 //
 //READ IN ALL STRUCTURES AT ONCE AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE
 //
@@ -142,7 +161,7 @@ int main (int argc, char *argv[]) {
 //OPTIMIZE STRUCTURE
 //
     allKissingSpheres[0].optimize();    
-
+    readSettings();
     return 0;  
-
+    
 }

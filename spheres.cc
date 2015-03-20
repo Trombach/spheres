@@ -128,8 +128,10 @@ void structure::optimize () {
 
 	T = gsl_multimin_fdfminimizer_vector_bfgs2;
 	s = gsl_multimin_fdfminimizer_alloc (T, (this->size()) * 3);
-
-	gsl_multimin_fdfminimizer_set (s, &min_function, x, 0.01, 1e-4);
+    
+	double stepSize = 0.01;
+	double accuracy = 1e-4;
+	gsl_multimin_fdfminimizer_set (s, &min_function, x, stepSize, accuracy);
 
 	size_t i = 0;
 	do {
@@ -139,8 +141,9 @@ void structure::optimize () {
 
 		if (status)
 			break;
-
-		status = gsl_multimin_test_gradient (s->gradient, 1e-3);
+        
+		double absoluteTolerance = 1e-3;
+		status = gsl_multimin_test_gradient (s->gradient, absoluteTolerance);
 
 		if (status == GSL_SUCCESS)
 			cout << "Minimum found at:\n" << endl;
@@ -152,7 +155,7 @@ void structure::optimize () {
 			cout << sphere <<  endl;
     		kissingSphere.push_back(sphere);
     	}
-    cout << s->f << endl;
+    cout << "LJ Energy is: " << s->f << endl;
 	}
 	while (status == GSL_CONTINUE && i < 100);
 
