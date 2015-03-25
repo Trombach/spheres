@@ -4,10 +4,10 @@
 #include <vector>
 #include <sstream>
 #include "spheres.h"
-
+#include <libconfig.h++>
 
 using namespace std; 
-
+using namespace libconfig;
 //
 //function for determining if a line in the input is emtpy
 //used for breaking the read loop
@@ -74,14 +74,35 @@ vector<structure> readallstruct (const std::string& fileName) {
 //
 //function for reading and processing the settings file
 //
-void readSettings () {
+int readSettings () {
     ifstream infile("settings");
 	string line;
 	
 	while (infile >> line) {
-        cout << line << endl;   
+        cout << line << endl;
+		string potential;
+	    if (line == "%pot") {
+		    getline (infile, line);
+			potential = line;
+		    cout << "potential is: " << potential << endl;
+
+			if (potential == "LJ") {
+				double epsilon;
+				//double rm;
+			    while (infile >> line) {
+                    if (line == "epsilon") {
+				        getline (infile, line);
+						epsilon = std::stod(line);
+						cout << "Epsilon is: " << epsilon << endl; 
+			        }
+				}	
+		    }	
+			else cout << "Potential unknown" << endl;
+			return 1;
+		}	
 	    	
     }
+	return 0;
 }	
 //
 //MAIN FUNCTION BEGINS HERE
@@ -161,7 +182,30 @@ int main (int argc, char *argv[]) {
 //OPTIMIZE STRUCTURE
 //
     allKissingSpheres[0].optimize();    
-    readSettings();
-    return 0;  
+
+	libconfig::Config cfg;
+	try {
+	    cfg.readFile("settings");
+	}
+	catch(const FileIOException &fioex) {
+        cout << "I/O error while reading file." << endl;
+		return(EXIT_FAILURE);
+	}
+    catch(const ParseException &pex) {
+		cout << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
+	    return(EXIT_FAILURE);
+
+	}
+    try {
+		string name = cfg.lookup("name");
+		cout << "name = " << name << endl;
+	}
+	catch (const SettingNotFoundException &nfex) {
+		cout << "No 'name' setting in configuration file." << endl;
+	}
+
+
+    return 0; 
+
     
 }

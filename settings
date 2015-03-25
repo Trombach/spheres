@@ -1,9 +1,13 @@
-%pot LJ
-epsilon 1.0 
-rm 1.0
-end
-%alg BFGS
-accuracy 1e-4
-dforce 1e-3
-stepsize 0.01
-end
+name = "abc";
+
+potential: {
+    name = "LJ";
+    epsilon = 1.0;
+    rm =  1.0;
+}
+algorythm: {
+    name = "BFGS";
+    accuracy =  1e-4;
+    dforce = 1e-3;
+    stepsize = 0.01;
+}

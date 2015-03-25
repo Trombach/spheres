@@ -1,2 +1,2 @@
 all:
-	clang++ -lgsl -lgslcblas  readfile.cc spheres.cc
+	clang++ -lconfig++ -lgsl -lgslcblas -std=c++11 readfile.cc spheres.cc
