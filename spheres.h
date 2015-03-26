@@ -54,7 +54,7 @@ public:
 	//
 	//initialize gsl minimizer function
 	//
-	void optimize ();
+	void optimize (const vector<double> parameters, const vector<double> opt);
 };
 
 #endif

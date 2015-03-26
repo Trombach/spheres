@@ -109,7 +109,7 @@ void LJEnergyAndGradient_gsl (const gsl_vector *x, void *params, double *f, gsl_
 //
 //initialize gsl minimizer function
 //
-void structure::optimize () {
+void structure::optimize (vector<double> parameters, const vector<double> opt) {
 	int status;
 
 	const gsl_multimin_fdfminimizer_type *T;
@@ -118,7 +118,7 @@ void structure::optimize () {
 	gsl_vector *x;
 	gsl_multimin_function_fdf min_function;
 
-	double p[2] = { 1.0, 1.0 };
+    double p[2] = { 1.0, 1.0 };
 
 	min_function.n = (this->size()) * 3;
     min_function.f = &LJEnergy_gsl;
@@ -136,8 +136,8 @@ void structure::optimize () {
 	T = gsl_multimin_fdfminimizer_vector_bfgs2;
 	s = gsl_multimin_fdfminimizer_alloc (T, (this->size()) * 3);
     
-	double stepSize = 0.01;
-	double accuracy = 1e-4;
+	double stepSize = opt[2];
+	double accuracy = opt[0];
 	gsl_multimin_fdfminimizer_set (s, &min_function, x, stepSize, accuracy);
 
 	size_t i = 0;
@@ -145,12 +145,14 @@ void structure::optimize () {
 		cout << "-----------------------------------------------" << endl;
 		i++;
 		status = gsl_multimin_fdfminimizer_iterate (s);
-
+        cout << status << endl;
+		
 		if (status)
 			break;
         
-		double absoluteTolerance = 1e-3;
+		double absoluteTolerance = opt[1];
 		status = gsl_multimin_test_gradient (s->gradient, absoluteTolerance);
+        //cout << status << endl;
 
 		if (status == GSL_SUCCESS)
 			cout << "Minimum found at:\n" << endl;

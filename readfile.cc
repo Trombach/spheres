@@ -181,7 +181,6 @@ int main (int argc, char *argv[]) {
 //
 //OPTIMIZE STRUCTURE
 //
-    allKissingSpheres[0].optimize();    
 
 	libconfig::Config cfg;
 	try {
@@ -196,14 +195,82 @@ int main (int argc, char *argv[]) {
 	    return(EXIT_FAILURE);
 
 	}
-    try {
-		string name = cfg.lookup("name");
-		cout << "name = " << name << endl;
+	string potential;
+	vector<double> p;
+    if (cfg.lookupValue("potential.name", potential)) {
+		cout << "Chosen potential is " << potential << endl;
 	}
-	catch (const SettingNotFoundException &nfex) {
-		cout << "No 'name' setting in configuration file." << endl;
+	else {
+		cout << "No 'potential' setting in configuration file." << endl;
+		return 1;
 	}
 
+    if (potential == "LJ") {
+		double epsilon;
+		double rm;
+		cout << "Setting LJ Parameters." << endl;
+		if (cfg.lookupValue("potential.epsilon", epsilon)) {
+			p.push_back(epsilon);
+			cout << "Epsilon set to " << p[0] << endl;
+		}
+		else {
+			cout << "No 'epsilon' in setting file." << endl;
+			return 1;
+		}
+		if (cfg.lookupValue("potential.rm", rm)) {
+			p.push_back(rm);
+			cout << "Rm set to " << p[1] << endl;
+		}
+		else {
+			cout << "No 'rm' in setting file." << endl;
+			return 1;
+		}
+	}
+    string algo;
+	double accuracy;
+	double dforce;
+	double stepsize;
+	vector<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize
+	if (cfg.lookupValue("opt.name", algo)) {
+		cout << "Optimization algo set to " << algo << endl;
+	}
+	else {
+	    cout << "No 'opt' setting in configuration file." << endl;
+		return 1;
+	}
+
+	if (cfg.lookupValue("opt.accuracy", accuracy)) {
+		cout << "Accuracy set to " << accuracy << endl;
+	}
+	else {
+	    cout << "No 'accuracy' setting in configuration file." << endl;
+		accuracy = 1e-4;
+		cout << "Fall back to " << accuracy << endl;
+	}
+
+	if (cfg.lookupValue("opt.dforce", dforce)) {
+		cout << "Convergence criterion for gradients set to " << dforce << endl;
+	}
+	else {
+	    cout << "No 'dforce' setting in configuration file." << endl;
+		dforce = 1e-3;
+	    cout << "Fall back to " << dforce << endl;
+	}
+
+	if (cfg.lookupValue("opt.stepsize", stepsize)) {
+		cout << "Stepsize set to " << stepsize << endl;
+	}
+	else {
+	    cout << "No 'stepsize' setting in configuration file." << endl;
+		stepsize = 0.01;
+		cout << "Fall back to " << stepsize << endl;
+	}
+    opt.push_back(accuracy);
+	opt.push_back(dforce);
+	opt.push_back(stepsize);
+    
+
+    allKissingSpheres[0].optimize(p,opt);    
 
     return 0; 
 

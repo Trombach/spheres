@@ -1,13 +1,12 @@
-name = "abc";
 
 potential: {
     name = "LJ";
     epsilon = 1.0;
     rm =  1.0;
-}
-algorythm: {
+};
+opt: {
     name = "BFGS";
     accuracy =  1e-4;
     dforce = 1e-3;
     stepsize = 0.01;
-}
+};
