@@ -118,13 +118,12 @@ void structure::optimize (vector<double> parameters, const vector<double> opt) {
 	gsl_vector *x;
 	gsl_multimin_function_fdf min_function;
 
-    double p[2] = { 1.0, 1.0 };
 
 	min_function.n = (this->size()) * 3;
     min_function.f = &LJEnergy_gsl;
 	min_function.df = &LJGradient_gsl;
 	min_function.fdf = &LJEnergyAndGradient_gsl;
-	min_function.params = static_cast<void*>(p);
+	min_function.params = static_cast<void*>(&parameters[0]);
 
 	x = gsl_vector_alloc ( (this->size()) *3 );
     for (structure::size_type i = 0; i < this->size(); ++i) {
