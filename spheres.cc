@@ -44,7 +44,7 @@ double structure::sumOverAllInteractions () {
 }
 
 
-vector<coord3d> structure::sumOverAllGradients (const double *p) {
+vector<coord3d> structure::sumOverAllGradients (const vector<double> &p) {
 	vector<coord3d> gradients(this->size(), coord3d());
 	coord3d force;
 	for (structure::size_type i = 0; i < this->size(); ++i) { 
@@ -67,12 +67,12 @@ double LJEnergy_gsl (const gsl_vector *v, void *params) {
 		kissingSphere.push_back(sphere);
 	}
     double totalEnergy = 0;
-	double *p = static_cast<double*>(params);
+	vector<double> *p = static_cast<vector<double>* >(params);
 	for (structure::const_iterator iter = kissingSphere.begin(); iter != kissingSphere.end(); ++iter) { 
 		for (structure::const_iterator jter = iter + 1; jter != kissingSphere.end(); ++jter) {
 			//cout << "iter is " << *iter << endl;
 			//cout << "jter is " << *jter << endl;
-            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), p[0], p[1]);
+            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), (*p)[0], (*p)[1]);
         }
 	}
 	return totalEnergy;
@@ -87,8 +87,8 @@ void LJGradient_gsl (const gsl_vector *v, void *params, gsl_vector *df) {
         coord3d sphere(gsl_vector_get (v, 3 * i), gsl_vector_get (v, 3 * i + 1), gsl_vector_get (v, 3 * i + 2));
 		kissingSphere.push_back(sphere);
 	}
-	double *p = static_cast<double*>(params);
-	vector<coord3d> gradients = kissingSphere.sumOverAllGradients(p);
+	vector<double> *p = static_cast<vector<double>*>(params);
+	vector<coord3d> gradients = kissingSphere.sumOverAllGradients(*p);
     for (vector<coord3d>::size_type i = 0; i < gradients.size(); ++i) {
 		for (int j=0; j <= 2; ++j) {
 			gsl_vector_set(df, 3 * i + j, gradients[i][j]);
@@ -109,7 +109,7 @@ void LJEnergyAndGradient_gsl (const gsl_vector *x, void *params, double *f, gsl_
 //
 //initialize gsl minimizer function
 //
-void structure::optimize (vector<double> parameters, const vector<double> opt) {
+int structure::optimize (const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
 	int status;
 
 	const gsl_multimin_fdfminimizer_type *T;
@@ -117,13 +117,21 @@ void structure::optimize (vector<double> parameters, const vector<double> opt) {
     
 	gsl_vector *x;
 	gsl_multimin_function_fdf min_function;
+    
 
+    switch (potential_switch) {
+		case 1:
+            min_function.f = &LJEnergy_gsl;
+	        min_function.df = &LJGradient_gsl;
+	        min_function.fdf = &LJEnergyAndGradient_gsl;
+			break;
+		default:
+			cerr << "Error, probably bad input of pot" << endl;
+			return 1;
+    }
 
-	min_function.n = (this->size()) * 3;
-    min_function.f = &LJEnergy_gsl;
-	min_function.df = &LJGradient_gsl;
-	min_function.fdf = &LJEnergyAndGradient_gsl;
-	min_function.params = static_cast<void*>(&parameters[0]);
+    min_function.n = (this->size()) * 3;
+	min_function.params = static_cast<void*>(&parameters);
 
 	x = gsl_vector_alloc ( (this->size()) *3 );
     for (structure::size_type i = 0; i < this->size(); ++i) {
@@ -132,7 +140,16 @@ void structure::optimize (vector<double> parameters, const vector<double> opt) {
 		}
 	}
 
-	T = gsl_multimin_fdfminimizer_vector_bfgs2;
+
+	switch (algo_switch) {
+		case 1:
+	        T = gsl_multimin_fdfminimizer_vector_bfgs2;
+			break;
+		default:
+			cerr << "Error, probably bad input of opt algo" << endl;
+			return 1;
+	}
+
 	s = gsl_multimin_fdfminimizer_alloc (T, (this->size()) * 3);
     
 	double stepSize = opt[2];
@@ -169,5 +186,5 @@ void structure::optimize (vector<double> parameters, const vector<double> opt) {
 
     gsl_multimin_fdfminimizer_free (s);
 	gsl_vector_free (x);
-
+    return 0;
 }

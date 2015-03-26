@@ -49,12 +49,12 @@ public:
 	//
 	//function to sum over all gradients to get gradient for each sphere
 	//
-	vector<coord3d> sumOverAllGradients (const double *p);
+	vector<coord3d> sumOverAllGradients (const vector<double> &p);
     
 	//
 	//initialize gsl minimizer function
 	//
-	void optimize (const vector<double> parameters, const vector<double> opt);
+	int optimize (const int &algo_switch, const int &potential_switch, const vector<double> parameters, const vector<double> opt);
 };
 
 #endif

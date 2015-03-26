@@ -179,7 +179,7 @@ int main (int argc, char *argv[]) {
 //	}
 //
 //
-//OPTIMIZE STRUCTURE
+//READ SETTINGS FILE
 //
 
 	libconfig::Config cfg;
@@ -197,7 +197,16 @@ int main (int argc, char *argv[]) {
 	}
 	string potential;
 	vector<double> p;
+	int potential_switch;
+	int algo_switch;
+    string algo;
+	double accuracy;
+	double dforce;
+	double stepsize;
     if (cfg.lookupValue("potential.name", potential)) {
+		if (potential == "LJ") {
+		    potential_switch = 1;
+		}
 		cout << "Chosen potential is " << potential << endl;
 	}
 	else {
@@ -226,12 +235,11 @@ int main (int argc, char *argv[]) {
 			return 1;
 		}
 	}
-    string algo;
-	double accuracy;
-	double dforce;
-	double stepsize;
 	vector<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize
 	if (cfg.lookupValue("opt.name", algo)) {
+		if (algo == "BFGS") {
+			algo_switch = 1;
+		}
 		cout << "Optimization algo set to " << algo << endl;
 	}
 	else {
@@ -270,7 +278,7 @@ int main (int argc, char *argv[]) {
 	opt.push_back(stepsize);
     
 
-    allKissingSpheres[0].optimize(p,opt);    
+    allKissingSpheres[0].optimize(algo_switch, potential_switch, p, opt);    
 
     return 0; 
 
