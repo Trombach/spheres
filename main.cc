@@ -23,7 +23,7 @@ bool justempty(string str) {
 //function for testing if input file exists
 //returns true for existing file
 //
-bool fexists (const std::string& fileName) {
+bool fexists (const std::string &fileName) {
     ifstream infile(fileName.c_str());
     return (bool)infile;
 }

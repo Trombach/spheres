@@ -30,6 +30,7 @@ double LJHessian (const double distance, const double epsilon, const double rm) 
     return - 12 * epsilon / pow (rm, 2) * (13 * pow (rm / distance, 14) - 7 * pow (rm / distance, 8) );
 }
 
+
 double structure::sumOverAllInteractions () {
     double totalEnergy = 0;
     //iterate over double index ij, where N>j>i and N>i
