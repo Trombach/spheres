@@ -25,7 +25,7 @@ bool justempty(string str) {
 //
 bool fexists (const std::string& fileName) {
     ifstream infile(fileName.c_str());
-    return infile;
+    return (bool)infile;
 }
 
 //
@@ -71,39 +71,6 @@ vector<structure> readallstruct (const std::string& fileName) {
 	return allKissingSpheres;
 }
 
-//
-//function for reading and processing the settings file
-//
-int readSettings () {
-    ifstream infile("settings");
-	string line;
-	
-	while (infile >> line) {
-        cout << line << endl;
-		string potential;
-	    if (line == "%pot") {
-		    getline (infile, line);
-			potential = line;
-		    cout << "potential is: " << potential << endl;
-
-			if (potential == "LJ") {
-				double epsilon;
-				//double rm;
-			    while (infile >> line) {
-                    if (line == "epsilon") {
-				        getline (infile, line);
-						epsilon = std::stod(line);
-						cout << "Epsilon is: " << epsilon << endl; 
-			        }
-				}	
-		    }	
-			else cout << "Potential unknown" << endl;
-			return 1;
-		}	
-	    	
-    }
-	return 0;
-}	
 //
 //MAIN FUNCTION BEGINS HERE
 //
