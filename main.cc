@@ -145,24 +145,6 @@ int main (int argc, char *argv[]) {
 	}
 
 //
-//READ IN ALL STRUCTURES AT ONCE AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE
-//
-    vector<structure> allKissingSpheres = readallstruct(fileName);
-	vector<double> allEnergies;
-    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
-	    allEnergies.push_back( allKissingSpheres[i].sumOverAllInteractions() );
-	}
-
-    cout << "Number of Energies is " << allEnergies.size() << endl;	
-	for (vector<double>::size_type i=0; i < 1; ++i) {
-	    cout << "Total LJ-Energy for structure " << i + 1 << " is " << allEnergies[i] << endl;
-    }
-    
-	cout << "Structure is:" << endl;
-	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
-		cout << allKissingSpheres[0][i] << endl;
-	}
-//
 //CALCULATE GRADIENTS
 //
 //	vector< vector<coord3d> > allGradients;
@@ -277,8 +259,30 @@ int main (int argc, char *argv[]) {
 	opt.push_back(dforce);
 	opt.push_back(stepsize);
     
+//
+//READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
+//
+    vector<structure> allKissingSpheres = readallstruct(fileName);
+//	vector<double> allEnergies;
+//    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
+//	    allEnergies.push_back( allKissingSpheres[i].sumOverAllInteractions() );
+//	}
+//
+//    cout << "Number of Energies is " << allEnergies.size() << endl;	
+//	for (vector<double>::size_type i=0; i < 1; ++i) {
+//	    cout << "Total LJ-Energy for structure " << i + 1 << " is " << allEnergies[i] << endl;
+//    }
+//    
+//	cout << "Structure is:" << endl;
+//	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
+//		cout << allKissingSpheres[0][i] << endl;
+//	}
 
-    allKissingSpheres[0].optimize(algo_switch, potential_switch, p, opt);    
+	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
+		cout << "Optimization for structure no " << i + 1 << endl;
+        allKissingSpheres[i].optimize(algo_switch, potential_switch, p, opt);
+		cout << "###############################################################\n" << endl;
+	}
 
     return 0; 
 

@@ -158,32 +158,41 @@ int structure::optimize (const int &algo_switch, const int &potential_switch, ve
 
 	size_t i = 0;
 	do {
-		cout << "-----------------------------------------------" << endl;
 		i++;
 		status = gsl_multimin_fdfminimizer_iterate (s);
-        cout << status << endl;
 		
-		if (status)
+		if (status) {
+			cerr << "Sth went wrong!" << endl;
+			cerr << status << endl;
 			break;
+		}
         
 		double absoluteTolerance = opt[1];
 		status = gsl_multimin_test_gradient (s->gradient, absoluteTolerance);
-        //cout << status << endl;
 
-		if (status == GSL_SUCCESS)
+		if (status == GSL_SUCCESS) {
 			cout << "Minimum found at:\n" << endl;
 
-		//create structure for optimized geometry
-    	structure kissingSphere;
-    	for (size_t i = 0; i < x->size / 3; ++i) {
-            coord3d sphere(gsl_vector_get (s->x, 3 * i), gsl_vector_get (s->x, 3 * i + 1), gsl_vector_get (s->x, 3 * i + 2));
-			cout << sphere <<  endl;
-    		kissingSphere.push_back(sphere);
-    	}
-    cout << "LJ Energy is: " << s->f << endl;
+		    //create structure for optimized geometry
+    	    structure kissingSphere;
+    	    for (size_t i = 0; i < x->size / 3; ++i) {
+                coord3d sphere(gsl_vector_get (s->x, 3 * i), gsl_vector_get (s->x, 3 * i + 1), gsl_vector_get (s->x, 3 * i + 2));
+			    cout << sphere <<  endl;
+    		    kissingSphere.push_back(sphere);
+    	    }
+		}
 	}
 	while (status == GSL_CONTINUE && i < 100);
 
+    
+    cout << "-----------------------------------------------" << endl;
+    cout << "LJ Energy is: " << s->f << endl;
+    if (status == GSL_SUCCESS) {
+		cout << "Optimization successful!" << endl;
+	}
+	else {
+		cout << "Error, " << status << endl;
+	}
     gsl_multimin_fdfminimizer_free (s);
 	gsl_vector_free (x);
     return 0;
