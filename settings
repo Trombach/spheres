@@ -9,4 +9,5 @@ opt: {
     accuracy =  0.1;
     dforce = 1e-3;
     stepsize = 0.01;
+    nsteps = 100;
 };

@@ -54,7 +54,7 @@ public:
 	//
 	//initialize gsl minimizer function
 	//
-	int optimize (const int &algo_switch, const int &potential_switch, const vector<double> parameters, const vector<double> opt);
+	structure optimize (const int &algo_switch, const int &potential_switch, const vector<double> parameters, const vector<double> opt, vector<double> &allEnergies);
 };
 
 #endif

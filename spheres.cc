@@ -109,8 +109,10 @@ void LJEnergyAndGradient_gsl (const gsl_vector *x, void *params, double *f, gsl_
 //
 //initialize gsl minimizer function
 //
-int structure::optimize (const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
+structure structure::optimize (const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt, vector<double> &allEnergies) {
 	int status;
+	structure newGeometry;
+	size_t nsteps = static_cast<size_t>(opt[3]);
 
 	const gsl_multimin_fdfminimizer_type *T;
 	gsl_multimin_fdfminimizer *s;
@@ -127,7 +129,8 @@ int structure::optimize (const int &algo_switch, const int &potential_switch, ve
 			break;
 		default:
 			cerr << "Error, probably bad input of pot" << endl;
-			return 1;
+			newGeometry.empty();
+			return newGeometry;
     }
 
     min_function.n = (this->size()) * 3;
@@ -147,7 +150,8 @@ int structure::optimize (const int &algo_switch, const int &potential_switch, ve
 			break;
 		default:
 			cerr << "Error, probably bad input of opt algo" << endl;
-			return 1;
+			newGeometry.empty();
+			return newGeometry;
 	}
 
 	s = gsl_multimin_fdfminimizer_alloc (T, (this->size()) * 3);
@@ -162,7 +166,7 @@ int structure::optimize (const int &algo_switch, const int &potential_switch, ve
 		status = gsl_multimin_fdfminimizer_iterate (s);
 		
 		if (status) {
-			cerr << "Sth went wrong!" << endl;
+			cerr << "Something went wrong!" << endl;
 			cerr << status << endl;
 			break;
 		}
@@ -174,15 +178,15 @@ int structure::optimize (const int &algo_switch, const int &potential_switch, ve
 			cout << "Minimum found at:\n" << endl;
 
 		    //create structure for optimized geometry
-    	    structure kissingSphere;
     	    for (size_t i = 0; i < x->size / 3; ++i) {
                 coord3d sphere(gsl_vector_get (s->x, 3 * i), gsl_vector_get (s->x, 3 * i + 1), gsl_vector_get (s->x, 3 * i + 2));
 			    cout << sphere <<  endl;
-    		    kissingSphere.push_back(sphere);
+    		    newGeometry.push_back(sphere);
     	    }
+        allEnergies.push_back(s->f);
 		}
 	}
-	while (status == GSL_CONTINUE && i < 100);
+	while (status == GSL_CONTINUE && i <= nsteps);
 
     
     cout << "-----------------------------------------------" << endl;
@@ -191,9 +195,10 @@ int structure::optimize (const int &algo_switch, const int &potential_switch, ve
 		cout << "Optimization successful!" << endl;
 	}
 	else {
-		cout << "Error, " << status << endl;
+		cout << "Error, " << status << ". Optimization failed." << endl;
 	}
     gsl_multimin_fdfminimizer_free (s);
 	gsl_vector_free (x);
-    return 0;
+
+    return newGeometry;
 }

@@ -185,6 +185,7 @@ int main (int argc, char *argv[]) {
 	double accuracy;
 	double dforce;
 	double stepsize;
+	int nsteps;
     if (cfg.lookupValue("potential.name", potential)) {
 		if (potential == "LJ") {
 		    potential_switch = 1;
@@ -217,7 +218,7 @@ int main (int argc, char *argv[]) {
 			return 1;
 		}
 	}
-	vector<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize
+	vector<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize, 3 == nsteps
 	if (cfg.lookupValue("opt.name", algo)) {
 		if (algo == "BFGS") {
 			algo_switch = 1;
@@ -255,9 +256,19 @@ int main (int argc, char *argv[]) {
 		stepsize = 0.01;
 		cout << "Fall back to " << stepsize << endl;
 	}
+
+	if (cfg.lookupValue("opt.nsteps", nsteps)) {
+		cout << "Number of steps set to " << nsteps << endl;
+	}
+	else {
+	    cout << "No 'nsteps' setting in configuration file." << endl;
+		stepsize = 100;
+		cout << "Fall back to " << stepsize << endl;
+	}
     opt.push_back(accuracy);
 	opt.push_back(dforce);
 	opt.push_back(stepsize);
+	opt.push_back(nsteps);
     
 //
 //READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
@@ -277,10 +288,11 @@ int main (int argc, char *argv[]) {
 //	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
 //		cout << allKissingSpheres[0][i] << endl;
 //	}
-
+    vector<structure> optimizedkissingSpheres;
+	vector<double> allEnergies;
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
 		cout << "Optimization for structure no " << i + 1 << endl;
-        allKissingSpheres[i].optimize(algo_switch, potential_switch, p, opt);
+        optimizedkissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
 		cout << "###############################################################\n" << endl;
 	}
 
