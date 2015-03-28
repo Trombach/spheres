@@ -31,14 +31,14 @@ double LJHessian (const double distance, const double epsilon, const double rm) 
 }
 
 
-double structure::sumOverAllInteractions () {
+double structure::sumOverAllInteractions (const vector<double> &p) {
     double totalEnergy = 0;
     //iterate over double index ij, where N>j>i and N>i
 	for (structure::const_iterator iter = this->begin(); iter != this->end(); ++iter) { 
 		for (structure::const_iterator jter = iter + 1; jter != this->end(); ++jter) {
 			//cout << "iter is " << *iter << endl;
 			//cout << "jter is " << *jter << endl;
-            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), 1.0, 1.0);
+            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), p[0], p[1]);
         }
 	}
 	return totalEnergy;
