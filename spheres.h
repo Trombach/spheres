@@ -44,7 +44,7 @@ public:
     //
     //function to sum over all sphere interactions, change later to work with different potentials
     //
-   	double sumOverAllInteractions ();
+   	double sumOverAllInteractions (const vector<double> &p);
 
 	//
 	//function to sum over all gradients to get gradient for each sphere

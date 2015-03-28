@@ -1,2 +1,2 @@
 all:
-	clang++ -lconfig++ -lgsl -lgslcblas -std=c++11 main.cc spheres.cc
+	clang++ -lconfig++ -lgsl -lgslcblas -std=c++11 -o optimize main.cc spheres.cc
