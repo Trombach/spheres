@@ -25,7 +25,9 @@ bool justempty(string str) {
 //
 bool fexists (const std::string &fileName) {
     ifstream infile(fileName.c_str());
-    return (bool)infile;
+	bool exist = infile.good();
+	infile.close();
+    return exist;
 }
 
 //
