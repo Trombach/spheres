@@ -29,6 +29,17 @@ struct coord3d {
     double dot(const coord3d& y) const { return x[0]*y[0]+x[1]*y[1]+x[2]*y[2]; }
     double norm() const { return sqrt(dot(*this)); }
     static double dist(const coord3d& x, const coord3d& y){ return (x-y).norm(); }
+    // d/dx_i ||x|| = x_i/||x||.
+    static coord3d dnorm(const coord3d& x){ return x/x.norm(); }
+    // d^2/(dx_i dx_j) ||x|| = -x_i x_j/||x||^3 + [i==j]/||x||
+    static void ddnorm(const coord3d& x, std::vector<double> &H)
+    {
+      const double n = 1.0/x.norm(), n3 = n*n*n;
+
+      for(int i=0;i<3;i++)
+        for(int j=0;j<3;j++)
+            H[i*3+j] = -x[i]*x[j]*n3 + (i==j? n : 0);
+    }
 
     friend std::ostream& operator<<(std::ostream &s, const coord3d& x){ s << std::fixed << "{" << x[0] << "," << x[1] << "," << x[2]<< "}"; return s; }
     friend std::istream& operator>>(std::istream &s, coord3d& x){ for(int i=0;i<3;i++){ s >> x[i]; } return s; }
@@ -56,5 +67,6 @@ public:
 	//
 	structure optimize (const int &algo_switch, const int &potential_switch, const vector<double> parameters, const vector<double> opt, vector<double> &allEnergies);
 };
+    std::vector< std::vector<double> > hessian ();
 
 #endif

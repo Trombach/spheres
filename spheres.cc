@@ -23,13 +23,27 @@ coord3d LJGradient(const coord3d ri, const coord3d rj, const double epsilon, con
 	return distanceVector / distanceVector.norm() * LJGradientValue;
 }
 
-//
-//function to calculate LJ Hessian
-//
-double LJHessian (const double distance, const double epsilon, const double rm) {
-    return - 12 * epsilon / pow (rm, 2) * (13 * pow (rm / distance, 14) - 7 * pow (rm / distance, 8) );
-}
 
+vector< vector<double> > structure::hessian (const vector<double> &p) {
+	vector < vector<double> > hessianMatrix;
+    for (structure::size_type i = 0; i < this->size(); i++) {
+		for (structure::size_type j = i + 1; j < this->size(); j++) {
+			coord3d distanceVector = (*this)[i] - (*this)[j];
+			double distance = coord3d::dist((*this)[i], (*this)[j]);
+
+			//calculate first derivative
+			double epsilon = p[0];
+			double rm = p[1];
+			double LJGradientValue = ( 12 * epsilon / rm ) * ( (pow (rm / distance, 13)) - (pow (rm / distance, 7)) );
+
+			//calculate second derivative
+            double LJHessianValue = - 12 * epsilon / pow (rm, 2) * (13 * pow (rm / distance, 14) - 7 * pow (rm / distance, 8) );
+
+            
+		}
+        
+	}
+}
 
 double structure::sumOverAllInteractions (const vector<double> &p) {
     double totalEnergy = 0;
