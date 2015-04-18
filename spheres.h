@@ -66,7 +66,8 @@ public:
 	//initialize gsl minimizer function
 	//
 	structure optimize (const int &algo_switch, const int &potential_switch, const vector<double> parameters, const vector<double> opt, vector<double> &allEnergies);
-};
-    std::vector< std::vector<double> > hessian ();
 
+	vector< vector<double> > hessian (const vector<double> &p);
+};
+    
 #endif

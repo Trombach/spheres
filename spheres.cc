@@ -38,7 +38,8 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 
 			//calculate second derivative
             double LJHessianValue = - 12 * epsilon / pow (rm, 2) * (13 * pow (rm / distance, 14) - 7 * pow (rm / distance, 8) );
-
+            
+			
             
 		}
         
