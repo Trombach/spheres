@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <iomanip>
 #include "spheres.h"
 #include <libconfig.h++>
 
@@ -257,13 +258,25 @@ int main (int argc, char *argv[]) {
 //	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
 //		cout << allKissingSpheres[0][i] << endl;
 //	}
-    vector<structure> optimizedkissingSpheres;
+    vector<structure> optimizedKissingSpheres;
 	vector<double> allEnergies;
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
 		cout << "Optimization for structure no " << i + 1 << endl;
-        optimizedkissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
+        optimizedKissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
 		cout << "###############################################################\n" << endl;
 	}
+    
+	vector< vector<double> > hessian =  optimizedKissingSpheres[0].hessian(p);
+	for (vector< vector<double> >::size_type i = 0; i < hessian.size(); i++) {
+		for (vector< vector<double> >::size_type j = 0; j < hessian.size(); j++) {
+			cout << setprecision(5) << fixed << setw(10) << hessian[i][j] << ' ';
+		}
+		cout << endl;
+	}
+	diag(hessian);
+
+	
+
 
     return 0; 
 

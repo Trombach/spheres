@@ -1,5 +1,9 @@
-#include "gsl/gsl_vector.h"
-#include "gsl/gsl_multimin.h"
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_multimin.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_eigen.h>
+#include <gsl/gsl_linalg.h>
 #include "spheres.h"
 
 
@@ -39,12 +43,13 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 
 			//calculate second derivative
             double d2E_dr2 = - 12 * epsilon / pow (rm, 2) * (13 * pow (rm / distance, 14) - 7 * pow (rm / distance, 8) );
-            
+
 			//calculate derivatives of r
 			coord3d dvecr_dr = coord3d::dnorm(distanceVector);
 
-			vector<double> d2rvecr_dr2;
+			vector<double> d2rvecr_dr2(9, double());
 			coord3d::ddnorm(distanceVector, d2rvecr_dr2);
+
 
 			//calculate dr_dx terms
 			//dnorm gives dvecr_dr which can be transformed into dr_dx by
@@ -74,8 +79,7 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 				d2r_dx2.push_back(d2rvecr_dr2[a]);
 			}
 
-
-
+			//calculation of hessian elements
 
 
             for (int k = 0; k < 3; k++) {
@@ -87,13 +91,38 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 					hessianMatrix[3 * j + k][3 * i + l] += dE_dr * d2r_dx2[9 + (3 * k + l)] + d2E_dr2 * dr_dx[3 + k] * dr_dx[l];
 				}
 			}
-					
-
-            
 		}
-        
 	}
 	return hessianMatrix;
+}
+
+int diag (vector< vector<double> > &hessian) {
+
+	const int hessianSize = hessian.size();
+	double hessianArray[hessianSize * hessianSize];
+
+	for (int i = 0; i < hessianSize; i++) {
+		for (int j = 0; j < hessianSize; j++) {
+			hessianArray[3 * i + j] = hessian[i][j];
+		}
+	}
+
+	gsl_matrix_view m = gsl_matrix_view_array (hessianArray, hessianSize, hessianSize);
+
+	gsl_vector *eval = gsl_vector_alloc (hessianSize);
+
+	gsl_eigen_symm_workspace *w = gsl_eigen_symm_alloc (hessianSize);
+
+	gsl_eigen_symm (&m.matrix, eval, w);
+
+	gsl_eigen_symm_free (w);
+
+    for (int i = 0; i < hessianSize; i++) {
+		double eval_i = gsl_vector_get (eval, i);
+
+		cout << eval_i << endl;
+	}
+	return 0;
 }
 
 double structure::sumOverAllInteractions (const vector<double> &p) {
