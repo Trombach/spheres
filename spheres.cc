@@ -25,25 +25,75 @@ coord3d LJGradient(const coord3d ri, const coord3d rj, const double epsilon, con
 
 
 vector< vector<double> > structure::hessian (const vector<double> &p) {
-	vector < vector<double> > hessianMatrix;
+	const double epsilon = p[0];
+	const double rm = p[1];
+	vector < vector<double>  > hessianMatrix (this->size() * 3, vector<double> (this->size() * 3, 0));
     for (structure::size_type i = 0; i < this->size(); i++) {
 		for (structure::size_type j = i + 1; j < this->size(); j++) {
-			coord3d distanceVector = (*this)[i] - (*this)[j];
-			double distance = coord3d::dist((*this)[i], (*this)[j]);
+
+			const coord3d distanceVector = (*this)[i] - (*this)[j];
+			const double distance = coord3d::dist((*this)[i], (*this)[j]);
 
 			//calculate first derivative
-			double epsilon = p[0];
-			double rm = p[1];
-			double LJGradientValue = ( 12 * epsilon / rm ) * ( (pow (rm / distance, 13)) - (pow (rm / distance, 7)) );
+			double dE_dr = ( 12 * epsilon / rm ) * ( (pow (rm / distance, 13)) - (pow (rm / distance, 7)) );
 
 			//calculate second derivative
-            double LJHessianValue = - 12 * epsilon / pow (rm, 2) * (13 * pow (rm / distance, 14) - 7 * pow (rm / distance, 8) );
+            double d2E_dr2 = - 12 * epsilon / pow (rm, 2) * (13 * pow (rm / distance, 14) - 7 * pow (rm / distance, 8) );
             
+			//calculate derivatives of r
+			coord3d dvecr_dr = coord3d::dnorm(distanceVector);
+
+			vector<double> d2rvecr_dr2;
+			coord3d::ddnorm(distanceVector, d2rvecr_dr2);
+
+			//calculate dr_dx terms
+			//dnorm gives dvecr_dr which can be transformed into dr_dx by
+			//   dr_dx = dvecr_dri * dri_dx, where dri is one element of vecr
+			//the last term gives either +1 or -1
+			vector<double> dr_dx;
+			for (int a = 0; a < 3; a++) {
+			    dr_dx.push_back(dvecr_dr[a]);
+			}
+			for (int a = 0; a < 3; a++) {
+			    dr_dx.push_back(- dvecr_dr[a]);
+			}
+
+			//calculate d2r_dx2 terms
 			
+			vector<double> d2r_dx2;
+			for (int a = 0; a < 9; a++) {
+				d2r_dx2.push_back(d2rvecr_dr2[a]);
+			}
+			for (int a = 0; a < 9; a++) {
+				d2r_dx2.push_back(- d2rvecr_dr2[a]);
+			}
+			for (int a = 0; a < 9; a++) {
+				d2r_dx2.push_back(- d2rvecr_dr2[a]);
+			}
+			for (int a = 0; a < 9; a++) {
+				d2r_dx2.push_back(d2rvecr_dr2[a]);
+			}
+
+
+
+
+
+            for (int k = 0; k < 3; k++) {
+			    for (int l = k; l < 3; l++) {
+
+				    hessianMatrix[3 * i + k][3 * i + l] += dE_dr * d2r_dx2[3 * k + l] + d2E_dr2 * dr_dx[k] * dr_dx[l];
+					hessianMatrix[3 * j + k][3 * j + l] += dE_dr * d2r_dx2[3 * k + l] + d2E_dr2 * dr_dx[3 + k] * dr_dx[3 + l];
+					hessianMatrix[3 * i + k][3 * j + l] += dE_dr * d2r_dx2[9 + (3 * k + l)] + d2E_dr2 * dr_dx[k] * dr_dx[3 + l];
+					hessianMatrix[3 * j + k][3 * i + l] += dE_dr * d2r_dx2[9 + (3 * k + l)] + d2E_dr2 * dr_dx[3 + k] * dr_dx[l];
+				}
+			}
+					
+
             
 		}
         
 	}
+	return hessianMatrix;
 }
 
 double structure::sumOverAllInteractions (const vector<double> &p) {
