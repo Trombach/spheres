@@ -269,7 +269,7 @@ int main (int argc, char *argv[]) {
 	vector< vector<double> > hessian =  optimizedKissingSpheres[0].hessian(p);
 	for (vector< vector<double> >::size_type i = 0; i < hessian.size(); i++) {
 		for (vector< vector<double> >::size_type j = 0; j < hessian.size(); j++) {
-			cout << setprecision(5) << fixed << setw(10) << hessian[i][j] << ' ';
+			cout << setprecision(1) << fixed << setw(10) << hessian[i][j] << ' ';
 		}
 		cout << endl;
 	}
