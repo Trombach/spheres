@@ -42,7 +42,7 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 			double dE_dr = ( 12 * epsilon / rm ) * ( (pow (rm / r, 13)) - (pow (rm / r, 7)) );
 
 			//calculate second derivative
-            double d2E_dr2 = - 12 * epsilon / pow (rm, 2) * (13 * pow (rm / r, 14) - 7 * pow (rm / r, 8) );
+            double d2E_dr2 = 12 * epsilon / pow (rm, 2) * (13 * pow (rm / r, 14) - 7 * pow (rm / r, 8) );
 
 			//calculate derivatives of r
 			coord3d dvecr_dr = coord3d::dnorm(vecr);
@@ -89,8 +89,10 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 			    for (int l = 0; l < 3; l++) {
 
 					const double hessianValue = dE_dr * d2rvecr_dr2[3 * k + l] + d2E_dr2 * dvecr_dr[k] * dvecr_dr[l];
-					//cout << "hessianValue = " << hessianValue << cout;
-					//
+					cout << "term 1 =" << dE_dr << ", " << d2rvecr_dr2[3 * k + l] << endl;
+					cout << "term 2 =" << d2E_dr2 << ", " << dvecr_dr[k] << ", " << dvecr_dr[l] << endl;
+					cout << "hessianValue = " << hessianValue << endl;
+					
 					hessianMatrix[3 * i + k][3 * i + l] += hessianValue;
 					hessianMatrix[3 * i + k][3 * j + l] -= hessianValue;
 					hessianMatrix[3 * j + k][3 * i + l] -= hessianValue;
@@ -110,7 +112,7 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 	return hessianMatrix;
 }
 
-int diag (vector< vector<double> > &hessian) {
+int diag (const vector< vector<double> > &hessian) {
 
 	const int hessianSize = hessian.size();
 	double hessianArray[hessianSize * hessianSize];
@@ -136,6 +138,8 @@ int diag (vector< vector<double> > &hessian) {
 
 		cout << eval_i << endl;
 	}
+
+	gsl_vector_free (eval);
 	return 0;
 }
 

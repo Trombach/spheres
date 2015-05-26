@@ -7,8 +7,23 @@
 #include "spheres.h"
 #include <libconfig.h++>
 
+
 using namespace std; 
 using namespace libconfig;
+
+#define container_output(container) \
+template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
+	{ \
+	s << "{"; \
+	for(typename container<T>::const_iterator x(v.begin());x!=v.end();){ \
+		s << *x; \
+		if(++x!=v.end()) s << ","; \
+	} \
+	s << "}"; \
+	return s; \
+	}
+container_output(vector);
+
 //
 //function for determining if a line in the input is emtpy
 //used for breaking the read loop
@@ -267,13 +282,17 @@ int main (int argc, char *argv[]) {
 	}
     
 	vector< vector<double> > hessian =  optimizedKissingSpheres[0].hessian(p);
-	for (vector< vector<double> >::size_type i = 0; i < hessian.size(); i++) {
-		for (vector< vector<double> >::size_type j = 0; j < hessian.size(); j++) {
-			cout << setprecision(1) << fixed << setw(10) << hessian[i][j] << ' ';
-		}
-		cout << endl;
-	}
-	diag(hessian);
+	//cout << "{";
+	//for (vector< vector<double> >::size_type i = 0; i < hessian.size(); i++) {
+	//	cout << "{";
+	//	for (vector< vector<double> >::size_type j = 0; j < hessian.size(); j++) {
+	//		cout << setprecision(1) << fixed << setw(10) << hessian[i][j] << ", ";
+	//	}
+	//	cout << "}" << endl;
+	//}
+	//cout << "}" << endl;
+	cout << hessian << endl;
+	//diag(hessian);
 
 	
 
