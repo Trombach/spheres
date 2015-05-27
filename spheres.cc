@@ -89,22 +89,15 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 			    for (int l = 0; l < 3; l++) {
 
 					const double hessianValue = dE_dr * d2rvecr_dr2[3 * k + l] + d2E_dr2 * dvecr_dr[k] * dvecr_dr[l];
-					cout << "term 1 =" << dE_dr << ", " << d2rvecr_dr2[3 * k + l] << endl;
-					cout << "term 2 =" << d2E_dr2 << ", " << dvecr_dr[k] << ", " << dvecr_dr[l] << endl;
-					cout << "hessianValue = " << hessianValue << endl;
+					//cout << "term 1 =" << dE_dr << ", " << d2rvecr_dr2[3 * k + l] << endl;
+					//cout << "term 2 =" << d2E_dr2 << ", " << dvecr_dr[k] << ", " << dvecr_dr[l] << endl;
+					//cout << "hessianValue = " << hessianValue << endl;
 					
 					hessianMatrix[3 * i + k][3 * i + l] += hessianValue;
 					hessianMatrix[3 * i + k][3 * j + l] -= hessianValue;
 					hessianMatrix[3 * j + k][3 * i + l] -= hessianValue;
 					hessianMatrix[3 * j + k][3 * j + l] += hessianValue;
 
-				    //hessianMatrix[3 * i + k][3 * i + l] += dE_dr * d2r_dx2[3 * k + l] + d2E_dr2 * dr_dx[k] * dr_dx[l]; cout << dE_dr * d2r_dx2[3 * k + l] + d2E_dr2 * dr_dx[k] * dr_dx[l] << " " << 3 * i + k << " " << 3 * i + l << endl;
-					////hessianMatrix[3 * j + k][3 * j + l] += dE_dr * d2r_dx2[3 * k + l] + d2E_dr2 * dr_dx[3 + k] * dr_dx[3 + l];
-					//hessianMatrix[3 * j + k][3 * j + l] += 999999;
-					////hessianMatrix[3 * i + k][3 * j + l] += dE_dr * d2r_dx2[9 + (3 * k + l)] + d2E_dr2 * dr_dx[k] * dr_dx[3 + l];
-					//hessianMatrix[3 * i + k][3 * j + l] += 999999;
-					////hessianMatrix[3 * j + k][3 * i + l] += dE_dr * d2r_dx2[9 + (3 * k + l)] + d2E_dr2 * dr_dx[3 + k] * dr_dx[l];
-					//hessianMatrix[3 * j + k][3 * i + l] += 999999;
 				}
 			}
 		}
@@ -112,16 +105,17 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 	return hessianMatrix;
 }
 
-int diag (const vector< vector<double> > &hessian) {
+int diag (vector< vector<double> > &hessian) {
 
 	const int hessianSize = hessian.size();
 	double hessianArray[hessianSize * hessianSize];
 
 	for (int i = 0; i < hessianSize; i++) {
 		for (int j = 0; j < hessianSize; j++) {
-			hessianArray[3 * i + j] = hessian[i][j];
+			hessianArray[hessianSize * i + j] = hessian[i][j];
 		}
 	}
+	
 
 	gsl_matrix_view m = gsl_matrix_view_array (hessianArray, hessianSize, hessianSize);
 
@@ -129,7 +123,12 @@ int diag (const vector< vector<double> > &hessian) {
 
 	gsl_eigen_symm_workspace *w = gsl_eigen_symm_alloc (hessianSize);
 
-	gsl_eigen_symm (&m.matrix, eval, w);
+	int status = gsl_eigen_symm (&m.matrix, eval, w);
+
+	if (status) {
+		cout << "An error occured." << endl;
+	}
+	cout << "Status " << status << endl;
 
 	gsl_eigen_symm_free (w);
 
