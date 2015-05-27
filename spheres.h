@@ -6,7 +6,7 @@
 #include <math.h>
 
 
-int diag (std::vector< std::vector<double> > &hessian); 
+std::vector<double> diag (std::vector< std::vector<double> > &hessian); 
 
 struct coord3d {
     double x[3];

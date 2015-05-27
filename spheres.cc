@@ -4,6 +4,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_linalg.h>
+#include <algorithm>
 #include "spheres.h"
 
 
@@ -105,7 +106,7 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 	return hessianMatrix;
 }
 
-int diag (vector< vector<double> > &hessian) {
+vector<double> diag (vector< vector<double> > &hessian) {
 
 	const int hessianSize = hessian.size();
 	double hessianArray[hessianSize * hessianSize];
@@ -126,20 +127,23 @@ int diag (vector< vector<double> > &hessian) {
 	int status = gsl_eigen_symm (&m.matrix, eval, w);
 
 	if (status) {
-		cout << "An error occured." << endl;
+		cout << "An error occured, status " << status << endl;
 	}
-	cout << "Status " << status << endl;
+	//cout << "Status " << status << endl;
 
 	gsl_eigen_symm_free (w);
-
+    
+	vector<double> eigenvalues;
+	//cout << "Unsorted eval:" << endl;
     for (int i = 0; i < hessianSize; i++) {
-		double eval_i = gsl_vector_get (eval, i);
+		eigenvalues.push_back(gsl_vector_get (eval, i));
+		sort(eigenvalues.begin(), eigenvalues.end());
 
-		cout << eval_i << endl;
+		//cout << gsl_vector_get (eval, i) << endl;
 	}
 
 	gsl_vector_free (eval);
-	return 0;
+	return eigenvalues;
 }
 
 double structure::sumOverAllInteractions (const vector<double> &p) {

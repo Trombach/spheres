@@ -274,14 +274,18 @@ int main (int argc, char *argv[]) {
 //		cout << allKissingSpheres[0][i] << endl;
 //	}
     vector<structure> optimizedKissingSpheres;
+	vector< vector<double> > hessian;
+	vector<double> eigenValues;
 	vector<double> allEnergies;
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
 		cout << "Optimization for structure no " << i + 1 << endl;
         optimizedKissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
+		hessian = optimizedKissingSpheres[i].hessian(p);
+		eigenValues = diag(hessian);
+		cout << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 		cout << "###############################################################\n" << endl;
 	}
     
-	vector< vector<double> > hessian =  optimizedKissingSpheres[0].hessian(p);
 	//cout << "{";
 	//for (vector< vector<double> >::size_type i = 0; i < hessian.size(); i++) {
 	//	cout << "{";
@@ -291,8 +295,8 @@ int main (int argc, char *argv[]) {
 	//	cout << "}" << endl;
 	//}
 	//cout << "}" << endl;
-	cout << hessian << endl;
-	diag(hessian);
+	//cout << hessian << endl;
+	//cout << "Sorted eval" << endl << eigenValues << endl;
 
 	
 
