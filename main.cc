@@ -167,10 +167,11 @@ int main (int argc, char *argv[]) {
 	int potential_switch;
 	int algo_switch;
     string algo;
-	double accuracy;
-	double dforce;
-	double stepsize;
-	int nsteps;
+	double accuracy(1e-4);
+	double dforce(1e-3);
+	double stepsize(0.01);
+	int nsteps(100);
+
     if (cfg.lookupValue("potential.name", potential)) {
 		if (potential == "LJ") {
 		    potential_switch = 1;
@@ -182,6 +183,7 @@ int main (int argc, char *argv[]) {
 		return 1;
 	}
 
+	
     if (potential == "LJ") {
 		double epsilon;
 		double rm;
@@ -203,6 +205,9 @@ int main (int argc, char *argv[]) {
 			return 1;
 		}
 	}
+
+
+
 	vector<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize, 3 == nsteps
 	if (cfg.lookupValue("opt.name", algo)) {
 		if (algo == "BFGS") {
@@ -220,7 +225,6 @@ int main (int argc, char *argv[]) {
 	}
 	else {
 	    cout << "No 'accuracy' setting in configuration file." << endl;
-		accuracy = 1e-4;
 		cout << "Fall back to " << accuracy << endl;
 	}
 
@@ -229,7 +233,6 @@ int main (int argc, char *argv[]) {
 	}
 	else {
 	    cout << "No 'dforce' setting in configuration file." << endl;
-		dforce = 1e-3;
 	    cout << "Fall back to " << dforce << endl;
 	}
 
@@ -238,7 +241,6 @@ int main (int argc, char *argv[]) {
 	}
 	else {
 	    cout << "No 'stepsize' setting in configuration file." << endl;
-		stepsize = 0.01;
 		cout << "Fall back to " << stepsize << endl;
 	}
 
@@ -247,7 +249,6 @@ int main (int argc, char *argv[]) {
 	}
 	else {
 	    cout << "No 'nsteps' setting in configuration file." << endl;
-		stepsize = 100;
 		cout << "Fall back to " << stepsize << endl;
 	}
     opt.push_back(accuracy);
