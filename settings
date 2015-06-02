@@ -2,7 +2,7 @@
 potential: {
     name = "LJ";
     epsilon = 5.0;
-    rm =  0.5;
+    rm =  1.0;
 };
 opt: {
     name = "BFGS";
