@@ -193,7 +193,7 @@ int main (int argc, char *argv[]) {
 			cout << "Epsilon set to " << p[0] << endl;
 		}
 		else {
-			cout << "No 'epsilon' in setting file." << endl;
+			cout << "No 'epsilon' in configuration file." << endl;
 			return 1;
 		}
 		if (cfg.lookupValue("potential.rm", rm)) {
@@ -201,7 +201,7 @@ int main (int argc, char *argv[]) {
 			cout << "Rm set to " << p[1] << endl;
 		}
 		else {
-			cout << "No 'rm' in setting file." << endl;
+			cout << "No 'rm' in configuration file." << endl;
 			return 1;
 		}
 	}
@@ -274,10 +274,12 @@ int main (int argc, char *argv[]) {
 //	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
 //		cout << allKissingSpheres[0][i] << endl;
 //	}
+//
     vector<structure> optimizedKissingSpheres;
 	vector< vector<double> > hessian;
 	vector<double> eigenValues;
 	vector<double> allEnergies;
+
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
 		cout << "Optimization for structure no " << i + 1 << endl;
         optimizedKissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
