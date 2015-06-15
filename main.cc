@@ -166,11 +166,21 @@ int main (int argc, char *argv[]) {
 	vector<double> p;
 	int potential_switch;
 	int algo_switch;
+	int scaling_switch;
     string algo;
+	double scalingFactor(1.0);
 	double accuracy(1e-4);
 	double dforce(1e-3);
 	double stepsize(0.01);
 	int nsteps(100);
+
+	if (cfg.lookupValue("scaling.factor", scalingFactor)) {
+		cout << "Scaling factor in seetings found. Input coordinates will be scaled by " << scalingFactor << endl;
+		scaling_switch = 1;
+	}
+	else {
+		cout << "No scaling of input coordinates." << endl;
+	}
 
     if (cfg.lookupValue("potential.name", potential)) {
 		if (potential == "LJ") {
@@ -260,6 +270,18 @@ int main (int argc, char *argv[]) {
 //READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
 //
     vector<structure> allKissingSpheres = readallstruct(fileName);
+	
+	switch (scaling_switch) {
+		case 1:
+			for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
+				allKissingSpheres[i] *= scalingFactor;
+			}
+		default:
+			break;
+	}
+
+
+
 //	vector<double> allEnergies;
 //    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
 //	    allEnergies.push_back( allKissingSpheres[i].sumOverAllInteractions() );
@@ -275,6 +297,10 @@ int main (int argc, char *argv[]) {
 //		cout << allKissingSpheres[0][i] << endl;
 //	}
 //
+
+
+
+
     vector<structure> optimizedKissingSpheres;
 	vector< vector<double> > hessian;
 	vector<double> eigenValues;
@@ -300,6 +326,8 @@ int main (int argc, char *argv[]) {
 	//cout << "}" << endl;
 	//cout << hessian << endl;
 	//cout << "Sorted eval" << endl << eigenValues << endl;
+	
+	
 	
 
 

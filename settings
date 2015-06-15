@@ -1,4 +1,6 @@
-
+scaling: {
+	factor = 2.0;
+};
 potential: {
     name = "LJ";
     epsilon = 5.0;
