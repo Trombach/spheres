@@ -54,6 +54,13 @@ class structure:public std::vector<coord3d> {
 
 public:   
 
+	structure &operator*= (const double &y) {
+		for (vector<coord3d>::size_type i = 0; i < this->size(); i++) { (*this)[i] *= y; }
+		return *this;
+	}
+
+	structure operator* (const double &y) const { return structure(*this) *= y; }
+
     //
     //function to sum over all sphere interactions, change later to work with different potentials
     //
@@ -72,14 +79,6 @@ public:
 	vector< vector<double> > hessian (const vector<double> &p);
 
 
-	structure &operator *=(const double &y) {
-		for (vector<coord3d>::size_type i = 0; i < this->size(); i++) {
-			(*this)[i] *= y;
-		}
-		return *this;
-	}
-
-	structure operator * (const double &y) const { return structure(*this) *= y; }
 
 
 };
