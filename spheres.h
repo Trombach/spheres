@@ -70,6 +70,18 @@ public:
 	structure optimize (const int &algo_switch, const int &potential_switch, const vector<double> parameters, const vector<double> opt, vector<double> &allEnergies);
 
 	vector< vector<double> > hessian (const vector<double> &p);
+
+
+	structure &operator *=(const double &y) {
+		for (vector<coord3d>::size_type i = 0; i < this->size(); i++) {
+			(*this)[i] *= y;
+		}
+		return *this;
+	}
+
+	structure operator * (const double &y) const { return structure(*this) *= y; }
+
+
 };
     
 #endif

@@ -300,7 +300,6 @@ int main (int argc, char *argv[]) {
 	//cout << "}" << endl;
 	//cout << hessian << endl;
 	//cout << "Sorted eval" << endl << eigenValues << endl;
-
 	
 
 

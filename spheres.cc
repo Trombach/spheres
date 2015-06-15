@@ -322,3 +322,4 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 
     return newGeometry;
 }
+
