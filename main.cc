@@ -82,10 +82,10 @@ vector<structure> readallstruct (const std::string& fileName) {
 	cout << "Number of structures is " << allKissingSpheres.size() << endl;
 	//cout << allKissingSpheres[0][3] << endl;
 	//cout << allKissingSpheres[1][3] << endl;
-	cout << "Last structure is:" << endl;
-	for (structure::size_type i = 0; i<allKissingSpheres [allKissingSpheres.size() - 1].size(); ++i) {
-	    cout <<  allKissingSpheres [allKissingSpheres.size() - 1][i]  << endl;
-	}
+	//cout << "Last structure is:" << endl;
+	//for (structure::size_type i = 0; i<allKissingSpheres [allKissingSpheres.size() - 1].size(); ++i) {
+	//    cout <<  allKissingSpheres [allKissingSpheres.size() - 1][i]  << endl;
+	//}
 	return allKissingSpheres;
 }
 
@@ -95,9 +95,9 @@ vector<structure> readallstruct (const std::string& fileName) {
 
 int main (int argc, char *argv[]) {
 	
-//
-//SOME START UP CHECKS AND ARGUMENT PROCESSING
-//
+	//
+	//SOME START UP CHECKS AND ARGUMENT PROCESSING
+	//
     if ( argc < 2 ) {
         cout << "Please provide filename." << endl;
         return 1;
@@ -107,9 +107,9 @@ int main (int argc, char *argv[]) {
         //cout << "Number of arguments is " << argc << endl;
     }
 
-//
-//CHECK IF FILE EXISTS
-//
+	//
+	//CHECK IF FILE EXISTS
+	//
 
     string fileName = argv[ argc -1 ]; //safe input file name
     cout << fileName << endl;
@@ -129,25 +129,25 @@ int main (int argc, char *argv[]) {
 		return 1;
 	}
 
-//
-//CALCULATE GRADIENTS
-//
-//	vector< vector<coord3d> > allGradients;
-//    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
-//        vector<coord3d> gradients = allKissingSpheres[i].sumOverAllGradients();
-//        allGradients.push_back(gradients);
-//	}
-//    for (vector< vector<coord3d> >::size_type i = 0; i < allGradients.size(); ++i) { 
-//        coord3d sum(0,0,0);
-//	    for (structure::size_type j = 0; j < allGradients[i].size(); ++j) {
-//	    	sum += allGradients[i][j];
-//	    }
-//	    cout << "Sum over all Forces for Structure " << i + 1 << " is : " << sum << endl;
-//	}
-//
-//
-//READ SETTINGS FILE
-//
+	//
+	//CALCULATE GRADIENTS
+	//
+	//	vector< vector<coord3d> > allGradients;
+	//    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
+	//        vector<coord3d> gradients = allKissingSpheres[i].sumOverAllGradients();
+	//        allGradients.push_back(gradients);
+	//	}
+	//    for (vector< vector<coord3d> >::size_type i = 0; i < allGradients.size(); ++i) { 
+	//        coord3d sum(0,0,0);
+	//	    for (structure::size_type j = 0; j < allGradients[i].size(); ++j) {
+	//	    	sum += allGradients[i][j];
+	//	    }
+	//	    cout << "Sum over all Forces for Structure " << i + 1 << " is : " << sum << endl;
+	//	}
+	//
+	//
+	//READ SETTINGS FILE
+	//
 
 	libconfig::Config cfg;
 	try {
@@ -197,6 +197,7 @@ int main (int argc, char *argv[]) {
     if (potential == "LJ") {
 		double epsilon;
 		double rm;
+		double exp1(12), exp2(6);
 		cout << "Setting LJ Parameters." << endl;
 		if (cfg.lookupValue("potential.epsilon", epsilon)) {
 			p.push_back(epsilon);
@@ -213,6 +214,24 @@ int main (int argc, char *argv[]) {
 		else {
 			cout << "No 'rm' in configuration file." << endl;
 			return 1;
+		}
+		if (cfg.lookupValue("potential.exp1", exp1)) {
+			p.push_back(exp1);
+			cout << "First exponent set to " << exp1 << endl;
+		}
+		else {
+			cout << "No first exponent in settings file." << endl;
+			cout << "Fall back to " << exp1 << endl;
+			p.push_back(exp1);
+		}
+		if (cfg.lookupValue("potential.exp2", exp2)) {
+			p.push_back(exp2);
+			cout << "First exponent set to " << exp2 << endl;
+		}
+		else {
+			cout << "No first exponent in settings file." << endl;
+			cout << "Fall back to " << exp2 << endl;
+			p.push_back(exp2);
 		}
 	}
 
@@ -266,11 +285,12 @@ int main (int argc, char *argv[]) {
 	opt.push_back(stepsize);
 	opt.push_back(nsteps);
     
-//
-//READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
-//
+	//
+	//READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
+	//
     vector<structure> allKissingSpheres = readallstruct(fileName);
 	
+	//if scaling is found in settings file scale all coordinates accordingly
 	switch (scaling_switch) {
 		case 1:
 			for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
@@ -282,21 +302,21 @@ int main (int argc, char *argv[]) {
 
 
 
-//	vector<double> allEnergies;
-//    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
-//	    allEnergies.push_back( allKissingSpheres[i].sumOverAllInteractions() );
-//	}
-//
-//    cout << "Number of Energies is " << allEnergies.size() << endl;	
-//	for (vector<double>::size_type i=0; i < 1; ++i) {
-//	    cout << "Total LJ-Energy for structure " << i + 1 << " is " << allEnergies[i] << endl;
-//    }
-//    
-//	cout << "Structure is:" << endl;
-//	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
-//		cout << allKissingSpheres[0][i] << endl;
-//	}
-//
+	//	vector<double> allEnergies;
+	//    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
+	//	    allEnergies.push_back( allKissingSpheres[i].sumOverAllInteractions() );
+	//	}
+	//
+	//    cout << "Number of Energies is " << allEnergies.size() << endl;	
+	//	for (vector<double>::size_type i=0; i < 1; ++i) {
+	//	    cout << "Total LJ-Energy for structure " << i + 1 << " is " << allEnergies[i] << endl;
+	//    }
+	//    
+	//	cout << "Structure is:" << endl;
+	//	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
+	//		cout << allKissingSpheres[0][i] << endl;
+	//	}
+	//
 
 
 

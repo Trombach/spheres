@@ -13,6 +13,8 @@ using namespace std;
 vector< vector<double> > structure::hessian (const vector<double> &p) {
 	const double epsilon = p[0];
 	const double rm = p[1];
+	const double exp1 = p[2];
+	const double exp2 = p[3];
 	vector < vector<double>  > hessianMatrix (this->size() * 3, vector<double> (this->size() * 3, 0));
     for (structure::size_type i = 0; i < this->size(); i++) {
 		for (structure::size_type j = i+1; j < this->size(); j++) {
@@ -21,10 +23,10 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 			const double r = coord3d::dist((*this)[i], (*this)[j]);
 
 			//calculate first derivative
-			double dE_dr = ( 12 * epsilon / rm ) * ( (pow (rm / r, 13)) - (pow (rm / r, 7)) );
+			double dE_dr = - ( epsilon / rm ) * ( exp1 * (pow (rm / r, exp1 + 1)) - 2 * exp2 * (pow (rm / r, exp2 + 1)) );
 
 			//calculate second derivative
-            double d2E_dr2 = 12 * epsilon / pow (rm, 2) * (13 * pow (rm / r, 14) - 7 * pow (rm / r, 8) );
+            double d2E_dr2 = epsilon / pow (rm, 2) * ( (pow (exp1, 2) + exp1) * pow (rm / r, exp1 + 2) - (2 * pow (exp2, 2) + 2 * exp2) * pow (rm / r, exp2 + 2) );
 
 			//calculate derivatives of r
 			coord3d dvecr_dr = coord3d::dnorm(vecr);

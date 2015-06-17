@@ -17,8 +17,8 @@ using namespace std;
 //
 //function to calculate LJ Energy, needs rij,rm and epsilon
 //
-double LJEnergy (const double distance, const double epsilon, const double rm) {
-    return epsilon * ( (pow (rm / distance, 12)) - 2 * (pow (rm / distance, 6)) );
+double LJEnergy (const double distance, const double epsilon, const double rm, const double exp1, const double exp2) {
+    return epsilon * ( (pow (rm / distance, exp1)) - 2 * (pow (rm / distance, exp2)) );
 }
 
 double structure::sumOverAllInteractions (const vector<double> &p) {
@@ -28,7 +28,7 @@ double structure::sumOverAllInteractions (const vector<double> &p) {
 		for (structure::const_iterator jter = iter + 1; jter != this->end(); ++jter) {
 			//cout << "iter is " << *iter << endl;
 			//cout << "jter is " << *jter << endl;
-            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), p[0], p[1]);
+            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), p[0], p[1], p[2], p[3]);
         }
 	}
 	return totalEnergy;
@@ -52,7 +52,7 @@ double LJEnergy_gsl (const gsl_vector *v, void *params) {
 		for (structure::const_iterator jter = iter + 1; jter != kissingSphere.end(); ++jter) {
 			//cout << "iter is " << *iter << endl;
 			//cout << "jter is " << *jter << endl;
-            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), (*p)[0], (*p)[1]);
+            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), (*p)[0], (*p)[1], (*p)[2], (*p)[3]);
         }
 	}
 	return totalEnergy;
@@ -68,10 +68,10 @@ double LJEnergy_gsl (const gsl_vector *v, void *params) {
 //
 //function to calculate LJ Gradient, needs rij,rm and epsilon; returns gradient for 1 sphere pair
 //
-coord3d LJGradient(const coord3d ri, const coord3d rj, const double epsilon, const double rm) {
+coord3d LJGradient(const coord3d ri, const coord3d rj, const double epsilon, const double rm, const double exp1, const double exp2) {
 	double distance = coord3d::dist (ri , rj);
 	coord3d distanceVector = rj - ri;
-	double LJGradientValue = ( 12 * epsilon / rm ) * ( (pow (rm / distance, 13)) - (pow (rm / distance, 7)) );
+	double LJGradientValue = ( epsilon / rm ) * ( exp1 * (pow (rm / distance, exp1 + 1)) - 2 * exp2 * (pow (rm / distance, exp2 + 1)) );
 	return distanceVector / distanceVector.norm() * LJGradientValue;
 }
 
@@ -80,7 +80,7 @@ vector<coord3d> structure::sumOverAllGradients (const vector<double> &p) {
 	coord3d force;
 	for (structure::size_type i = 0; i < this->size(); ++i) { 
 		for (structure::size_type j = i + 1; j < this->size(); ++j) {
-		    coord3d twoBodyGradient = LJGradient ((*this)[i], (*this)[j], p[0], p[1]);
+		    coord3d twoBodyGradient = LJGradient ((*this)[i], (*this)[j], p[0], p[1], p[2], p[3]);
             gradients[i] += twoBodyGradient;
 			gradients[j] -= twoBodyGradient;
         }

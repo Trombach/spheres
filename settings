@@ -1,5 +1,5 @@
 scaling: {
-	factor = 2.0;
+	factor = 1.0;
 };
 potential: {
     name = "LJ";
