@@ -52,10 +52,14 @@ struct coord3d {
 
 class structure:public std::vector<coord3d> {    
     
+private:
+	double structureEnergy;
+	int structureNumber;
+	vector<coord3d> structureCoordinates;
 
 public:   
 	
-	structure();
+	structure() {};
 	structure(int number, double energy, vector<coord3d> coordinates) { structureNumber = number; structureEnergy = energy; structureCoordinates = coordinates; }
 
 	int getNumber() const { return structureNumber; }
@@ -80,13 +84,6 @@ public:
 	structure optimize (const int &algo_switch, const int &potential_switch, const vector<double> parameters, const vector<double> opt, vector<double> &allEnergies);
 
 	vector< vector<double> > hessian (const vector<double> &p);
-
-private:
-	double structureEnergy;
-	int structureNumber;
-	vector<coord3d> structureCoordinates;
-
-
 
 };
     

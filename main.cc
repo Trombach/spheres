@@ -90,7 +90,6 @@ int main (int argc, char *argv[]) {
     }
     else {
         cout << "Filename is " << argv[ argc -1 ] << "."  << endl;
-        //cout << "Number of arguments is " << argc << endl;
     }
 
 	//CHECK IF FILE EXISTS
@@ -129,9 +128,8 @@ int main (int argc, char *argv[]) {
 	//	    cout << "Sum over all Forces for Structure " << i + 1 << " is : " << sum << endl;
 	//	}
 	//
-	//
+	
 	//READ SETTINGS FILE
-	//
 
 	libconfig::Config cfg;
 	try {
@@ -269,9 +267,7 @@ int main (int argc, char *argv[]) {
 	opt.push_back(stepsize);
 	opt.push_back(nsteps);
     
-	//
 	//READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
-	//
     vector<structure> allKissingSpheres = readallstruct(fileName);
 	
 	//if scaling is found in settings file scale all coordinates accordingly
