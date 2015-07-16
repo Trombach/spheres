@@ -79,7 +79,8 @@ public:
 		return *this;
 	}
 	structure operator* (const double &y) const { return structure(*this) *= y; }
-	coord3d& operator[](unsigned int i){ return structureCoordinates[i]; }
+	coord3d& operator[] (unsigned int i) { return structureCoordinates[i]; }
+	bool operator< (const structure y) const { return this->getEnergy() < y.getEnergy(); }
 
     //function to sum over all sphere interactions, change later to work with different potentials
    	double sumOverAllInteractions (const std::vector<double> &p);

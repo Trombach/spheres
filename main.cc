@@ -6,6 +6,7 @@
 #include <iomanip>
 #include "spheres.h"
 #include <libconfig.h++>
+#include <algorithm>
 
 
 using namespace std; 
@@ -151,7 +152,7 @@ int main (int argc, char *argv[]) {
 	int scaling_switch;
     string algo;
 	double scalingFactor(1.0);
-	double accuracy(1e-4);
+	double accuracy(0.1);
 	double dforce(1e-3);
 	double stepsize(0.01);
 	int nsteps(100);
@@ -309,12 +310,16 @@ int main (int argc, char *argv[]) {
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
 		cout << "Optimization for structure no " << allKissingSpheres[i].getNumber() << endl;
         optimizedKissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
+		optimizedKissingSpheres[i].setNumber( allKissingSpheres[i].getNumber() );
 		hessian = optimizedKissingSpheres[i].hessian(p);
 		eigenValues = diag(hessian);
 		cout << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 		cout << "###############################################################\n" << endl;
 	}
-    
+	sort(optimizedKissingSpheres.begin(), optimizedKissingSpheres.end());
+    for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
+		cout << "Number: " << optimizedKissingSpheres[i].getNumber() << "\t" << "Energy: " << optimizedKissingSpheres[i].getEnergy() << endl;
+	}
 	//cout << "{";
 	//for (vector< vector<double> >::size_type i = 0; i < hessian.size(); i++) {
 	//	cout << "{";

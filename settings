@@ -3,15 +3,14 @@ scaling: {
 };
 potential: {
     name = "LJ";
-    epsilon = 5.0;
+    epsilon = 20.0;
     rm =  1.0;
 	exp1 = 12;
 	exp2 = 6;
 };
 opt: {
     name = "BFGS";
-    accuracy =  0.1;
     dforce = 1e-3;
     stepsize = 0.01;
-    nsteps = 100;
+    nsteps = 1000;
 };

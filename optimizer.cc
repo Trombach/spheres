@@ -143,7 +143,7 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 	        min_function.fdf = &LJEnergyAndGradient_gsl;
 			break;
 		default:
-			cerr << "Error, probably bad input of pot" << endl;
+			cerr << "Error, probably bad input of potential name!" << endl;
 			return newGeometry;
     }
 
@@ -163,7 +163,7 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 	        T = gsl_multimin_fdfminimizer_vector_bfgs2;
 			break;
 		default:
-			cerr << "Error, probably bad input of opt algo" << endl;
+			cerr << "Error, probably bad input of algorithm name!" << endl;
 			return newGeometry;
 	}
 
@@ -191,8 +191,8 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 			cout << "Minimum found at:\n" << endl;
 
 		    //create structure for optimized geometry
-    	    for (size_t i = 0; i < x->size / 3; ++i) {
-                coord3d sphere(gsl_vector_get (s->x, 3 * i), gsl_vector_get (s->x, 3 * i + 1), gsl_vector_get (s->x, 3 * i + 2));
+    	    for (size_t j = 0; j < x->size / 3; ++j) {
+                coord3d sphere(gsl_vector_get (s->x, 3 * j), gsl_vector_get (s->x, 3 * j + 1), gsl_vector_get (s->x, 3 * j + 2));
 			    cout << sphere <<  endl;
     		    newGeometry.push_back(sphere);
     	    }
@@ -204,11 +204,13 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
     
     cout << "-----------------------------------------------" << endl;
     cout << "LJ Energy is: " << s->f << endl;
+	newGeometry.setEnergy(s->f);
+
     if (status == GSL_SUCCESS) {
 		cout << "Optimization successful!" << endl;
 	}
 	else {
-		cout << "Error, " << status << ". Optimization failed." << endl;
+		cout << "Error: " << status << ". Optimization failed." << endl;
 	}
     gsl_multimin_fdfminimizer_free (s);
 	gsl_vector_free (x);
