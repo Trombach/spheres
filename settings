@@ -5,6 +5,8 @@ potential: {
     name = "LJ";
     epsilon = 5.0;
     rm =  1.0;
+	exp1 = 12;
+	exp2 = 6;
 };
 opt: {
     name = "BFGS";

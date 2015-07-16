@@ -24,11 +24,9 @@ double LJEnergy (const double distance, const double epsilon, const double rm, c
 double structure::sumOverAllInteractions (const vector<double> &p) {
     double totalEnergy = 0;
     //iterate over double index ij, where N>j>i and N>i
-	for (structure::const_iterator iter = this->begin(); iter != this->end(); ++iter) { 
-		for (structure::const_iterator jter = iter + 1; jter != this->end(); ++jter) {
-			//cout << "iter is " << *iter << endl;
-			//cout << "jter is " << *jter << endl;
-            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), p[0], p[1], p[2], p[3]);
+	for (int i = 0; i < this->nAtoms(); ++i) { 
+		for (int j = i + 1; j < this->nAtoms(); ++j) {
+            totalEnergy += LJEnergy (coord3d::dist ((*this)[i],(*this)[j]), p[0], p[1], p[2], p[3]);
         }
 	}
 	return totalEnergy;
@@ -48,11 +46,9 @@ double LJEnergy_gsl (const gsl_vector *v, void *params) {
 	}
     double totalEnergy = 0;
 	vector<double> *p = static_cast<vector<double>* >(params);
-	for (structure::const_iterator iter = kissingSphere.begin(); iter != kissingSphere.end(); ++iter) { 
-		for (structure::const_iterator jter = iter + 1; jter != kissingSphere.end(); ++jter) {
-			//cout << "iter is " << *iter << endl;
-			//cout << "jter is " << *jter << endl;
-            totalEnergy += LJEnergy (coord3d::dist (*iter,*jter), (*p)[0], (*p)[1], (*p)[2], (*p)[3]);
+	for (int i = 0; i < kissingSphere.nAtoms(); ++i) { 
+		for (int j = i + 1; j < kissingSphere.nAtoms(); ++j) {
+            totalEnergy += LJEnergy (coord3d::dist (kissingSphere[i],kissingSphere[j]), (*p)[0], (*p)[1], (*p)[2], (*p)[3]);
         }
 	}
 	return totalEnergy;
@@ -76,10 +72,10 @@ coord3d LJGradient(const coord3d ri, const coord3d rj, const double epsilon, con
 }
 
 vector<coord3d> structure::sumOverAllGradients (const vector<double> &p) {
-	vector<coord3d> gradients(this->size(), coord3d());
+	vector<coord3d> gradients(this->nAtoms(), coord3d());
 	coord3d force;
-	for (structure::size_type i = 0; i < this->size(); ++i) { 
-		for (structure::size_type j = i + 1; j < this->size(); ++j) {
+	for (int i = 0; i < this->nAtoms(); ++i) { 
+		for (int j = i + 1; j < this->nAtoms(); ++j) {
 		    coord3d twoBodyGradient = LJGradient ((*this)[i], (*this)[j], p[0], p[1], p[2], p[3]);
             gradients[i] += twoBodyGradient;
 			gradients[j] -= twoBodyGradient;
@@ -148,15 +144,14 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 			break;
 		default:
 			cerr << "Error, probably bad input of pot" << endl;
-			newGeometry.empty();
 			return newGeometry;
     }
 
-    min_function.n = (this->size()) * 3;
+    min_function.n = (this->nAtoms()) * 3;
 	min_function.params = static_cast<void*>(&parameters);
 
-	x = gsl_vector_alloc ( (this->size()) *3 );
-    for (structure::size_type i = 0; i < this->size(); ++i) {
+	x = gsl_vector_alloc ( (this->nAtoms()) *3 );
+    for (int i = 0; i < this->nAtoms(); ++i) {
 	    for (int j = 0; j<=2; ++j) {
 	        gsl_vector_set(x, 3 * i + j, (*this)[i][j]);
 		}
@@ -169,11 +164,10 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 			break;
 		default:
 			cerr << "Error, probably bad input of opt algo" << endl;
-			newGeometry.empty();
 			return newGeometry;
 	}
 
-	s = gsl_multimin_fdfminimizer_alloc (T, (this->size()) * 3);
+	s = gsl_multimin_fdfminimizer_alloc (T, (this->nAtoms()) * 3);
     
 	double stepSize = opt[2];
 	double accuracy = opt[0];

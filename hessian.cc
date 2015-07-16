@@ -15,9 +15,9 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 	const double rm = p[1];
 	const double exp1 = p[2];
 	const double exp2 = p[3];
-	vector < vector<double>  > hessianMatrix (this->size() * 3, vector<double> (this->size() * 3, 0));
-    for (structure::size_type i = 0; i < this->size(); i++) {
-		for (structure::size_type j = i+1; j < this->size(); j++) {
+	vector < vector<double>  > hessianMatrix (this->nAtoms() * 3, vector<double> (this->nAtoms() * 3, 0));
+    for (int i = 0; i < this->nAtoms(); i++) {
+		for (int j = i + 1; j < this->nAtoms(); j++) {
 
 			const coord3d vecr = (*this)[i] - (*this)[j];
 			const double r = coord3d::dist((*this)[i], (*this)[j]);
@@ -37,34 +37,6 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 			vector<double> d2rvecr_dr2(9, double());
 			coord3d::ddnorm(vecr, d2rvecr_dr2);
 
-
-			//calculate dr_dx terms
-			//dnorm gives dvecr_dr which can be transformed into dr_dx by
-			//   dr_dx = dr_dri * dri_dx, where dri is one element of vecr
-			//the last term gives either +1 or -1
-			//vector<double> dr_dx;
-			//for (int a = 0; a < 3; a++) {
-			//    dr_dx.push_back(dvecr_dr[a]);
-			//}
-			//for (int a = 0; a < 3; a++) {
-			//    dr_dx.push_back(- dvecr_dr[a]);
-			//}
-
-			//calculate d2r_dx2 terms
-			
-			//vector<double> d2r_dx2;
-			//for (int a = 0; a < 9; a++) {
-			//	d2r_dx2.push_back(d2rvecr_dr2[a]);
-			//}
-			//for (int a = 0; a < 9; a++) {
-			//	d2r_dx2.push_back(- d2rvecr_dr2[a]);
-			//}
-			//for (int a = 0; a < 9; a++) {
-			//	d2r_dx2.push_back(- d2rvecr_dr2[a]);
-			//}
-			//for (int a = 0; a < 9; a++) {
-			//	d2r_dx2.push_back(d2rvecr_dr2[a]);
-			//}
 
 			//calculation of hessian elements
 

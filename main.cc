@@ -307,7 +307,7 @@ int main (int argc, char *argv[]) {
 	vector<double> allEnergies;
 
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
-		cout << "Optimization for structure no " << i + 1 << endl;
+		cout << "Optimization for structure no " << allKissingSpheres[i].getNumber() << endl;
         optimizedKissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
 		hessian = optimizedKissingSpheres[i].hessian(p);
 		eigenValues = diag(hessian);
