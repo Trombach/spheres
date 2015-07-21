@@ -316,24 +316,30 @@ int main (int argc, char *argv[]) {
 		cout << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 		cout << "###############################################################\n" << endl;
 	}
+
+	for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
+		coord3d CoM = optimizedKissingSpheres[i].centreOfMass();
+		optimizedKissingSpheres[i].shiftToCoM(CoM);
+		vector< vector<double> > inertiaTensor = optimizedKissingSpheres[i].momentOfInertia();
+		vector<double> inertia = diag(inertiaTensor);
+		optimizedKissingSpheres[i].setMomentOfInertia(inertia);
+	}
+
+
 	sort(optimizedKissingSpheres.begin(), optimizedKissingSpheres.end());
     for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
-		cout << "Number: " << optimizedKissingSpheres[i].getNumber() << "\t" << "Energy: " << optimizedKissingSpheres[i].getEnergy() << endl;
+		cout << "Number: " << optimizedKissingSpheres[i].getNumber() << "\t" << "Energy: " << optimizedKissingSpheres[i].getEnergy() << "\t" << "Inertia: " << optimizedKissingSpheres[i].getMomentOfInertia() << endl;
 	}
-	//cout << "{";
-	//for (vector< vector<double> >::size_type i = 0; i < hessian.size(); i++) {
-	//	cout << "{";
-	//	for (vector< vector<double> >::size_type j = 0; j < hessian.size(); j++) {
-	//		cout << setprecision(1) << fixed << setw(10) << hessian[i][j] << ", ";
-	//	}
-	//	cout << "}" << endl;
-	//}
-	//cout << "}" << endl;
-	//cout << hessian << endl;
-	//cout << "Sorted eval" << endl << eigenValues << endl;
-	
-	
-	
+
+
+	//cout << "Centre of mass is: " << optimizedKissingSpheres[0].centreOfMass() << endl;
+	//coord3d CoM = optimizedKissingSpheres[0].centreOfMass();
+	//optimizedKissingSpheres[0].shiftToCoM(CoM);
+	//cout << "New entre of mass is: " << optimizedKissingSpheres[0].centreOfMass() << endl;
+	//vector< vector<double> > inertiaTensor = optimizedKissingSpheres[0].momentOfInertia();
+	//vector<double> inertia = diag(inertiaTensor);
+	//cout << "Moment of inertia Tensor is: " << optimizedKissingSpheres[0].momentOfInertia() <<
+	//endl << "Eigenvalues are :" << inertia << endl;
 
 
     return 0; 

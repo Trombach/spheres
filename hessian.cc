@@ -65,14 +65,14 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 	return hessianMatrix;
 }
 
-vector<double> diag (vector< vector<double> > &hessian) {
+vector<double> diag (vector< vector<double> > &matrix) {
 
-	const int hessianSize = hessian.size();
+	const int hessianSize = matrix.size();
 	double hessianArray[hessianSize * hessianSize];
 
 	for (int i = 0; i < hessianSize; i++) {
 		for (int j = 0; j < hessianSize; j++) {
-			hessianArray[hessianSize * i + j] = hessian[i][j];
+			hessianArray[hessianSize * i + j] = matrix[i][j];
 		}
 	}
 	

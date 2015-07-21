@@ -56,6 +56,7 @@ private:
 	double structureEnergy;
 	int structureNumber;
 	std::vector<coord3d> structureCoordinates;
+	std::vector<double> structureMomentOfInertia;
 
 public:   
 	
@@ -65,10 +66,12 @@ public:
 	int getNumber() const { return structureNumber; }
 	double getEnergy() const { return structureEnergy; }
 	std::vector<coord3d> getCoordinates() const { return structureCoordinates; }
+	std::vector<double> getMomentOfInertia() const { return structureMomentOfInertia; }
 
 	void setNumber (int number) { structureNumber = number; }
 	void setEnergy (double energy) { structureEnergy = energy; }
 	void setCoordinates (std::vector<coord3d> coordinates) { structureCoordinates = coordinates; }
+	void setMomentOfInertia (std::vector<double> inertiaEigenvalues) { structureMomentOfInertia = inertiaEigenvalues; }
 
 	int nAtoms() { return (this->getCoordinates()).size(); }
 
@@ -90,6 +93,12 @@ public:
 	structure optimize (const int &algo_switch, const int &potential_switch, const std::vector<double> parameters, const std::vector<double> opt, std::vector<double> &allEnergies);
 
 	std::vector< std::vector<double> > hessian (const std::vector<double> &p);
+
+	coord3d centreOfMass ();
+	void shiftToCoM (coord3d &CoM);
+	std::vector< std::vector<double> > momentOfInertia ();
+
+	
 
 };
     
