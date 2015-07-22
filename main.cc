@@ -313,8 +313,12 @@ int main (int argc, char *argv[]) {
 	
 	switch (output_switch) {
 		case 1:
-			for (vector<int>::size_type i = 0; i < structureNumbers.size(); i++) {
-				xyzout(optimizedKissingSpheres[structureNumbers[i] - 1], "optStruct" + to_string(structureNumbers[i]));
+			for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
+				for (vector<int>::size_type j = 0; j < structureNumbers.size(); j++) {
+					if (optimizedKissingSpheres[i].getNumber() == structureNumbers[j]) {
+						xyzout(optimizedKissingSpheres[i], "optStruct" + to_string(optimizedKissingSpheres[i].getNumber()));
+					}
+				}
 			}
 		default:
 			break;
