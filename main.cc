@@ -25,6 +25,8 @@ template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
 	}
 container_output(vector);
 
+void xyzout (structure &outputStructure, const string &name = "structure.xyz");
+
 //function for determining if a line in the input is emtpy
 //used for breaking the read loop
 bool justempty(string str) {
@@ -113,22 +115,6 @@ int main (int argc, char *argv[]) {
 		return 1;
 	}
 
-	//
-	//CALCULATE GRADIENTS
-	//
-	//	vector< vector<coord3d> > allGradients;
-	//    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
-	//        vector<coord3d> gradients = allKissingSpheres[i].sumOverAllGradients();
-	//        allGradients.push_back(gradients);
-	//	}
-	//    for (vector< vector<coord3d> >::size_type i = 0; i < allGradients.size(); ++i) { 
-	//        coord3d sum(0,0,0);
-	//	    for (structure::size_type j = 0; j < allGradients[i].size(); ++j) {
-	//	    	sum += allGradients[i][j];
-	//	    }
-	//	    cout << "Sum over all Forces for Structure " << i + 1 << " is : " << sum << endl;
-	//	}
-	//
 	
 	//READ SETTINGS FILE
 
@@ -143,19 +129,31 @@ int main (int argc, char *argv[]) {
     catch(const ParseException &pex) {
 		cout << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
 	    return(EXIT_FAILURE);
-
 	}
+
+	const Setting &root = cfg.getRoot();
+
 	string potential;
 	vector<double> p;
-	int potential_switch;
-	int algo_switch;
-	int scaling_switch;
+	vector<int> structureNumbers;
+	int potential_switch, algo_switch, scaling_switch, output_switch(1);
     string algo;
-	double scalingFactor(1.0);
-	double accuracy(0.1);
-	double dforce(1e-3);
-	double stepsize(0.01);
+	double scalingFactor(1.0), accuracy(0.1), dforce(1e-3), stepsize(0.01);
 	int nsteps(100);
+	
+	try {
+		const Setting &numbers = root["output"]["number"];
+		int count = numbers.getLength();
+		for (int i = 0; i < count; i++) {
+			structureNumbers.push_back (numbers[i]);
+		}
+	}
+	catch (const SettingNotFoundException &nfex) {
+		cout << "Output setting not Found." << endl;
+		output_switch = 0;
+	}
+	cout << "Structures to print: " << structureNumbers << endl;
+
 
 	if (cfg.lookupValue("scaling.factor", scalingFactor)) {
 		cout << "Scaling factor in seetings found. Input coordinates will be scaled by " << scalingFactor << endl;
@@ -178,9 +176,7 @@ int main (int argc, char *argv[]) {
 
 	
     if (potential == "LJ") {
-		double epsilon;
-		double rm;
-		double exp1(12), exp2(6);
+		double exp1(12), exp2(6), rm, epsilon;
 		cout << "Setting LJ Parameters." << endl;
 		if (cfg.lookupValue("potential.epsilon", epsilon)) {
 			p.push_back(epsilon);
@@ -267,6 +263,7 @@ int main (int argc, char *argv[]) {
 	opt.push_back(dforce);
 	opt.push_back(stepsize);
 	opt.push_back(nsteps);
+
     
 	//READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
     vector<structure> allKissingSpheres = readallstruct(fileName);
@@ -280,25 +277,6 @@ int main (int argc, char *argv[]) {
 		default:
 			break;
 	}
-
-
-
-	//	vector<double> allEnergies;
-	//    for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); ++i) {
-	//	    allEnergies.push_back( allKissingSpheres[i].sumOverAllInteractions() );
-	//	}
-	//
-	//    cout << "Number of Energies is " << allEnergies.size() << endl;	
-	//	for (vector<double>::size_type i=0; i < 1; ++i) {
-	//	    cout << "Total LJ-Energy for structure " << i + 1 << " is " << allEnergies[i] << endl;
-	//    }
-	//    
-	//	cout << "Structure is:" << endl;
-	//	for (structure::size_type i = 0; i < allKissingSpheres[0].size(); ++i) {
-	//		cout << allKissingSpheres[0][i] << endl;
-	//	}
-	//
-
 
 
 
@@ -331,16 +309,16 @@ int main (int argc, char *argv[]) {
 		cout << "Number: " << optimizedKissingSpheres[i].getNumber() << "\t" << "Energy: " << optimizedKissingSpheres[i].getEnergy() << "\t" << "Inertia: " << optimizedKissingSpheres[i].getMomentOfInertia() << endl;
 	}
 
-
-	//cout << "Centre of mass is: " << optimizedKissingSpheres[0].centreOfMass() << endl;
-	//coord3d CoM = optimizedKissingSpheres[0].centreOfMass();
-	//optimizedKissingSpheres[0].shiftToCoM(CoM);
-	//cout << "New entre of mass is: " << optimizedKissingSpheres[0].centreOfMass() << endl;
-	//vector< vector<double> > inertiaTensor = optimizedKissingSpheres[0].momentOfInertia();
-	//vector<double> inertia = diag(inertiaTensor);
-	//cout << "Moment of inertia Tensor is: " << optimizedKissingSpheres[0].momentOfInertia() <<
-	//endl << "Eigenvalues are :" << inertia << endl;
-
+	//OUTPUT CONTROL
+	
+	switch (output_switch) {
+		case 1:
+			for (vector<int>::size_type i = 0; i < structureNumbers.size(); i++) {
+				xyzout(optimizedKissingSpheres[structureNumbers[i] - 1], "optStruct" + to_string(structureNumbers[i]));
+			}
+		default:
+			break;
+	}
 
     return 0; 
 
