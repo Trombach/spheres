@@ -7,7 +7,7 @@
 #include <string>
 
 
-std::vector<double> diag (std::vector< std::vector<double> > &hessian); 
+std::vector<double> diag (std::vector< std::vector<double> > &matrix); 
 
 struct coord3d {
     double x[3];

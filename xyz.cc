@@ -28,5 +28,6 @@ void xyzout (structure &outputStructure, const string &name = "structure.xyz") {
 	for (int i = 0; i < outputStructure.nAtoms(); i++) {
 		xyz << setw(5) << left << "X" << setw(15) << setprecision(6) << setiosflags(ios::fixed) << right << outputStructure[i][0] << setw(15) << outputStructure[i][1] << setw(15) << outputStructure[i][2] << endl;
 	}
+	xyz.close();
 }
 	

@@ -285,6 +285,8 @@ int main (int argc, char *argv[]) {
 	vector<double> eigenValues;
 	vector<double> allEnergies;
 
+
+	//OPTIMIZE AND HESSIAN
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
 		cout << "Optimization for structure no " << allKissingSpheres[i].getNumber() << endl;
         optimizedKissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
@@ -294,7 +296,8 @@ int main (int argc, char *argv[]) {
 		cout << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 		cout << "###############################################################\n" << endl;
 	}
-
+	
+	//INERTIA TENSOR AND EIGENVALUES
 	for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
 		coord3d CoM = optimizedKissingSpheres[i].centreOfMass();
 		optimizedKissingSpheres[i].shiftToCoM(CoM);
@@ -303,21 +306,30 @@ int main (int argc, char *argv[]) {
 		optimizedKissingSpheres[i].setMomentOfInertia(inertia);
 	}
 
-
+	//SORT BY ENERGY
 	sort(optimizedKissingSpheres.begin(), optimizedKissingSpheres.end());
+	ofstream output;
+	output.open ("energies");
+	output << left << setw(10) << "number" << right << setw(15) << "energy" << right << setw(25) << "eigenvalues" << endl;
     for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
-		cout << "Number: " << optimizedKissingSpheres[i].getNumber() << "\t" << "Energy: " << optimizedKissingSpheres[i].getEnergy() << "\t" << "Inertia: " << optimizedKissingSpheres[i].getMomentOfInertia() << endl;
+		output << 
+			left << setw(10) << optimizedKissingSpheres[i].getNumber() << 
+			right << setw(15) << optimizedKissingSpheres[i].getEnergy() << 
+			right << setw(25) << optimizedKissingSpheres[i].getMomentOfInertia() << 
+		endl;
 	}
+	output.close();
 
-	//OUTPUT CONTROL
-	
+	//WRITE OUTPUT
 	switch (output_switch) {
 		case 1:
-			for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
-				for (vector<int>::size_type j = 0; j < structureNumbers.size(); j++) {
-					if (optimizedKissingSpheres[i].getNumber() == structureNumbers[j]) {
-						xyzout(optimizedKissingSpheres[i], "optStruct" + to_string(optimizedKissingSpheres[i].getNumber()));
-					}
+			for (vector<int>::size_type i = 0; i < structureNumbers.size(); i++) {
+				vector<structure>::iterator printThis = find_if (optimizedKissingSpheres.begin(), optimizedKissingSpheres.end(), [&] (structure toPrint) { return (toPrint.getNumber() == structureNumbers[i]); });
+				if (printThis != optimizedKissingSpheres.end()) {
+					xyzout (*printThis, "optStructure" + to_string (printThis->getNumber()));
+				}
+				else {
+					cerr << "Structure with number " << i << "not found." << endl;
 				}
 			}
 		default:
