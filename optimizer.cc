@@ -124,7 +124,7 @@ void LJEnergyAndGradient_gsl (const gsl_vector *x, void *params, double *f, gsl_
 //
 //initialize gsl minimizer function
 //
-structure structure::optimize (const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt, vector<double> &allEnergies) {
+structure structure::optimize (ofstream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt, vector<double> &allEnergies) {
 	int status;
 	structure newGeometry;
 	size_t nsteps = static_cast<size_t>(opt[3]);
@@ -179,8 +179,7 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 		status = gsl_multimin_fdfminimizer_iterate (s);
 		
 		if (status) {
-			cerr << "Something went wrong!" << endl;
-			cerr << status << endl;
+			cerr << "Something went wrong! Error, " << status << endl;
 			break;
 		}
         
@@ -188,12 +187,12 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 		status = gsl_multimin_test_gradient (s->gradient, absoluteTolerance);
 
 		if (status == GSL_SUCCESS) {
-			cout << "Minimum found at:\n" << endl;
+			min << "Minimum found at:\n" << endl;
 
 		    //create structure for optimized geometry
     	    for (size_t j = 0; j < x->size / 3; ++j) {
                 coord3d sphere(gsl_vector_get (s->x, 3 * j), gsl_vector_get (s->x, 3 * j + 1), gsl_vector_get (s->x, 3 * j + 2));
-			    cout << sphere <<  endl;
+			    min << sphere <<  endl;
     		    newGeometry.push_back(sphere);
     	    }
         allEnergies.push_back(s->f);
@@ -202,15 +201,15 @@ structure structure::optimize (const int &algo_switch, const int &potential_swit
 	while (status == GSL_CONTINUE && i <= nsteps);
 
     
-    cout << "-----------------------------------------------" << endl;
-    cout << "LJ Energy is: " << s->f << endl;
+    min << "-----------------------------------------------" << endl;
+    min << "LJ Energy is: " << s->f << endl;
 	newGeometry.setEnergy(s->f);
 
     if (status == GSL_SUCCESS) {
-		cout << "Optimization successful!" << endl;
+		min << "Optimization successful!" << endl;
 	}
 	else {
-		cout << "Error: " << status << ". Optimization failed." << endl;
+		min << "Error: " << status << ". Optimization failed." << endl;
 	}
     gsl_multimin_fdfminimizer_free (s);
 	gsl_vector_free (x);

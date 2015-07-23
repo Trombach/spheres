@@ -2,6 +2,7 @@
 #define SPHERES
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <math.h>
 #include <string>
@@ -90,7 +91,7 @@ public:
 	//function to sum over all gradients to get gradient for each sphere
 	std::vector<coord3d> sumOverAllGradients (const std::vector<double> &p);
 	//initialize gsl minimizer function
-	structure optimize (const int &algo_switch, const int &potential_switch, const std::vector<double> parameters, const std::vector<double> opt, std::vector<double> &allEnergies);
+	structure optimize (std::ofstream &min, const int &algo_switch, const int &potential_switch, const std::vector<double> parameters, const std::vector<double> opt, std::vector<double> &allEnergies);
 
 	std::vector< std::vector<double> > hessian (const std::vector<double> &p);
 

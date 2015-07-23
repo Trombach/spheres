@@ -78,7 +78,7 @@ vector<structure> readallstruct (const std::string& fileName) {
 	    }
 	}
     infile.close();
-	cout << "Number of structures is " << allKissingSpheres.size() << endl;
+	cout << "\t" << "Number of structures: " << allKissingSpheres.size() << endl;
 	return allKissingSpheres;
 }
 
@@ -86,32 +86,32 @@ vector<structure> readallstruct (const std::string& fileName) {
 
 int main (int argc, char *argv[]) {
 	
+	cout << endl;
 	//SOME START UP CHECKS AND ARGUMENT PROCESSING
     if ( argc < 2 ) {
-        cout << "Please provide filename." << endl;
+        cout << "\t" << "Please provide filename!" << endl;
         return 1;
-    }
-    else {
-        cout << "Filename is " << argv[ argc -1 ] << "."  << endl;
     }
 
 	//CHECK IF FILE EXISTS
 
     string fileName = argv[ argc -1 ]; //safe input file name
-    cout << fileName << endl;
     
     if (fexists(fileName)) {
-        cout << "File " << fileName << " exists." << endl;
+        cout << "\t" << "File " << fileName << " exists." << endl;
     }
     else {
-        cout << "File " << fileName << " does not exist." << endl;
+        cout << "\t" << "File " << fileName << " does not exist." << endl;
         return 1;
     }
+
+	cout << endl;
+
     if (fexists("settings")) {
-		cout << "Settings file found." << endl;
+		cout << "\t" << "Settings file found." << endl;
 	}
 	else {
-		cout << "No settings file in working directory" << endl;
+		cout << "\t" << "No settings file in working directory" << endl;
 		return 1;
 	}
 
@@ -123,13 +123,15 @@ int main (int argc, char *argv[]) {
 	    cfg.readFile("settings");
 	}
 	catch(const FileIOException &fioex) {
-        cout << "I/O error while reading file." << endl;
+        cerr << "\tI/O error while reading file." << endl;
 		return(EXIT_FAILURE);
 	}
     catch(const ParseException &pex) {
-		cout << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
+		cerr << "\tParse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
 	    return(EXIT_FAILURE);
 	}
+
+	cout << endl;
 
 	const Setting &root = cfg.getRoot();
 
@@ -149,121 +151,117 @@ int main (int argc, char *argv[]) {
 		}
 	}
 	catch (const SettingNotFoundException &nfex) {
-		cout << "Output setting not Found." << endl;
+		cerr << "\tOutput setting not Found." << endl;
 		output_switch = 0;
 	}
-	cout << "Structures to print: " << structureNumbers << endl;
+	cout << "\tStructures to print: " << structureNumbers << endl;
 
+
+	cout << endl;
 
 	if (cfg.lookupValue("scaling.factor", scalingFactor)) {
-		cout << "Scaling factor in seetings found. Input coordinates will be scaled by " << scalingFactor << endl;
+		cout << "\tScaling: " << scalingFactor << endl;
 		scaling_switch = 1;
 	}
 	else {
-		cout << "No scaling of input coordinates." << endl;
+		cout << "\tNo scaling" << endl;
 	}
 
     if (cfg.lookupValue("potential.name", potential)) {
 		if (potential == "LJ") {
 		    potential_switch = 1;
 		}
-		cout << "Chosen potential is " << potential << endl;
+		cout << "\tPotential: " << potential << endl;
 	}
 	else {
-		cout << "No 'potential' setting in configuration file." << endl;
+		cout << "\tNo 'potential' setting in configuration file." << endl;
 		return 1;
 	}
 
 	
     if (potential == "LJ") {
 		double exp1(12), exp2(6), rm, epsilon;
-		cout << "Setting LJ Parameters." << endl;
 		if (cfg.lookupValue("potential.epsilon", epsilon)) {
 			p.push_back(epsilon);
-			cout << "Epsilon set to " << p[0] << endl;
+			cout << "\t\tEpsilon: " << p[0] << endl;
 		}
 		else {
-			cout << "No 'epsilon' in configuration file." << endl;
+			cout << "\tNo 'epsilon' in configuration file." << endl;
 			return 1;
 		}
 		if (cfg.lookupValue("potential.rm", rm)) {
 			p.push_back(rm);
-			cout << "Rm set to " << p[1] << endl;
+			cout << "\t\tRm: " << p[1] << endl;
 		}
 		else {
-			cout << "No 'rm' in configuration file." << endl;
+			cout << "\tNo 'rm' in configuration file." << endl;
 			return 1;
 		}
 		if (cfg.lookupValue("potential.exp1", exp1)) {
 			p.push_back(exp1);
-			cout << "First exponent set to " << exp1 << endl;
+			cout << "\t\tExp1: " << exp1 << endl;
 		}
 		else {
-			cout << "No first exponent in settings file." << endl;
-			cout << "Fall back to " << exp1 << endl;
 			p.push_back(exp1);
+			cout << "\t\tExp1: " << exp1 << endl;
 		}
 		if (cfg.lookupValue("potential.exp2", exp2)) {
 			p.push_back(exp2);
-			cout << "First exponent set to " << exp2 << endl;
+			cout << "\t\tExp2: " << exp2 << endl;
 		}
 		else {
-			cout << "No first exponent in settings file." << endl;
-			cout << "Fall back to " << exp2 << endl;
 			p.push_back(exp2);
+			cout << "\t\tExp2: " << exp2 << endl;
 		}
 	}
 
-
+	cout << endl;
 
 	vector<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize, 3 == nsteps
 	if (cfg.lookupValue("opt.name", algo)) {
 		if (algo == "BFGS") {
 			algo_switch = 1;
 		}
-		cout << "Optimization algo set to " << algo << endl;
+		cout << "\tAlgo: " << algo << endl;
 	}
 	else {
-	    cout << "No 'opt' setting in configuration file." << endl;
+	    cout << "\tNo 'opt' setting in configuration file." << endl;
 		return 1;
 	}
 
 	if (cfg.lookupValue("opt.accuracy", accuracy)) {
-		cout << "Accuracy set to " << accuracy << endl;
+		cout << "\t\tAccuracy: " << accuracy << endl;
 	}
 	else {
-	    cout << "No 'accuracy' setting in configuration file." << endl;
-		cout << "Fall back to " << accuracy << endl;
+		cout << "\t\tAccuracy: " << accuracy << endl;
 	}
 
 	if (cfg.lookupValue("opt.dforce", dforce)) {
-		cout << "Convergence criterion for gradients set to " << dforce << endl;
+		cout << "\t\tDforce:  " << dforce << endl;
 	}
 	else {
-	    cout << "No 'dforce' setting in configuration file." << endl;
-	    cout << "Fall back to " << dforce << endl;
+		cout << "\t\tDforce:  " << dforce << endl;
 	}
 
 	if (cfg.lookupValue("opt.stepsize", stepsize)) {
-		cout << "Stepsize set to " << stepsize << endl;
+		cout << "\t\tStepsize: " << stepsize << endl;
 	}
 	else {
-	    cout << "No 'stepsize' setting in configuration file." << endl;
-		cout << "Fall back to " << stepsize << endl;
+		cout << "\t\tStepsize: " << stepsize << endl;
 	}
 
 	if (cfg.lookupValue("opt.nsteps", nsteps)) {
-		cout << "Number of steps set to " << nsteps << endl;
+		cout << "\t\tNsteps: " << nsteps << endl;
 	}
 	else {
-	    cout << "No 'nsteps' setting in configuration file." << endl;
-		cout << "Fall back to " << stepsize << endl;
+		cout << "\t\tNsteps: " << nsteps << endl;
 	}
     opt.push_back(accuracy);
 	opt.push_back(dforce);
 	opt.push_back(stepsize);
 	opt.push_back(nsteps);
 
+	cout << endl;
     
 	//READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
     vector<structure> allKissingSpheres = readallstruct(fileName);
@@ -287,15 +285,20 @@ int main (int argc, char *argv[]) {
 
 
 	//OPTIMIZE AND HESSIAN
+	cout << "\tStarting optimization..." << endl;
+	ofstream min;
+	min.open ("opt");
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
-		cout << "Optimization for structure no " << allKissingSpheres[i].getNumber() << endl;
-        optimizedKissingSpheres.push_back( allKissingSpheres[i].optimize( algo_switch, potential_switch, p, opt , allEnergies) );
+		min << "Optimization for structure no " << allKissingSpheres[i].getNumber() << endl;
+        optimizedKissingSpheres.push_back (allKissingSpheres[i].optimize(min, algo_switch, potential_switch, p, opt , allEnergies));
 		optimizedKissingSpheres[i].setNumber( allKissingSpheres[i].getNumber() );
 		hessian = optimizedKissingSpheres[i].hessian(p);
 		eigenValues = diag(hessian);
-		cout << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
-		cout << "###############################################################\n" << endl;
+		min << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
+		min << "###############################################################\n" << endl;
 	}
+	min.close();
+	cout << "\tAll Done!" << endl << endl;
 	
 	//INERTIA TENSOR AND EIGENVALUES
 	for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
@@ -315,7 +318,7 @@ int main (int argc, char *argv[]) {
 		output << 
 			left << setw(10) << optimizedKissingSpheres[i].getNumber() << 
 			right << setw(15) << optimizedKissingSpheres[i].getEnergy() << 
-			right << setw(25) << optimizedKissingSpheres[i].getMomentOfInertia() << 
+			right << setw(15) << optimizedKissingSpheres[i].getMomentOfInertia() << 
 		endl;
 	}
 	output.close();
@@ -329,13 +332,14 @@ int main (int argc, char *argv[]) {
 					xyzout (*printThis, "optStructure" + to_string (printThis->getNumber()));
 				}
 				else {
-					cerr << "Structure with number " << i << "not found." << endl;
+					cerr << "Structure number " << i << " not found." << endl;
 				}
 			}
 		default:
 			break;
 	}
 
+	cout << "\tProgram terminated" << endl;
     return 0; 
 
     
