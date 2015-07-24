@@ -22,7 +22,7 @@ container_output(vector);
 void xyzout (structure &outputStructure, const string &name = "structure.xyz") {
 	vector<coord3d> coordinates = outputStructure.getCoordinates();
 	ofstream xyz;
-	xyz.open (name);
+	xyz.open ("output/" + name);
 	xyz << outputStructure.nAtoms() << endl;
 	xyz << "Energy: " << outputStructure.getEnergy() << ", moment of inertia: " << outputStructure.getMomentOfInertia() << endl;
 	for (int i = 0; i < outputStructure.nAtoms(); i++) {

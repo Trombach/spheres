@@ -142,6 +142,7 @@ int main (int argc, char *argv[]) {
     string algo;
 	double scalingFactor(1.0), accuracy(0.1), dforce(1e-3), stepsize(0.01);
 	int nsteps(100);
+	bool printInput(false);
 	
 	try {
 		const Setting &numbers = root["output"]["number"];
@@ -154,7 +155,13 @@ int main (int argc, char *argv[]) {
 		cerr << "\tOutput setting not Found." << endl;
 		output_switch = 0;
 	}
-	cout << "\tStructures to print: " << structureNumbers << endl;
+	cout << "\tStructures to print: " << structureNumbers;
+	if (cfg.lookupValue ("output.input", printInput)) {
+		cout << ", including input coordinates" << endl;
+	}
+	else {
+		cout << ", excluding input coordinates" << endl;
+	}
 
 
 	cout << endl;
@@ -323,16 +330,25 @@ int main (int argc, char *argv[]) {
 	}
 	output.close();
 
-	//WRITE OUTPUT
+	//WRITE OUTPUT STRUCTURES
 	switch (output_switch) {
 		case 1:
-			for (vector<int>::size_type i = 0; i < structureNumbers.size(); i++) {
-				vector<structure>::iterator printThis = find_if (optimizedKissingSpheres.begin(), optimizedKissingSpheres.end(), [&] (structure toPrint) { return (toPrint.getNumber() == structureNumbers[i]); });
-				if (printThis != optimizedKissingSpheres.end()) {
-					xyzout (*printThis, "optStructure" + to_string (printThis->getNumber()));
+			if (structureNumbers[0] == 0) {
+				for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
+					xyzout (optimizedKissingSpheres[i], "optStructure" + to_string (optimizedKissingSpheres[i].getNumber()));
+					xyzout (allKissingSpheres[i], "inpStructure" + to_string (allKissingSpheres[i].getNumber()));
 				}
-				else {
-					cerr << "Structure number " << i << " not found." << endl;
+			}
+			else {
+				for (vector<int>::size_type i = 0; i < structureNumbers.size(); i++) {
+					vector<structure>::iterator printThis = find_if (optimizedKissingSpheres.begin(), optimizedKissingSpheres.end(), [&] (structure toPrint) { return (toPrint.getNumber() == structureNumbers[i]); });
+					if (printThis != optimizedKissingSpheres.end()) {
+						xyzout (*printThis, "optStructure" + to_string (printThis->getNumber()));
+						xyzout (allKissingSpheres[structureNumbers[i - 1]], "inpStructure" + to_string (allKissingSpheres[i].getNumber()));
+					}
+					else {
+						cerr << "Structure number " << i << " not found." << endl;
+					}
 				}
 			}
 		default:

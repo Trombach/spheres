@@ -14,7 +14,8 @@ opt: {
     stepsize = 0.01;
     nsteps = 1000;
 };
-//output: {
-//	number = [228, 238];
-//};
+output: {
+	number = [1];
+	input = true;
+};
 	
