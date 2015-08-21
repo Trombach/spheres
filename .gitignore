@@ -28,7 +28,8 @@
 *.app
 
 # User
-*out
+*out*
 optimize
 opt*
 energies
+ouput/*

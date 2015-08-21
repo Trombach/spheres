@@ -270,7 +270,7 @@ int main (int argc, char *argv[]) {
 
 	cout << endl;
     
-	//READ IN ALL STRUCTURES AT ONCE (AND CALCULATE LJ-ENERGY FOR EACH STRUCTURE)
+	//READ IN ALL STRUCTURES AT ONCE
     vector<structure> allKissingSpheres = readallstruct(fileName);
 	
 	//if scaling is found in settings file scale all coordinates accordingly
