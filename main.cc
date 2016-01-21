@@ -4,9 +4,11 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
-#include "spheres.h"
 #include <libconfig.h++>
 #include <algorithm>
+#include "structure.h"
+#include "iop.h"
+#include "lina.h"
 
 
 using namespace std; 
@@ -25,62 +27,7 @@ template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
 	}
 container_output(vector);
 
-void xyzout (structure &outputStructure, const string &name = "structure.xyz");
 
-//function for determining if a line in the input is emtpy
-//used for breaking the read loop
-bool justempty(string str) {
-	if (str.empty()) {
-		return true;
-	}
-	return false;
-}
-
-//function for testing if input file exists
-//returns true for existing file
-bool fexists (const std::string &fileName) {
-    ifstream infile(fileName.c_str());
-	bool exist = infile.good();
-	infile.close();
-    return exist;
-}
-
-//function for reading all strucutures of input file
-//structures must be separated by a blank line, last line should be a blank line as well
-vector<structure> readallstruct (const std::string& fileName) {
-	ifstream infile(fileName.c_str());
-	coord3d sphere; //sphere refers to 1 'atom'
-	string line;
-	int number = 1;
-	vector<structure> allKissingSpheres; //this vector stores all read in structures
-	//double while loop, inner loop goes over all coordinates of one structure, outer loop goes over all 
-	//structures till eof
-	while (true) {
-	    structure kissingSphere; //kissingSphere refers to 1 cluster of kissing Spheres
-		vector<coord3d> coordinates;
-	    while (true) {
-	        getline(infile,line);
-	        if(justempty(line) || infile.eof()) break;
-	        else {
-	    	    stringstream lineStream(line); //string can't be read into coord3d object, convert to 
-				                               //stringstream first
-	    	    lineStream >> sphere;
-				coordinates.push_back(sphere);
-	        }
-	    }
-		kissingSphere.setCoordinates(coordinates);
-		kissingSphere.setNumber(number);
-		if (infile.eof()) break; //does last line has to be blank? break works for files with blank line at 
-		                         //the end
-		else {
-		    allKissingSpheres.push_back(kissingSphere);
-			number++;
-	    }
-	}
-    infile.close();
-	cout << "\t" << "Number of structures: " << allKissingSpheres.size() << endl;
-	return allKissingSpheres;
-}
 
 //MAIN FUNCTION BEGINS HERE
 

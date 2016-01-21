@@ -5,7 +5,7 @@
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_linalg.h>
 #include <algorithm>
-#include "spheres.h"
+#include "structure.h"
 
 
 using namespace std;
