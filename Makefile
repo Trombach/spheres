@@ -1,2 +1,7 @@
+CC= clang++
+CFLAGS= -O3 -std=c++11
+LFLAGS= -lconfig++ -lgsl -lgslcblas
+FLAGS= $(CFLAGS) $(LFLAGS)
+
 all:
-	clang++ -O3 -lconfig++ -lgsl -lgslcblas -std=c++11 -o optimize main.cc structure-optimize.cc lina.cc structure.cc iop.cc
+	$(CC) $(FLAGS) -o optimize main.cc structure-optimize.cc lina.cc structure.cc iop.cc
