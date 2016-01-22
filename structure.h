@@ -12,7 +12,6 @@ private:
 	std::vector<double> structureMomentOfInertia;
 
 public:   
-	
 	structure() {};
 	structure(int number, double energy, std::vector<coord3d> coordinates) { structureNumber = number; structureEnergy = energy; structureCoordinates = coordinates; }
 
