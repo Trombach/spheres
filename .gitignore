@@ -33,3 +33,4 @@ optimize
 opt*
 energies
 ouput/
+Makefile
