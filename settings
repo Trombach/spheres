@@ -3,7 +3,7 @@ scaling: {
 };
 potential: {
     name = "LJ";
-    epsilon = 20.0;
+    epsilon = 1.0;
     rm =  1.0;
 	exp1 = 12.0;
 	exp2 = 6.0;

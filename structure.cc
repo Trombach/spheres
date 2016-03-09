@@ -92,3 +92,11 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
 	return hessianMatrix;
 }
 
+
+bool structure::isMinimum () {
+	vector<double> hessian = this->getHessian();
+	if (hessian[0] > -0.001) return true;
+	return false;
+}
+
+

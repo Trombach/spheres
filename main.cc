@@ -241,6 +241,8 @@ int main (int argc, char *argv[]) {
 	//OPTIMIZE AND HESSIAN
 	cout << "\tStarting optimization..." << endl;
 	ofstream min;
+	unsigned int hessianWarnings = 0;
+	vector<int> notMinimum;
 	min.open ("opt");
 	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
 		min << "Optimization for structure no " << allKissingSpheres[i].getNumber() << endl;
@@ -248,9 +250,17 @@ int main (int argc, char *argv[]) {
 		optimizedKissingSpheres[i].setNumber( allKissingSpheres[i].getNumber() );
 		hessian = optimizedKissingSpheres[i].hessian(p);
 		eigenValues = diag(hessian);
+		optimizedKissingSpheres[i].setHessian (eigenValues);
 		min << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
+		if (!optimizedKissingSpheres[i].isMinimum()) {
+			min << "Warning!!! Eigenvalue smaller than 0 in Hessian." << endl;
+			hessianWarnings += 1;
+			notMinimum.push_back(optimizedKissingSpheres[i].getNumber());
+		}
 		min << "###############################################################\n" << endl;
 	}
+	min << endl << "Number of warnings for Hessian eigenvalues: " << hessianWarnings << endl;
+	min << "List of non-minimum Structures: " << notMinimum << endl;
 	min.close();
 	cout << "\tAll Done!" << endl << endl;
 	

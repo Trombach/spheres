@@ -10,6 +10,7 @@ private:
 	int structureNumber;
 	std::vector<coord3d> structureCoordinates;
 	std::vector<double> structureMomentOfInertia;
+	std::vector<double> structureHessian;
 
 public:   
 	structure() {};
@@ -19,11 +20,13 @@ public:
 	double getEnergy() const { return structureEnergy; }
 	std::vector<coord3d> getCoordinates() const { return structureCoordinates; }
 	std::vector<double> getMomentOfInertia() const { return structureMomentOfInertia; }
+	std::vector<double> getHessian() const { return structureHessian; }
 
 	void setNumber (int number) { structureNumber = number; }
 	void setEnergy (double energy) { structureEnergy = energy; }
 	void setCoordinates (std::vector<coord3d> coordinates) { structureCoordinates = coordinates; }
 	void setMomentOfInertia (std::vector<double> inertiaEigenvalues) { structureMomentOfInertia = inertiaEigenvalues; }
+	void setHessian (std::vector<double> hessianEigenvalues) {structureHessian = hessianEigenvalues; }
 
 	int nAtoms() { return (this->getCoordinates()).size(); }
 
@@ -49,6 +52,7 @@ public:
 	coord3d centreOfMass ();
 	void shiftToCoM (coord3d &CoM);
 	std::vector< std::vector<double> > momentOfInertia ();
+	bool isMinimum ();
 
 
 };
