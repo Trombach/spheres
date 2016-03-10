@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <libconfig.h++>
 #include <algorithm>
+#include <map>
 #include "structure.h"
 #include "iop.h"
 #include "lina.h"
@@ -27,7 +28,7 @@ template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
 	}
 container_output(vector);
 
-
+typedef map<double, unsigned int, function<bool(double a, double b)> > energyMap;
 
 //MAIN FUNCTION BEGINS HERE
 
@@ -275,17 +276,47 @@ int main (int argc, char *argv[]) {
 
 	//SORT BY ENERGY
 	sort(optimizedKissingSpheres.begin(), optimizedKissingSpheres.end());
-	ofstream output;
-	output.open ("energies");
-	output << left << setw(10) << "number" << right << setw(15) << "energy" << right << setw(25) << "eigenvalues" << endl;
+	ofstream energies, energystats;
+	auto compare_map = [&] (double a, double b) { return b-a > 0.00001;};
+	energyMap energyStat(compare_map);
+
+	energies.open ("energies");
+	energystats.open("energystats");
+	energies << left << setw(10) << "number" << right << setw(15) << "energy" << right << setw(25) << "eigenvalues" << endl;
     for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
-		output << 
+		energies << 
 			left << setw(10) << optimizedKissingSpheres[i].getNumber() << 
 			right << setw(15) << optimizedKissingSpheres[i].getEnergy() << 
-			right << setw(15) << optimizedKissingSpheres[i].getMomentOfInertia() << 
-		endl;
+			right << setw(15) << optimizedKissingSpheres[i].getMomentOfInertia();
+			if (find (notMinimum.begin(), notMinimum.end(), optimizedKissingSpheres[i].getNumber()) != notMinimum.end()) energies << "!!!";
+		energies << endl;
 	}
-	output.close();
+
+
+	//STATISTICS ON ENERGIES
+	for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
+		double energy = optimizedKissingSpheres[i].getEnergy();
+		energyMap::iterator iter(energyStat.find(energy));
+		if (iter != energyStat.end()) {
+			iter->second++;
+		} else {
+			energyStat[energy] = 1;
+		}	
+	}
+	energystats << "Statistics on energies: " << endl;
+	energystats << setw(10) << "energy" << setw(10) << "count" << endl;
+	for (energyMap::iterator iter = energyStat.begin(); iter != energyStat.end(); iter++) {
+		energystats << setw(10) << iter->first << setw(10) << iter->second << endl;
+	}
+	energystats << endl << "Number of unique energies is: " << energyStat.size() << endl;
+	energystats << endl << "non-minimum structures:" << endl;
+	for (vector<int>::size_type i = 0; i < notMinimum.size(); i++) {
+		vector<structure>::iterator  printThis = find_if (optimizedKissingSpheres.begin(), optimizedKissingSpheres.end(), [&] (structure toPrint) { return (toPrint.getNumber() == notMinimum[i]); });
+		energystats << setw(10) << notMinimum[i] << setw(10) << printThis->getEnergy() << setw(10) << printThis->getMomentOfInertia() << endl;
+	}	
+	energies.close();
+	energystats.close();
+
 
 	//WRITE OUTPUT STRUCTURES
 	switch (output_switch) {
