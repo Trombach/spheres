@@ -212,7 +212,7 @@ int main (int argc, char *argv[]) {
 		cout << "\t\tNsteps: " << nsteps << endl;
 	}
     opt.push_back(accuracy); //opt[0] should not be touched, not very important for opt
-	opt.push_back(dforce);   //opt[1] for some reason can't be set below 10e-5, don't know why
+	opt.push_back(dforce);   //opt[1] for some reason can't be set below 10e-5, don't know why, GSL error
 	opt.push_back(stepsize); //opt[2]
 	opt.push_back(nsteps);   //opt[3]
 

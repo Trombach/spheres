@@ -10,7 +10,7 @@ potential: {
 };
 opt: {
     name = "BFGS";
-    dforce = 1e-6;
+    dforce = 1e-5;
     stepsize = 0.01;
     nsteps = 1000;
 };
