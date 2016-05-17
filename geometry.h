@@ -28,6 +28,7 @@ struct coord3d {
 	double& operator[](unsigned int i){ return x[i]; }
     double  operator[](unsigned int i) const { return x[i]; }
 
+
     double dot(const coord3d& y) const { return x[0]*y[0]+x[1]*y[1]+x[2]*y[2]; }
     double norm() const { return sqrt(dot(*this)); }
     static double dist(const coord3d& x, const coord3d& y){ return (x-y).norm(); }

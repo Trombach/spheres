@@ -211,10 +211,10 @@ int main (int argc, char *argv[]) {
 	else {
 		cout << "\t\tNsteps: " << nsteps << endl;
 	}
-    opt.push_back(accuracy);
-	opt.push_back(dforce);
-	opt.push_back(stepsize);
-	opt.push_back(nsteps);
+    opt.push_back(accuracy); //opt[0] should not be touched, not very important for opt
+	opt.push_back(dforce);   //opt[1] for some reason can't be set below 10e-5, don't know why
+	opt.push_back(stepsize); //opt[2]
+	opt.push_back(nsteps);   //opt[3]
 
 	cout << endl;
     
@@ -277,7 +277,7 @@ int main (int argc, char *argv[]) {
 	//SORT BY ENERGY
 	sort(optimizedKissingSpheres.begin(), optimizedKissingSpheres.end());
 	ofstream energies, energystats;
-	auto compare_map = [&] (double a, double b) { return b-a > 0.00001;};
+	auto compare_map = [&] (double a, double b) { return b-a > 0.00000001;};
 	energyMap energyStat(compare_map);
 
 	energies.open ("energies");
@@ -311,7 +311,7 @@ int main (int argc, char *argv[]) {
 	energystats << endl << "Number of unique energies is: " << energyStat.size() << endl;
 	energystats << endl << "non-minimum structures:" << endl;
 	for (vector<int>::size_type i = 0; i < notMinimum.size(); i++) {
-		vector<structure>::iterator  printThis = find_if (optimizedKissingSpheres.begin(), optimizedKissingSpheres.end(), [&] (structure toPrint) { return (toPrint.getNumber() == notMinimum[i]); });
+		vector<structure>::iterator printThis = find_if (optimizedKissingSpheres.begin(), optimizedKissingSpheres.end(), [&] (structure toPrint) { return (toPrint.getNumber() == notMinimum[i]); });
 		energystats << setw(10) << notMinimum[i] << setw(10) << printThis->getEnergy() << setw(10) << printThis->getMomentOfInertia() << endl;
 	}	
 	energies.close();
@@ -335,7 +335,7 @@ int main (int argc, char *argv[]) {
 						xyzout (allKissingSpheres[structureNumbers[i - 1]], "inpStructure" + to_string (allKissingSpheres[i].getNumber()));
 					}
 					else {
-						cerr << "Structure number " << i << " not found." << endl;
+						cerr << "Structure number " << structureNumbers[i] << " not found." << endl;
 					}
 				}
 			}
@@ -343,7 +343,7 @@ int main (int argc, char *argv[]) {
 			break;
 	}
 
-	cout << "\tProgram terminated" << endl;
+	cout << "\tAll good!" << endl;
     return 0; 
 
     

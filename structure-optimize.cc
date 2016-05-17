@@ -163,7 +163,7 @@ structure structure::optimize (ofstream &min, const int &algo_switch, const int 
 	        T = gsl_multimin_fdfminimizer_vector_bfgs2;
 			break;
 		default:
-			cerr << "Error, probably bad input of algorithm name!" << endl;
+			cerr << "Error, bad input of algorithm name!" << endl;
 			return newGeometry;
 	}
 
