@@ -28,7 +28,7 @@ template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
 	}
 container_output(vector);
 
-typedef map<double, unsigned int, function<bool(double a, double b)> > energyMap;
+typedef map <pair < double, vector<double> >, unsigned int, function<bool( pair < double, vector<double> > a, pair < double, vector<double> > b)> > energyMap;
 
 //MAIN FUNCTION BEGINS HERE
 
@@ -219,13 +219,13 @@ int main (int argc, char *argv[]) {
 	cout << endl;
     
 	//READ IN ALL STRUCTURES AT ONCE
-    vector<structure> allKissingSpheres = readallstruct(fileName);
+    vector<structure> allKS = readallstruct(fileName);
 	
 	//if scaling is found in settings file scale all coordinates accordingly
 	switch (scaling_switch) {
 		case 1:
-			for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
-				allKissingSpheres[i] *= scalingFactor;
+			for (vector<structure>::size_type i = 0; i < allKS.size(); i++) {
+				allKS[i] *= scalingFactor;
 			}
 		default:
 			break;
@@ -233,7 +233,7 @@ int main (int argc, char *argv[]) {
 
 
 
-    vector<structure> optimizedKissingSpheres;
+    vector<structure> optKS;
 	vector< vector<double> > hessian;
 	vector<double> eigenValues;
 	vector<double> allEnergies;
@@ -245,18 +245,18 @@ int main (int argc, char *argv[]) {
 	unsigned int hessianWarnings = 0;
 	vector<int> notMinimum;
 	min.open ("opt");
-	for (vector<structure>::size_type i = 0; i < allKissingSpheres.size(); i++) {
-		min << "Optimization for structure no " << allKissingSpheres[i].getNumber() << endl;
-        optimizedKissingSpheres.push_back (allKissingSpheres[i].optimize(min, algo_switch, potential_switch, p, opt , allEnergies));
-		optimizedKissingSpheres[i].setNumber( allKissingSpheres[i].getNumber() );
-		hessian = optimizedKissingSpheres[i].hessian(p);
+	for (vector<structure>::size_type i = 0; i < allKS.size(); i++) {
+		min << "Optimization for structure no " << allKS[i].getNumber() << endl;
+        optKS.push_back (allKS[i].optimize(min, algo_switch, potential_switch, p, opt , allEnergies));
+		optKS[i].setNumber( allKS[i].getNumber() );
+		hessian = optKS[i].hessian(p);
 		eigenValues = diag(hessian);
-		optimizedKissingSpheres[i].setHessian (eigenValues);
+		optKS[i].setHessian (eigenValues);
 		min << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
-		if (!optimizedKissingSpheres[i].isMinimum()) {
+		if (!optKS[i].isMinimum()) {
 			min << "Warning!!! Eigenvalue smaller than 0 in Hessian." << endl;
 			hessianWarnings += 1;
-			notMinimum.push_back(optimizedKissingSpheres[i].getNumber());
+			notMinimum.push_back(optKS[i].getNumber());
 		}
 		min << "###############################################################\n" << endl;
 	}
@@ -266,55 +266,72 @@ int main (int argc, char *argv[]) {
 	cout << "\tAll Done!" << endl << endl;
 	
 	//INERTIA TENSOR AND EIGENVALUES
-	for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
-		coord3d CoM = optimizedKissingSpheres[i].centreOfMass();
-		optimizedKissingSpheres[i].shiftToCoM(CoM);
-		vector< vector<double> > inertiaTensor = optimizedKissingSpheres[i].momentOfInertia();
+	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
+		coord3d CoM = optKS[i].centreOfMass();
+		optKS[i].shiftToCoM(CoM);
+		vector< vector<double> > inertiaTensor = optKS[i].momentOfInertia();
 		vector<double> inertia = diag(inertiaTensor);
-		optimizedKissingSpheres[i].setMomentOfInertia(inertia);
+		optKS[i].setMomentOfInertia(inertia);
 	}
 
 	//SORT BY ENERGY
-	sort(optimizedKissingSpheres.begin(), optimizedKissingSpheres.end());
+	sort(optKS.begin(), optKS.end());
 	ofstream energies, energystats;
-
-	auto compare_map = [&] (double a, double b) { return b-a > 0.00000001;};
-	energyMap energyStat(compare_map);
 
 	energies.open ("energies");
 	energystats.open("energystats");
 	energies << left << setw(10) << "number" << right << setw(15) << "energy" << right << setw(25) << "eigenvalues" << endl;
-    for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
+    for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
 		energies << 
-			left << setw(10) << optimizedKissingSpheres[i].getNumber() << 
-			right << setw(15) << optimizedKissingSpheres[i].getEnergy() << 
-			right << setw(15) << optimizedKissingSpheres[i].getMomentOfInertia();
-			if (find (notMinimum.begin(), notMinimum.end(), optimizedKissingSpheres[i].getNumber()) != notMinimum.end()) energies << "!!!";
+			left << setw(10) << optKS[i].getNumber() << 
+			right << setw(15) << optKS[i].getEnergy() << 
+			right << setw(15) << optKS[i].getMomentOfInertia();
+			if (find (notMinimum.begin(), notMinimum.end(), optKS[i].getNumber()) != notMinimum.end()) energies << "!!!";
 		energies << endl;
 	}
 
-
 	//STATISTICS ON ENERGIES
-	for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
-		double energy = optimizedKissingSpheres[i].getEnergy();
-		energyMap::iterator iter(energyStat.find(energy));
+	auto compare_inertia = [&] (vector<double> a, vector<double> b) {
+		double threshold = 1e-3;
+		if (b[0]-a[0] > threshold) return true;
+		if (b[1]-a[1] > threshold) return true;
+		if (b[2]-a[2] > threshold) return true;
+		return false;
+	};
+	auto compare_map = [&] (pair < double, vector<double> > a, pair < double, vector<double> > b) { 
+		return (b.first-a.first > 1e-10) && compare_inertia(a.second, b.second);
+	};
+	energyMap energyStat(compare_map);
+
+
+	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
+		pair < double, vector<double> > key (optKS[i].getEnergy(), optKS[i].getMomentOfInertia());
+		energyMap::iterator iter(energyStat.find(key));
 		if (iter != energyStat.end()) {
 			iter->second++;
 		} else {
-			energyStat[energy] = 1;
+			energyStat[key] = 1;
 		}	
 	}
+
+
 	energystats << "Statistics on energies: " << endl;
-	energystats << setw(10) << "energy" << setw(10) << "count" << endl;
+	energystats << setw(10) << right << "energy" << setw(30) << "count" << setw(10) << "inertia" << endl;
 	for (energyMap::iterator iter = energyStat.begin(); iter != energyStat.end(); iter++) {
-		energystats << setw(10) << iter->first << setw(10) << iter->second << endl;
+		energystats << setw(10) << right << iter->first.first << setw(30) << iter->second << setw(10) << iter->first.second << endl;
 	}
+
 	energystats << endl << "Number of unique energies is: " << energyStat.size() << endl;
 	energystats << endl << "non-minimum structures:" << endl;
 	for (vector<int>::size_type i = 0; i < notMinimum.size(); i++) {
-		vector<structure>::iterator printThis = find_if (optimizedKissingSpheres.begin(), optimizedKissingSpheres.end(), [&] (structure toPrint) { return (toPrint.getNumber() == notMinimum[i]); });
-		energystats << setw(10) << notMinimum[i] << setw(10) << printThis->getEnergy() << setw(10) << printThis->getMomentOfInertia() << endl;
+		vector<structure>::iterator printThis = find_if (optKS.begin(), optKS.end(), [&] (structure toPrint) { return (toPrint.getNumber() == notMinimum[i]); });
+		energystats << setw(10) << notMinimum[i] << setw(10) << printThis->getEnergy() << setw(10) << printThis->getMomentOfInertia();
+		for (int j=0; j<10; j++) {
+			energystats << ", " << printThis->getHessian()[j];
+		}
+		energystats << "..." << endl;
 	}	
+
 	energies.close();
 	energystats.close();
 
@@ -323,17 +340,17 @@ int main (int argc, char *argv[]) {
 	switch (output_switch) {
 		case 1:
 			if (structureNumbers[0] == 0) {
-				for (vector<structure>::size_type i = 0; i < optimizedKissingSpheres.size(); i++) {
-					xyzout (optimizedKissingSpheres[i], "optStructure" + to_string (optimizedKissingSpheres[i].getNumber()));
-					xyzout (allKissingSpheres[i], "inpStructure" + to_string (allKissingSpheres[i].getNumber()));
+				for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
+					xyzout (optKS[i], "optStructure" + to_string (optKS[i].getNumber()));
+					xyzout (allKS[i], "inpStructure" + to_string (allKS[i].getNumber()));
 				}
 			}
 			else {
 				for (vector<int>::size_type i = 0; i < structureNumbers.size(); i++) {
-					vector<structure>::iterator printThis = find_if (optimizedKissingSpheres.begin(), optimizedKissingSpheres.end(), [&] (structure toPrint) { return (toPrint.getNumber() == structureNumbers[i]); });
-					if (printThis != optimizedKissingSpheres.end()) {
+					vector<structure>::iterator printThis = find_if (optKS.begin(), optKS.end(), [&] (structure toPrint) { return (toPrint.getNumber() == structureNumbers[i]); });
+					if (printThis != optKS.end()) {
 						xyzout (*printThis, "optStructure" + to_string (printThis->getNumber()));
-						xyzout (allKissingSpheres[structureNumbers[i - 1]], "inpStructure" + to_string (allKissingSpheres[i].getNumber()));
+						xyzout (allKS[structureNumbers[i - 1]], "inpStructure" + to_string (allKS[i].getNumber()));
 					}
 					else {
 						cerr << "Structure number " << structureNumbers[i] << " not found." << endl;
