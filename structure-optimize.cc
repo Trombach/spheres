@@ -179,7 +179,7 @@ structure structure::optimize (ofstream &min, const int &algo_switch, const int 
 		status = gsl_multimin_fdfminimizer_iterate (s);
 		
 		if (status) {
-			cerr << "GSL error:\n\t" << status << ": " << gsl_strerror(status) << endl;
+			cerr << "Structure " << this->getNumber() << ": GSL error:\n\t" << status << ": " << gsl_strerror(status) << endl;
 			break;
 		}
         

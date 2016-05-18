@@ -277,6 +277,7 @@ int main (int argc, char *argv[]) {
 	//SORT BY ENERGY
 	sort(optimizedKissingSpheres.begin(), optimizedKissingSpheres.end());
 	ofstream energies, energystats;
+
 	auto compare_map = [&] (double a, double b) { return b-a > 0.00000001;};
 	energyMap energyStat(compare_map);
 
