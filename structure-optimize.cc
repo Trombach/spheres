@@ -124,7 +124,7 @@ void LJEnergyAndGradient_gsl (const gsl_vector *x, void *params, double *f, gsl_
 //
 //initialize gsl minimizer function
 //
-structure structure::optimize (ofstream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt, vector<double> &allEnergies) {
+structure structure::optimize (ostream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
 	int status;
 	structure newGeometry;
 	size_t nsteps = static_cast<size_t>(opt[3]);
@@ -169,8 +169,9 @@ structure structure::optimize (ofstream &min, const int &algo_switch, const int 
 
 	s = gsl_multimin_fdfminimizer_alloc (T, (this->nAtoms()) * 3);
     
-	double stepSize = opt[2];
 	double accuracy = opt[0];
+	double absoluteTolerance = opt[1];
+	double stepSize = opt[2];
 	gsl_multimin_fdfminimizer_set (s, &min_function, x, stepSize, accuracy);
 
 	size_t i = 0;
@@ -183,7 +184,6 @@ structure structure::optimize (ofstream &min, const int &algo_switch, const int 
 			break;
 		}
         
-		double absoluteTolerance = opt[1];
 		status = gsl_multimin_test_gradient (s->gradient, absoluteTolerance);
 
 		if (status == GSL_SUCCESS) {
@@ -195,7 +195,6 @@ structure structure::optimize (ofstream &min, const int &algo_switch, const int 
 			    min << sphere <<  endl;
     		    newGeometry.push_back(sphere);
     	    }
-        allEnergies.push_back(s->f);
 		}
 	}
 	while (status == GSL_CONTINUE && i <= nsteps);

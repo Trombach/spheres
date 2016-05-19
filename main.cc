@@ -33,7 +33,9 @@ typedef map <pair < double, vector<double> >, unsigned int, function<bool( pair 
 //MAIN FUNCTION BEGINS HERE
 
 int main (int argc, char *argv[]) {
-	
+	clock_t tstart, tend, topt;
+	tstart=clock();
+
 	cout << endl;
 	//SOME START UP CHECKS AND ARGUMENT PROCESSING
     if ( argc < 2 ) {
@@ -42,7 +44,6 @@ int main (int argc, char *argv[]) {
     }
 
 	//CHECK IF FILE EXISTS
-
     string fileName = argv[ argc -1 ]; //safe input file name
     
     if (fexists(fileName)) {
@@ -232,47 +233,56 @@ int main (int argc, char *argv[]) {
 	}
 
 
-
-    vector<structure> optKS;
-	vector< vector<double> > hessian;
-	vector<double> eigenValues;
-	vector<double> allEnergies;
-
-
 	//OPTIMIZE AND HESSIAN
+    vector<structure> optKS; optKS.resize(allKS.size());
+
+
 	cout << "\tStarting optimization..." << endl;
 	ofstream min;
 	unsigned int hessianWarnings = 0;
 	vector<int> notMinimum;
 	min.open ("opt");
+
+	#pragma omp parallel for
 	for (vector<structure>::size_type i = 0; i < allKS.size(); i++) {
-		min << "Optimization for structure no " << allKS[i].getNumber() << endl;
-        optKS.push_back (allKS[i].optimize(min, algo_switch, potential_switch, p, opt , allEnergies));
+		vector< vector<double> > hessian;
+		vector<double> eigenValues;
+		stringstream threadstream;
+		threadstream << "Optimization for structure no " << allKS[i].getNumber() << endl;
+        optKS[i] = allKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
 		optKS[i].setNumber( allKS[i].getNumber() );
+
 		hessian = optKS[i].hessian(p);
 		eigenValues = diag(hessian);
 		optKS[i].setHessian (eigenValues);
-		min << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
-		if (!optKS[i].isMinimum()) {
-			min << "Warning!!! Eigenvalue smaller than 0 in Hessian." << endl;
-			hessianWarnings += 1;
-			notMinimum.push_back(optKS[i].getNumber());
-		}
-		min << "###############################################################\n" << endl;
-	}
-	min << endl << "Number of warnings for Hessian eigenvalues: " << hessianWarnings << endl;
-	min << "List of non-minimum Structures: " << notMinimum << endl;
-	min.close();
-	cout << "\tAll Done!" << endl << endl;
-	
-	//INERTIA TENSOR AND EIGENVALUES
-	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
+
+		//Inertia
 		coord3d CoM = optKS[i].centreOfMass();
 		optKS[i].shiftToCoM(CoM);
 		vector< vector<double> > inertiaTensor = optKS[i].momentOfInertia();
 		vector<double> inertia = diag(inertiaTensor);
 		optKS[i].setMomentOfInertia(inertia);
+
+		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
+		if (!optKS[i].isMinimum()) {
+			threadstream << "Warning!!! Eigenvalue smaller than 0 in Hessian." << endl;
+			hessianWarnings += 1;
+			notMinimum.push_back(optKS[i].getNumber());
+		}
+		#pragma omp critical
+		{
+			min << threadstream.rdbuf() << endl;
+			min << "***************End of Opt***************" << endl;
+		}
 	}
+
+
+	min << endl << "Number of warnings for Hessian eigenvalues: " << hessianWarnings << endl;
+	min << "List of non-minimum Structures: " << notMinimum << endl;
+	min.close();
+	topt=clock();
+	float optTime ((float)topt-(float)tstart);
+	cout << "\tTime for structure optimization: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
 
 	//SORT BY ENERGY
 	sort(optKS.begin(), optKS.end());
@@ -360,8 +370,10 @@ int main (int argc, char *argv[]) {
 		default:
 			break;
 	}
-
-	cout << "\tAll good!" << endl;
+	
+	tend=clock();
+	float totalTime ((float)tend-(float)tstart);
+	cout << "\tTotal rumtime: " << totalTime/CLOCKS_PER_SEC << " s" << endl;
     return 0; 
 
     
