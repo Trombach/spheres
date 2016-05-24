@@ -370,6 +370,18 @@ int main (int argc, char *argv[]) {
 		default:
 			break;
 	}
+
+	//
+	//WRITE COORD CHECKPOINT
+	
+	stringstream out;
+	simpleout(optKS, out);
+
+	ofstream coord;
+	coord.open("coord");
+	coord << out.rdbuf();
+	coord.close();
+	
 	
 	tend=clock();
 	float totalTime ((float)tend-(float)tstart);
