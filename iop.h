@@ -13,5 +13,6 @@ void simpleout (vector<structure> &outputStructures, stringstream &ouput);
 bool justempty(string str);
 bool fexists (const std::string &fileName);
 vector<structure> readallstruct (const std::string& fileName);
+int readsettings (vector<double> &opt, vector<double> &p, vector<int> &switches, double &scalingFactor);
 
 #endif
