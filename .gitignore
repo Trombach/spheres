@@ -29,10 +29,9 @@
 
 # User
 *out*
+opt
 optimize
-opt*
 energies
-ouput/
 Makefile
 energystats
 coord
