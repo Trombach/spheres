@@ -34,15 +34,19 @@ int main (int argc, char *argv[]) {
 	clock_t tstart, tend, topt;
 	tstart=clock();
 
+
+
+
 	cout << endl;
 	//SOME START UP CHECKS AND ARGUMENT PROCESSING
-    if ( argc < 2 ) {
-        cout << "\t" << "Please provide filename!" << endl;
-        return 1;
-    }
+
+
+
+
+
 
 	//CHECK IF FILE EXISTS
-    string fileName = argv[ argc -1 ]; //safe input file name
+    string fileName = "coord"; //safe input file name
     
     if (fexists(fileName)) {
         cout << "\t" << "File " << fileName << " exists." << endl;
@@ -54,6 +58,12 @@ int main (int argc, char *argv[]) {
 
 	cout << endl;
 
+
+
+
+
+
+	//READ SETTINGS FILE
     if (fexists("settings")) {
 		cout << "\t" << "Settings file found." << endl;
 	}
@@ -67,46 +77,49 @@ int main (int argc, char *argv[]) {
 	vector<int> switches; //vector of switches, 0 == potential, 1 == algo, 2 == scaling
 	double scalingFactor(1.0);
 
-
 	readsettings(opt, p, switches, scalingFactor);
 	int potential_switch(switches[0]), algo_switch(switches[1]), scaling_switch(switches[2]);
 	
 	
 	cout << endl;
 
+
+
+
+
+
     
 	//READ IN ALL STRUCTURES AT ONCE
-    vector<structure> allKS = readallstruct(fileName);
+    vector<structure> optKS = readallstruct(fileName);
 	
 	//if scaling is found in settings file scale all coordinates accordingly
 	switch (scaling_switch) {
 		case 1:
-			for (vector<structure>::size_type i = 0; i < allKS.size(); i++) {
-				allKS[i] *= scalingFactor;
+			for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
+				optKS[i] *= scalingFactor;
 			}
 		default:
 			break;
 	}
 
 
-	//OPTIMIZE AND HESSIAN
-    vector<structure> optKS; optKS.resize(allKS.size());
 
 
-	cout << "\tStarting optimization..." << endl;
-	ofstream min;
+
+
+	//HESSIAN
+	ofstream energystats;
 	unsigned int hessianWarnings = 0;
 	vector<int> notMinimum;
-	min.open ("opt");
 
 	#pragma omp parallel for
-	for (vector<structure>::size_type i = 0; i < allKS.size(); i++) {
+	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
+
 		vector< vector<double> > hessian;
 		vector<double> eigenValues;
 		stringstream threadstream;
-		threadstream << "Optimization for structure no " << allKS[i].getNumber() << endl;
-        optKS[i] = allKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
-		optKS[i].setNumber( allKS[i].getNumber() );
+
+		optKS[i].setEnergy (optKS[i].sumOverAllInteractions(p));
 
 		hessian = optKS[i].hessian(p);
 		eigenValues = diag(hessian);
@@ -120,29 +133,34 @@ int main (int argc, char *argv[]) {
 		optKS[i].setMomentOfInertia(inertia);
 
 		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
-		if (!optKS[i].isMinimum()) {
-			threadstream << "Warning!!! Eigenvalue smaller than 0 in Hessian." << endl;
-			hessianWarnings += 1;
-			notMinimum.push_back(optKS[i].getNumber());
-		}
 		#pragma omp critical
 		{
-			min << threadstream.rdbuf() << endl;
-			min << "***************End of Opt***************" << endl;
+			if (!optKS[i].isMinimum()) {
+				threadstream << "Warning!!! Eigenvalue smaller than 0 in Hessian." << endl;
+				hessianWarnings += 1;
+				notMinimum.push_back(optKS[i].getNumber());
+			}
+		energystats << threadstream.rdbuf() << endl;
 		}
 	}
 
 
-	min << endl << "Number of warnings for Hessian eigenvalues: " << hessianWarnings << endl;
-	min << "List of non-minimum Structures: " << notMinimum << endl;
-	min.close();
+
+
 	topt=clock();
 	float optTime ((float)topt-(float)tstart);
-	cout << "\tTime for structure optimization: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\tTime for Hessian and energy calculation: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
+
+
+	
+
+
+
+
 
 	//SORT BY ENERGY
 	sort(optKS.begin(), optKS.end());
-	ofstream energies, energystats;
+	ofstream energies;
 
 	energies.open ("energies");
 	energystats.open("energystats");
@@ -156,21 +174,28 @@ int main (int argc, char *argv[]) {
 		energies << endl;
 	}
 
+
+
+
+
+
+
+
 	//STATISTICS ON ENERGIES
-	auto compare_inertia = [&] (vector<double> a, vector<double> b) {
+	auto compare_inertia = [&] (vector<double> a, vector<double> b) {//sort by moment of inertia function
 		double threshold = 1e-5;
 		if (b[0]-a[0] > threshold) return true;
 		if (b[1]-a[1] > threshold) return true;
 		if (b[2]-a[2] > threshold) return true;
 		return false;
 	};
-	auto compare_map = [&] (pair < double, vector<double> > a, pair < double, vector<double> > b) { 
+	auto compare_map = [&] (pair < double, vector<double> > a, pair < double, vector<double> > b) { //sort by energy function
 		return (b.first-a.first > 1e-10) && compare_inertia(a.second, b.second);
 	};
 	energyMap energyStat(compare_map);
 
 
-	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
+	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {//put all structures in a map with energy as key
 		pair < double, vector<double> > key (optKS[i].getEnergy(), optKS[i].getMomentOfInertia());
 		energyMap::iterator iter(energyStat.find(key));
 		if (iter != energyStat.end()) {
@@ -198,8 +223,17 @@ int main (int argc, char *argv[]) {
 		energystats << "..." << endl;
 	}	
 
+	energystats << endl << "Number of warnings for Hessian eigenvalues: " << hessianWarnings << endl;
+	energystats << "List of non-minimum Structures: " << notMinimum << endl;
+
 	energies.close();
 	energystats.close();
+
+
+
+
+
+
 
 
 	////WRITE OUTPUT STRUCTURES
@@ -227,16 +261,10 @@ int main (int argc, char *argv[]) {
 	//		break;
 	//}
 
-	//
-	//WRITE COORD CHECKPOINT
-	
-	stringstream out;
-	simpleout(optKS, out);
 
-	ofstream coord;
-	coord.open("coord");
-	coord << out.rdbuf();
-	coord.close();
+
+
+
 	
 	
 	tend=clock();
