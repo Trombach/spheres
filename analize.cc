@@ -111,6 +111,7 @@ int main (int argc, char *argv[]) {
 	ofstream energystats;
 	unsigned int hessianWarnings = 0;
 	vector<int> notMinimum;
+	vector<structure> notMinimumKS;
 
 	#pragma omp parallel for
 	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
@@ -139,6 +140,7 @@ int main (int argc, char *argv[]) {
 				threadstream << "Warning!!! Eigenvalue smaller than 0 in Hessian." << endl;
 				hessianWarnings += 1;
 				notMinimum.push_back(optKS[i].getNumber());
+				notMinimumKS.push_back(optKS[i]);
 			}
 		energystats << threadstream.rdbuf() << endl;
 		}
@@ -180,28 +182,37 @@ int main (int argc, char *argv[]) {
 
 
 
-
 	//STATISTICS ON ENERGIES
-	auto compare_inertia = [&] (vector<double> a, vector<double> b) {//sort by moment of inertia function
-		double threshold = 1e-5;
-		if (b[0]-a[0] > threshold) return true;
-		if (b[1]-a[1] > threshold) return true;
-		if (b[2]-a[2] > threshold) return true;
+	auto compare_map = [&] (pair < double, vector<double> > a, pair < double, vector<double> > b) { //sort by energy and inertia function
+		double eps = 1e-3;
+		if (b.first-a.first > eps) return true;
+		if (a.first-b.first < eps && b.second[0]-a.second[0] > eps) return true;
+		if (a.first-b.first < eps && a.second[0]-b.second[0] < eps && b.second[1]-a.second[1] > eps) return true;
+		if (a.first-b.first < eps && a.second[0]-b.second[0] < eps && a.second[1]-b.second[1] < eps && b.second[2]-a.second[2] > eps) return true;	
 		return false;
 	};
-	auto compare_map = [&] (pair < double, vector<double> > a, pair < double, vector<double> > b) { //sort by energy function
-		return (b.first-a.first > 1e-10) && compare_inertia(a.second, b.second);
-	};
 	energyMap energyStat(compare_map);
+	energyMap notMinimumStat(compare_map);
 
-
-	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {//put all structures in a map with energy as key
+	//put all structures in a map with energy and inertia as key
+	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
 		pair < double, vector<double> > key (optKS[i].getEnergy(), optKS[i].getMomentOfInertia());
 		energyMap::iterator iter(energyStat.find(key));
 		if (iter != energyStat.end()) {
 			iter->second++;
 		} else {
 			energyStat[key] = 1;
+		}	
+	}
+
+	//put all nonMinimum structures in a map with energy and inertia as key
+	for (vector<structure>::size_type i = 0; i < notMinimumKS.size(); i++) {
+		pair < double, vector<double> > key (notMinimumKS[i].getEnergy(), notMinimumKS[i].getMomentOfInertia());
+		energyMap::iterator iter(notMinimumStat.find(key));
+		if (iter != notMinimumStat.end()) {
+			iter->second++;
+		} else {
+			notMinimumStat[key] = 1;
 		}	
 	}
 
@@ -212,16 +223,20 @@ int main (int argc, char *argv[]) {
 		energystats << setw(10) << right << iter->first.first << setw(30) << iter->second << setw(10) << iter->first.second << endl;
 	}
 
-	energystats << endl << "Number of unique energies is: " << energyStat.size() << endl;
+	energystats << endl << "Number of unique structures: " << energyStat.size() << endl;
 	energystats << endl << "non-minimum structures:" << endl;
-	for (vector<int>::size_type i = 0; i < notMinimum.size(); i++) {
-		vector<structure>::iterator printThis = find_if (optKS.begin(), optKS.end(), [&] (structure toPrint) { return (toPrint.getNumber() == notMinimum[i]); });
-		energystats << setw(10) << notMinimum[i] << setw(10) << printThis->getEnergy() << setw(10) << printThis->getMomentOfInertia();
-		for (int j=0; j<10; j++) {
-			energystats << ", " << printThis->getHessian()[j];
-		}
-		energystats << "..." << endl;
-	}	
+	for (energyMap::iterator iter = notMinimumStat.begin(); iter != notMinimumStat.end(); iter++) {
+		energystats << setw(10) << right << iter->first.first << setw(30) << iter->second << setw(10) << iter->first.second << endl;
+	}
+	energystats << endl << "Number of unique non-minimum structures: " << notMinimumStat.size() << endl;
+	//for (vector<int>::size_type i = 0; i < notMinimum.size(); i++) {
+	//	vector<structure>::iterator printThis = find_if (optKS.begin(), optKS.end(), [&] (structure toPrint) { return (toPrint.getNumber() == notMinimum[i]); });
+	//	energystats << setw(10) << notMinimum[i] << setw(10) << printThis->getEnergy() << setw(10) << printThis->getMomentOfInertia();
+	//	for (int j=0; j<10; j++) {
+	//		energystats << ", " << printThis->getHessian()[j];
+	//	}
+	//	energystats << "..." << endl;
+	//}	
 
 	energystats << endl << "Number of warnings for Hessian eigenvalues: " << hessianWarnings << endl;
 	energystats << "List of non-minimum Structures: " << notMinimum << endl;

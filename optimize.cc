@@ -107,9 +107,7 @@ int main (int argc, char *argv[]) {
 	}
 
 
-
-
-
+	
 
 	//OPTIMIZE AND HESSIAN
     vector<structure> optKS; optKS.resize(allKS.size());
@@ -160,6 +158,7 @@ int main (int argc, char *argv[]) {
 			optKS[i].setCoordinates(coords);
 			
 			optKS[i] = optKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
+			optKS[i].setNumber(allKS[i].getNumber());
 
 			hessian = optKS[i].hessian(p);
 			eigenValues = diag(hessian);
@@ -171,8 +170,6 @@ int main (int argc, char *argv[]) {
 			for (vector<coord3d>::size_type s = 0; s < gradients.size(); s++) {
 				threadstream << gradients[s] << endl;
 			}
-			hessianWarnings +=1;
-			notMinimum.push_back(optKS[i].getNumber());
 		}
 
 		//Inertia
@@ -184,12 +181,15 @@ int main (int argc, char *argv[]) {
 
 		#pragma omp critical
 		{
+			if (!optKS[i].isMinimum() || reopts > 5) {
+				hessianWarnings += 1;
+				notMinimum.push_back(optKS[i].getNumber());
+			}
 			min << threadstream.rdbuf() << endl;
 			min << "***************End of Opt***************" << endl;
 		}
 	}
 	
-
 
 
 
