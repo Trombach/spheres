@@ -208,7 +208,7 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 		min << "Optimization successful!" << endl;
 	}
 	else {
-		min << "Error: " << status << ". Optimization failed." << endl;
+		min << "Error: " << status << ", " << gsl_strerror(status) << ". Optimization failed." << endl;
 	}
     gsl_multimin_fdfminimizer_free (s);
 	gsl_vector_free (x);

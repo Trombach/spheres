@@ -117,6 +117,7 @@ int main (int argc, char *argv[]) {
 	ofstream min;
 	unsigned int hessianWarnings = 0;
 	vector<int> notMinimum;
+	vector<structure> reoptKS;
 	min.open ("opt");
 
 	#pragma omp parallel for
@@ -139,23 +140,54 @@ int main (int argc, char *argv[]) {
 		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 
 		int reopts(0);
-		vector<coord3d> gradients;
-		vector<coord3d> coords;
+		structure newKS;
 		while (!optKS[i].isMinimum() && reopts < 6) {
+			vector<coord3d> gradients;
+			vector<coord3d> coords;
 			reopts++;
 			threadstream << "Reoptimization attempt " << reopts << endl;
-			gradients = optKS[i].sumOverAllGradients(p);
 			coords = optKS[i].getCoordinates();
+			hessian = optKS[i].hessian(p);
+			vector<pair<double, vector<double> > > eval_evec = diagv(hessian);
+
+			auto pairCompare = [&] (const pair<double, vector<double> > a, const pair<double, vector<double> > b) {
+				return a.first < b.first;
+			};
+			sort (eval_evec.begin(), eval_evec.end(), pairCompare);
+			
+			for (vector<double>::size_type j=0; j<eval_evec[0].second.size()/3; j++) {
+				coord3d gradient (eval_evec[0].second[3*j], eval_evec[0].second[3*j+1], eval_evec[0].second[3*j+2]);
+				gradients.push_back(gradient / gradient.norm());
+			}
+			
 
 			if (gradients.size() != coords.size()) {
 				cerr << "gradient and coordinate vector are of different size" << endl;
 				break;
 			}
 
+			vector<coord3d> negative, positive;
+			//negative gradient direction
+			threadstream << "negative deflection" << endl;
 			for (vector<coord3d>::size_type	j = 0; j < coords.size(); j++) {
-				coords[j] = coords[j] + gradients[j];
+				negative.push_back(coords[j] - (gradients[j] * 0.2));
 			}
-			optKS[i].setCoordinates(coords);
+
+			newKS.setCoordinates(negative);
+
+			newKS = newKS.optimize(threadstream, algo_switch, potential_switch, p, opt);
+
+			hessian = newKS.hessian(p);
+			eigenValues = diag(hessian);
+			newKS.setHessian (eigenValues);
+
+
+			//positive gradient direction
+			threadstream << "positive deflection" << endl;
+			for (vector<coord3d>::size_type	j = 0; j < coords.size(); j++) {
+				positive.push_back(coords[j] + (gradients[j] * 0.2));
+			}
+			optKS[i].setCoordinates(positive);
 			
 			optKS[i] = optKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
 			optKS[i].setNumber(allKS[i].getNumber());
@@ -166,10 +198,10 @@ int main (int argc, char *argv[]) {
 		}
 		if (!optKS[i].isMinimum() || reopts > 5) {
 			threadstream << "Structure did not converge to minimum after " << reopts << " attempts." << endl;
-			threadstream << "Final gradient:" << endl;
-			for (vector<coord3d>::size_type s = 0; s < gradients.size(); s++) {
-				threadstream << gradients[s] << endl;
-			}
+			//threadstream << "Final gradient:" << endl;
+			//for (vector<coord3d>::size_type s = 0; s < gradients.size(); s++) {
+			//	threadstream << gradients[s] << endl;
+			//}
 		}
 
 		//Inertia
@@ -179,12 +211,21 @@ int main (int argc, char *argv[]) {
 		vector<double> inertia = diag(inertiaTensor);
 		optKS[i].setMomentOfInertia(inertia);
 
+		if (reopts>0) {
+			coord3d CoM = newKS.centreOfMass();
+			newKS.shiftToCoM(CoM);
+			vector< vector<double> > inertiaTensor = newKS.momentOfInertia();
+			vector<double> inertia = diag(inertiaTensor);
+			newKS.setMomentOfInertia(inertia);
+		}
+
 		#pragma omp critical
 		{
 			if (!optKS[i].isMinimum() || reopts > 5) {
 				hessianWarnings += 1;
 				notMinimum.push_back(optKS[i].getNumber());
 			}
+			if (reopts>0) reoptKS.push_back(newKS);
 			min << threadstream.rdbuf() << endl;
 			min << "***************End of Opt***************" << endl;
 		}
@@ -217,6 +258,7 @@ int main (int argc, char *argv[]) {
 	
 	stringstream out;
 	simpleout(optKS, out);
+	simpleout(reoptKS, out);
 
 	ofstream coord;
 	coord.open("coord");

@@ -36,7 +36,7 @@ vector<double> diag (vector< vector<double> > &matrix) {
 	int status = gsl_eigen_symm (&m.matrix, eval, w);
 
 	if (status) {
-		cout << "An error occured, status " << status << endl;
+		cout << "An error occured, status " << status << ", " << gsl_strerror(status) << endl;
 	}
 
 	gsl_eigen_symm_free (w);
@@ -51,7 +51,7 @@ vector<double> diag (vector< vector<double> > &matrix) {
 	return eigenvalues;
 }
 
-pair<vector<double>, vector< vector<double> > > diagv (vector< vector<double> > &matrix) {
+vector<pair<double, vector<double> > > diagv (vector< vector<double> > &matrix) {
 
 	for (vector< vector<double> >::size_type i = 0; i < matrix.size(); i++) {
 		assert (matrix.size() == matrix[i].size());
@@ -75,26 +75,23 @@ pair<vector<double>, vector< vector<double> > > diagv (vector< vector<double> > 
 	int status = gsl_eigen_symmv (&m.matrix, eval, evec, w);
 
 	if (status) {
-		cout << "An error occured, status " << status << endl;
+		cout << "An error occured, status " << status << ", " << gsl_strerror(status) << endl;
 	}
 
 
 	gsl_eigen_symmv_free (w);
     
-	vector<double> eigenvalues;
+	vector<pair<double, vector<double> > > eval_evec;
     for (int i = 0; i < matrixSize; i++) {
-		eigenvalues.push_back(gsl_vector_get (eval, i));
-	}
-	vector< vector<double> > eigenvectors;
-	for (int i = 0; i < matrixSize; i++) {
 		vector<double> eigv;
 		for (int j = 0; j < matrixSize; j++) {
 			eigv.push_back(gsl_matrix_get(evec, i, j));
 		}
-		eigenvectors.push_back(eigv);
+		eval_evec.push_back(make_pair(gsl_vector_get (eval, i), eigv));
 	}
+
 
 	gsl_vector_free (eval);
 	gsl_matrix_free (evec);
-	return make_pair(eigenvalues,eigenvectors);
+	return eval_evec;
 }
