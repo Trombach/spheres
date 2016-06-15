@@ -13,8 +13,14 @@ private:
 	std::vector<double> structureHessian;
 
 public:   
-	structure() {};
-	structure(int number, double energy, std::vector<coord3d> coordinates) { structureNumber = number; structureEnergy = energy; structureCoordinates = coordinates; }
+	structure() {
+		structureEnergy = 0;
+		structureNumber = 0;
+		structureCoordinates = {};
+		structureMomentOfInertia = {0,0,0};
+		structureHessian = {0};
+	};
+	structure(int number, double energy, std::vector<coord3d> coordinates, std::vector<double> momentOfInertia, std::vector<double> hessian) { structureNumber = number; structureEnergy = energy; structureCoordinates = coordinates; structureMomentOfInertia = momentOfInertia; structureHessian = hessian;}
 
 	int getNumber() const { return structureNumber; }
 	double getEnergy() const { return structureEnergy; }

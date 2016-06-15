@@ -30,6 +30,7 @@
 # User
 *out*
 opt
+reopt
 optimize
 energies
 Makefile

@@ -223,12 +223,13 @@ int main (int argc, char *argv[]) {
 		energystats << setw(10) << right << iter->first.first << setw(30) << iter->second << setw(10) << iter->first.second << endl;
 	}
 
-	energystats << endl << "Number of unique structures: " << energyStat.size() << endl;
 	energystats << endl << "non-minimum structures:" << endl;
 	for (energyMap::iterator iter = notMinimumStat.begin(); iter != notMinimumStat.end(); iter++) {
 		energystats << setw(10) << right << iter->first.first << setw(30) << iter->second << setw(10) << iter->first.second << endl;
 	}
-	energystats << endl << "Number of unique non-minimum structures: " << notMinimumStat.size() << endl;
+	energystats << endl << "Number of unique structures: " << energyStat.size() << endl;
+	energystats << "Number of unique non-minimum structures: " << notMinimumStat.size() << endl;
+	energystats << "Number of unique minimum structures: " << energyStat.size()-notMinimumStat.size() << endl;
 	//for (vector<int>::size_type i = 0; i < notMinimum.size(); i++) {
 	//	vector<structure>::iterator printThis = find_if (optKS.begin(), optKS.end(), [&] (structure toPrint) { return (toPrint.getNumber() == notMinimum[i]); });
 	//	energystats << setw(10) << notMinimum[i] << setw(10) << printThis->getEnergy() << setw(10) << printThis->getMomentOfInertia();
