@@ -35,7 +35,23 @@ vector< vector<double> > structure::momentOfInertia () {
 	}
 	return inertiaMatrix;
 }
+
 		
+matrix3d structure::m3d_momentOfInertia () {
+	matrix3d inertiaMatrix;
+	for (int i = 0; i < nAtoms(); i++) {
+		inertiaMatrix(0,0) += pow((*this)[i][1],2) + pow((*this)[i][2],2);
+		inertiaMatrix(1,1) += pow((*this)[i][2],2) + pow((*this)[i][0],2);
+		inertiaMatrix(2,2) += pow((*this)[i][0],2) + pow((*this)[i][1],2);
+		inertiaMatrix(0,1) += - (*this)[i][0] * (*this)[i][1];
+		inertiaMatrix(0,2) += - (*this)[i][0] * (*this)[i][2];
+		inertiaMatrix(1,2) += - (*this)[i][1] * (*this)[i][2];
+		inertiaMatrix(1,0) += - (*this)[i][0] * (*this)[i][1];
+		inertiaMatrix(2,0) += - (*this)[i][0] * (*this)[i][2];
+		inertiaMatrix(2,1) += - (*this)[i][1] * (*this)[i][2];
+	}
+	return inertiaMatrix;
+}
 
 vector< vector<double> > structure::hessian (const vector<double> &p) {
 	const double epsilon = p[0];

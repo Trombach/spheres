@@ -246,9 +246,13 @@ int main (int argc, char *argv[]) {
 	energystats.close();
 
 
+	matrix3d test = optKS[0].m3d_momentOfInertia();
+	matrix3d test1 = m3d_diagv(test);
+	matrix3d test2 = test1.inverse();
 
-
-
+	for (int i=0; i<3; i++) 
+		for (int j=0; j<3; j++)
+			cout << i << j << " " << test2(i,j) << endl;
 
 
 

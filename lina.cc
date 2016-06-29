@@ -8,6 +8,7 @@
 #include <gsl/gsl_linalg.h>
 #include <algorithm>
 #include <assert.h>
+#include "geometry.h"
 
 
 using namespace std;
@@ -94,4 +95,31 @@ vector<pair<double, vector<double> > > diagv (vector< vector<double> > &matrix) 
 	gsl_vector_free (eval);
 	gsl_matrix_free (evec);
 	return eval_evec;
+}
+
+matrix3d m3d_diagv (matrix3d &matrix) {
+
+
+	gsl_matrix_view m = gsl_matrix_view_array (matrix.values, 3, 3);
+	gsl_vector *eval = gsl_vector_alloc (3);
+	gsl_matrix *evec = gsl_matrix_alloc (3, 3);
+	gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc (3);
+
+	int status = gsl_eigen_symmv (&m.matrix, eval, evec, w);
+
+	if (status) {
+		cout << "An error occured, status " << status << ", " << gsl_strerror(status) << endl;
+	}
+
+	gsl_eigen_symmv_free (w);
+
+	matrix3d diag;
+	for (int i=0; i<3; i++)
+		for (int j=0; j<3; j++)
+			diag(i,j) =	gsl_matrix_get(evec, i, j);
+
+	gsl_vector_free (eval);
+	gsl_matrix_free (evec);
+
+	return diag;
 }

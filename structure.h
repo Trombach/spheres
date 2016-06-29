@@ -58,6 +58,7 @@ public:
 	coord3d centreOfMass ();
 	void shiftToCoM (coord3d &CoM);
 	std::vector< std::vector<double> > momentOfInertia ();
+	matrix3d m3d_momentOfInertia ();
 	bool isMinimum ();
 
 
