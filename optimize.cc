@@ -139,44 +139,11 @@ int main (int argc, char *argv[]) {
 
 		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 
-		//int reopts(0);
-		//structure newKS;
-		//while (!optKS[i].isMinimum() && reopts < 6) {
-		//	
-
-
-
-
-		//	//positive gradient direction
-		//	threadstream << "positive deflection" << endl;
-		//	for (vector<coord3d>::size_type	j = 0; j < coords.size(); j++) {
-		//		positive.push_back(coords[j] + (gradients[j] * 0.2));
-		//	}
-		//	optKS[i].setCoordinates(positive);
-		//	
-		//	optKS[i] = optKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
-		//	optKS[i].setNumber(allKS[i].getNumber());
-
-		//	hessian = optKS[i].hessian(p);
-		//	eigenValues = diag(hessian);
-		//	optKS[i].setHessian (eigenValues);
-		//}
 		if (!optKS[i].isMinimum()){
 			threadstream << "Structure did not converge to minimum, will reoptimize later." << endl;
-			//threadstream << "Final gradient:" << endl;
-			//for (vector<coord3d>::size_type s = 0; s < gradients.size(); s++) {
-			//	threadstream << gradients[s] << endl;
-			//}
 		}
 
 
-		//if (reopts>0) {
-		//	coord3d CoM = newKS.centreOfMass();
-		//	newKS.shiftToCoM(CoM);
-		//	vector< vector<double> > inertiaTensor = newKS.momentOfInertia();
-		//	vector<double> inertia = diag(inertiaTensor);
-		//	newKS.setMomentOfInertia(inertia);
-		//}
 
 		#pragma omp critical
 		{
