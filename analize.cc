@@ -6,12 +6,15 @@
 #include <iomanip>
 #include <algorithm>
 #include <map>
+#include <functional>
+#include <cassert>
 #include "structure.h"
 #include "iop.h"
 #include "lina.h"
 
 
 using namespace std; 
+
 
 #define container_output(container) \
 template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
@@ -191,6 +194,7 @@ int main (int argc, char *argv[]) {
 		if (a.first-b.first < eps && a.second[0]-b.second[0] < eps && a.second[1]-b.second[1] < eps && b.second[2]-a.second[2] > eps) return true;	
 		return false;
 	};
+
 	energyMap energyStat(compare_map);
 	energyMap notMinimumStat(compare_map);
 
@@ -245,7 +249,7 @@ int main (int argc, char *argv[]) {
 	energies.close();
 	energystats.close();
 
-
+	//test for inversion matrix
 	matrix3d test = optKS[0].m3d_momentOfInertia();
 	matrix3d test1 = m3d_diagv(test);
 	matrix3d test2 = test1.inverse();
@@ -255,6 +259,85 @@ int main (int argc, char *argv[]) {
 			cout << i << j << " " << test2(i,j) << endl;
 
 
+	//calculate all interparticle distances for minimum structures
+	for (vector<structure>::size_type i=0; i<optKS.size(); i++) {
+		vector<double> interPartDist;
+		vector<coord3d> currentCoord=optKS[i].getCoordinates();
+		for (vector<coord3d>::size_type j=0; j<currentCoord.size(); j++) {
+			for (vector<coord3d>::size_type k=j+1; k<currentCoord.size(); k++) {
+				interPartDist.push_back(coord3d::dist(currentCoord[j], currentCoord[k]));	
+			}
+		}
+		sort(interPartDist.begin(), interPartDist.end());
+		optKS[i].setInterPartDist(interPartDist);
+	}
+	
+	//calculate all interparticle distances for non-minimum structures
+	for (vector<structure>::size_type i=0; i<notMinimumKS.size(); i++) {
+		vector<double> interPartDist;
+		vector<coord3d> currentCoord=notMinimumKS[i].getCoordinates();
+		for (vector<coord3d>::size_type j=0; j<currentCoord.size(); j++) {
+			for (vector<coord3d>::size_type k=j+1; k<currentCoord.size(); k++) {
+				interPartDist.push_back(coord3d::dist(currentCoord[j], currentCoord[k]));	
+			}
+		}
+		sort(interPartDist.begin(), interPartDist.end());
+		notMinimumKS[i].setInterPartDist(interPartDist);
+	}
+
+	//compare function for distance vectors
+	auto compare_interPartDist = [&] (vector<double> a, vector<double> b) {
+		assert (a.size() == b.size());
+		double eps = 1e-3;
+		vector<double> diff;
+		for (vector<double>::size_type i = 0; i < a.size(); i++) {
+			diff.push_back(abs(a[i]-b[i]));
+		}
+		auto max = max_element (begin(diff), end(diff));
+		if (*max < eps) return true;
+		return false;
+	};
+
+	//sort all minimum structures into vector< vector <structure> > according to distance vector
+	vector< vector<structure> > eqClasses;
+	vector<structure> one;
+	one.push_back(optKS[0]);
+	eqClasses.push_back(one);
+	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
+		for (vector< vector<structure> >::size_type j = 0; j < eqClasses.size(); j++) {
+			if (compare_interPartDist (optKS[i].getInterPartDist(), eqClasses[j][0].getInterPartDist())) {
+				eqClasses[j].push_back(optKS[i]);
+				break;
+			}
+			if (j + 1 == eqClasses.size()) {
+				vector<structure> newEqClass;
+				newEqClass.push_back(optKS[i]);
+				eqClasses.push_back(newEqClass);
+			}
+		}
+	}
+	cout << "Number of equality classes: " << eqClasses.size() << endl;
+
+
+	//sort all non-minimum structures into vector< vector <structure> > according to distance vector
+	vector< vector<structure> > notMinimumEqClasses;
+	vector<structure> notMinimumOne;
+	notMinimumOne.push_back(notMinimumKS[0]);
+	notMinimumEqClasses.push_back(notMinimumOne);
+	for (vector<structure>::size_type i = 1; i < notMinimumKS.size(); i++) {
+		for (vector< vector<structure> >::size_type j = 0; j < notMinimumEqClasses.size(); j++) {
+			if (compare_interPartDist (notMinimumKS[i].getInterPartDist(), notMinimumEqClasses[j][0].getInterPartDist())) {
+				notMinimumEqClasses[j].push_back(notMinimumKS[i]);
+				break;
+			}
+			if (j + 1 == notMinimumEqClasses.size()) {
+				vector<structure> newEqClass;
+				newEqClass.push_back(notMinimumKS[i]);
+				notMinimumEqClasses.push_back(newEqClass);
+			}
+		}
+	}
+	cout << "Number of non-minimum equality classes: " << notMinimumEqClasses.size() << endl;
 
 	////WRITE OUTPUT STRUCTURES
 	//switch (output_switch) {

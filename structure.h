@@ -11,6 +11,7 @@ private:
 	std::vector<coord3d> structureCoordinates;
 	std::vector<double> structureMomentOfInertia;
 	std::vector<double> structureHessian;
+	std::vector<double> interPartDist;
 
 public:   
 	structure() {
@@ -27,12 +28,14 @@ public:
 	std::vector<coord3d> getCoordinates() const { return structureCoordinates; }
 	std::vector<double> getMomentOfInertia() const { return structureMomentOfInertia; }
 	std::vector<double> getHessian() const { return structureHessian; }
+	std::vector<double> getInterPartDist() const { return interPartDist; }
 
 	void setNumber (int number) { structureNumber = number; }
 	void setEnergy (double energy) { structureEnergy = energy; }
 	void setCoordinates (std::vector<coord3d> coordinates) { structureCoordinates = coordinates; }
 	void setMomentOfInertia (std::vector<double> inertiaEigenvalues) { structureMomentOfInertia = inertiaEigenvalues; }
 	void setHessian (std::vector<double> hessianEigenvalues) {structureHessian = hessianEigenvalues; }
+	void setInterPartDist (std::vector<double> distances) { interPartDist = distances;}
 
 	int nAtoms() { return (this->getCoordinates()).size(); }
 

@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <map>
+#include <functional>
 #include "structure.h"
 #include "iop.h"
 #include "lina.h"
@@ -26,7 +27,6 @@ template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
 	}
 container_output(vector);
 
-typedef map <pair < double, vector<double> >, unsigned int, function<bool( pair < double, vector<double> > a, pair < double, vector<double> > b)> > energyMap;
 
 //MAIN FUNCTION BEGINS HERE
 
