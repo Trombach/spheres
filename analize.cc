@@ -34,7 +34,7 @@ typedef map <pair < double, vector<double> >, unsigned int, function<bool( pair 
 //MAIN FUNCTION BEGINS HERE
 
 int main (int argc, char *argv[]) {
-	clock_t tstart, tend, topt;
+	clock_t tstart, tend, topt, tsort1, tsort2;
 	tstart=clock();
 
 
@@ -249,14 +249,25 @@ int main (int argc, char *argv[]) {
 	energies.close();
 	energystats.close();
 
-	//test for inversion matrix
-	matrix3d test = optKS[0].m3d_momentOfInertia();
-	matrix3d test1 = m3d_diagv(test);
-	matrix3d test2 = test1.inverse();
+	
 
-	for (int i=0; i<3; i++) 
-		for (int j=0; j<3; j++)
-			cout << i << j << " " << test2(i,j) << endl;
+
+	tsort1=clock();
+	float sort1Time ((float)tsort1-(float)topt);
+	cout << "\tTime for sorting by energy and moment of intertia: " << sort1Time/CLOCKS_PER_SEC << " s" << endl << endl;
+
+
+
+
+
+	////test for inversion matrix
+	//matrix3d test = optKS[0].m3d_momentOfInertia();
+	//matrix3d test1 = m3d_diagv(test);
+	//matrix3d test2 = test1.inverse();
+
+	//for (int i=0; i<3; i++) 
+	//	for (int j=0; j<3; j++)
+	//		cout << i << j << " " << test2(i,j) << endl;
 
 
 	//calculate all interparticle distances for minimum structures
@@ -272,18 +283,6 @@ int main (int argc, char *argv[]) {
 		optKS[i].setInterPartDist(interPartDist);
 	}
 	
-	//calculate all interparticle distances for non-minimum structures
-	for (vector<structure>::size_type i=0; i<notMinimumKS.size(); i++) {
-		vector<double> interPartDist;
-		vector<coord3d> currentCoord=notMinimumKS[i].getCoordinates();
-		for (vector<coord3d>::size_type j=0; j<currentCoord.size(); j++) {
-			for (vector<coord3d>::size_type k=j+1; k<currentCoord.size(); k++) {
-				interPartDist.push_back(coord3d::dist(currentCoord[j], currentCoord[k]));	
-			}
-		}
-		sort(interPartDist.begin(), interPartDist.end());
-		notMinimumKS[i].setInterPartDist(interPartDist);
-	}
 
 	//compare function for distance vectors
 	auto compare_interPartDist = [&] (vector<double> a, vector<double> b) {
@@ -316,28 +315,13 @@ int main (int argc, char *argv[]) {
 			}
 		}
 	}
-	cout << "Number of equality classes: " << eqClasses.size() << endl;
+	cout << "\tNumber of equality classes: " << eqClasses.size() << endl;
 
 
-	//sort all non-minimum structures into vector< vector <structure> > according to distance vector
-	vector< vector<structure> > notMinimumEqClasses;
-	vector<structure> notMinimumOne;
-	notMinimumOne.push_back(notMinimumKS[0]);
-	notMinimumEqClasses.push_back(notMinimumOne);
-	for (vector<structure>::size_type i = 1; i < notMinimumKS.size(); i++) {
-		for (vector< vector<structure> >::size_type j = 0; j < notMinimumEqClasses.size(); j++) {
-			if (compare_interPartDist (notMinimumKS[i].getInterPartDist(), notMinimumEqClasses[j][0].getInterPartDist())) {
-				notMinimumEqClasses[j].push_back(notMinimumKS[i]);
-				break;
-			}
-			if (j + 1 == notMinimumEqClasses.size()) {
-				vector<structure> newEqClass;
-				newEqClass.push_back(notMinimumKS[i]);
-				notMinimumEqClasses.push_back(newEqClass);
-			}
-		}
-	}
-	cout << "Number of non-minimum equality classes: " << notMinimumEqClasses.size() << endl;
+	tsort2=clock();
+	float sort2Time ((float)tsort2-(float)tsort1);
+	cout << "\tTime for sorting by inter-particle distances: " << sort2Time/CLOCKS_PER_SEC << " s" << endl << endl;
+
 
 	////WRITE OUTPUT STRUCTURES
 	//switch (output_switch) {

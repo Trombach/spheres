@@ -110,7 +110,7 @@ int main (int argc, char *argv[]) {
 	
 
 	//OPTIMIZE AND HESSIAN
-    vector<structure> optKS; optKS.resize(allKS.size());
+    vector<structure> optKS; //optKS.resize(allKS.size());
 
 
 	cout << "\tStarting optimization..." << endl;
@@ -125,32 +125,34 @@ int main (int argc, char *argv[]) {
 
 		vector< vector<double> > hessian;
 		vector<double> eigenValues;
+		structure threadKS;
 		stringstream threadstream;
 
 		threadstream << "Optimization for structure no " << allKS[i].getNumber() << endl;
 
-        optKS[i] = allKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
-		optKS[i].setNumber( allKS[i].getNumber() );
+        threadKS = allKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
+		threadKS.setNumber( allKS[i].getNumber() );
 
-		hessian = optKS[i].hessian(p);
+		hessian = threadKS.hessian(p);
 		eigenValues = diag(hessian);
-		optKS[i].setHessian (eigenValues);
+		threadKS.setHessian (eigenValues);
 
 
 		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 
-		if (!optKS[i].isMinimum()){
-			threadstream << "Structure did not converge to minimum, will reoptimize later." << endl;
-		}
 
 
 
 		#pragma omp critical
 		{
-			if (!optKS[i].isMinimum()) {
+			if (threadKS.isMinimum()) {
+				optKS.push_back(threadKS);
+			}
+			else {
 				hessianWarnings += 1;
-				notMinimum.push_back(optKS[i].getNumber());
-				notMinimumKS.push_back(optKS[i]);
+				notMinimum.push_back(threadKS.getNumber());
+				notMinimumKS.push_back(threadKS);
+				threadstream << "Structure did not converge to minimum, will reoptimize later." << endl;
 			}
 			min << threadstream.rdbuf() << endl;
 			min << "***************End of Opt***************" << endl;
@@ -166,7 +168,7 @@ int main (int argc, char *argv[]) {
 	min.close();
 
 	
-	cout << "\tStarting reoptimization..." << endl;
+	cout << "\tStarting reoptimization for " << notMinimumKS.size() << " structure(s)." << endl;
 	//ATTEMPT REOPTIMIZATION
 	//positive
 	
