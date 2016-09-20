@@ -34,7 +34,7 @@ typedef map <pair < double, vector<double> >, unsigned int, function<bool( pair 
 //MAIN FUNCTION BEGINS HERE
 
 int main (int argc, char *argv[]) {
-	clock_t tstart, tend, topt, tsort1, tsort2;
+	clock_t tstart, tend, topt, tsort1, tsort2, tsort3;
 	tstart=clock();
 
 
@@ -298,29 +298,73 @@ int main (int argc, char *argv[]) {
 	};
 
 	//sort all minimum structures into vector< vector <structure> > according to distance vector
-	vector< vector<structure> > eqClasses;
+	vector< vector<structure> > eqClasses_dist;
 	vector<structure> one;
 	one.push_back(optKS[0]);
-	eqClasses.push_back(one);
+	eqClasses_dist.push_back(one);
 	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
-		for (vector< vector<structure> >::size_type j = 0; j < eqClasses.size(); j++) {
-			if (compare_interPartDist (optKS[i].getInterPartDist(), eqClasses[j][0].getInterPartDist())) {
-				eqClasses[j].push_back(optKS[i]);
+		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_dist.size(); j++) {
+			if (compare_interPartDist (optKS[i].getInterPartDist(), eqClasses_dist[j][0].getInterPartDist())) {
+				eqClasses_dist[j].push_back(optKS[i]);
 				break;
 			}
-			if (j + 1 == eqClasses.size()) {
+			if (j + 1 == eqClasses_dist.size()) {
 				vector<structure> newEqClass;
 				newEqClass.push_back(optKS[i]);
-				eqClasses.push_back(newEqClass);
+				eqClasses_dist.push_back(newEqClass);
 			}
 		}
 	}
-	cout << "\tNumber of equality classes: " << eqClasses.size() << endl;
+	cout << "\tNumber of equality classes for particle distances: " << eqClasses_dist.size() << endl;
+
+
+
+
 
 
 	tsort2=clock();
 	float sort2Time ((float)tsort2-(float)tsort1);
 	cout << "\tTime for sorting by inter-particle distances: " << sort2Time/CLOCKS_PER_SEC << " s" << endl << endl;
+
+
+
+
+
+
+	//calculate adj Matrix
+	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
+		optKS[i].setAdjMatrix(optKS[i].createAdjMatrix(p));
+		vector<int> bondVector = optKS[i].createBondVector();
+		sort(bondVector.begin(), bondVector.end());
+		optKS[i].setBondVector(bondVector);
+	}
+
+
+	
+
+	//sort all minimum structures into vector< vector<struckter> > according to squared adj matrix
+	vector< vector<structure> > eqClasses_adjMat2;
+	eqClasses_adjMat2.push_back(one);
+	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
+		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_adjMat2.size(); j++) {
+			if (optKS[i].getBondVector() == eqClasses_adjMat2[j][0].getBondVector()) {
+				eqClasses_adjMat2[j].push_back(optKS[i]);
+				break;
+			}
+			if (j + 1 == eqClasses_adjMat2.size()) {
+				vector<structure> newEqClass;
+				newEqClass.push_back(optKS[i]);
+				eqClasses_adjMat2.push_back(newEqClass);
+			}
+		}
+	}
+	cout << "\tNumber of equality classes for number of bonds: " << eqClasses_adjMat2.size() << endl;
+
+
+
+	tsort3=clock();
+	float sort3Time ((float)tsort3-(float)tsort2);
+	cout << "\tTime for sorting by square of adjacency Matrix: " << sort3Time/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
 	////WRITE OUTPUT STRUCTURES

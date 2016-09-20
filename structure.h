@@ -12,6 +12,8 @@ private:
 	std::vector<double> structureMomentOfInertia;
 	std::vector<double> structureHessian;
 	std::vector<double> interPartDist;
+	std::vector< std::vector<int> > structureAdjMatrix;
+	std::vector<int> structureBondVector;
 
 public:   
 	structure() {
@@ -29,6 +31,8 @@ public:
 	std::vector<double> getMomentOfInertia() const { return structureMomentOfInertia; }
 	std::vector<double> getHessian() const { return structureHessian; }
 	std::vector<double> getInterPartDist() const { return interPartDist; }
+	std::vector< std::vector<int> > getAdjMatrix() const { return structureAdjMatrix; }
+	std::vector<int> getBondVector() const { return structureBondVector; }
 
 	void setNumber (int number) { structureNumber = number; }
 	void setEnergy (double energy) { structureEnergy = energy; }
@@ -36,6 +40,8 @@ public:
 	void setMomentOfInertia (std::vector<double> inertiaEigenvalues) { structureMomentOfInertia = inertiaEigenvalues; }
 	void setHessian (std::vector<double> hessianEigenvalues) {structureHessian = hessianEigenvalues; }
 	void setInterPartDist (std::vector<double> distances) { interPartDist = distances;}
+	void setAdjMatrix (std::vector< std::vector<int> > adjMatrix) { structureAdjMatrix = adjMatrix; }
+	void setBondVector (std::vector<int> bondVector) { structureBondVector = bondVector; }
 
 	int nAtoms() { return (this->getCoordinates()).size(); }
 
@@ -64,6 +70,10 @@ public:
 	matrix3d m3d_momentOfInertia ();
 	bool isMinimum ();
 
+
+
+	std::vector< std::vector<int> > createAdjMatrix (std::vector<double> &p);
+	std::vector<int> createBondVector ();
 
 };
 

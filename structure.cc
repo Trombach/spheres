@@ -115,4 +115,34 @@ bool structure::isMinimum () {
 	return false;
 }
 
+vector< vector<int> > structure::createAdjMatrix (vector<double> &p) {
+	vector< vector<int> > adjMatrix;
+	vector<coord3d> currentCoord = this->getCoordinates();
+	for (vector<coord3d>::size_type j = 0; j < currentCoord.size(); j++) {
+		vector<int> currentRow;
+		for (vector<coord3d>::size_type k = 0; k < currentCoord.size(); k++) {
+			if (j == k) currentRow.push_back(1);
+			else {
+				double diff = fabs(coord3d::dist (currentCoord[j], currentCoord[k]) - p[1]);
+				if (diff < 0.1) currentRow.push_back(1);
+				else currentRow.push_back(0);
+			}
+		}
+		adjMatrix.push_back(currentRow);
+	}
+	return adjMatrix;
+}
+
+vector<int> structure::createBondVector () {
+	vector< vector<int> > adjMatrix = this->getAdjMatrix();
+	vector<int> bondVector (adjMatrix.size());
+	for (vector< vector<int> >::size_type i = 0; i < adjMatrix.size(); i++) {
+		for (vector< vector<int> >::size_type j = 0; j < adjMatrix.size(); j++) {
+			bondVector[i] += adjMatrix[i][j] * adjMatrix[j][i];
+		}
+	}
+	return bondVector;
+}
+
+
 
