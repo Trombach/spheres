@@ -14,6 +14,7 @@ private:
 	std::vector<double> interPartDist;
 	std::vector< std::vector<int> > structureAdjMatrix;
 	std::vector<int> structureBondVector;
+	std::vector<double> structureAdjMatrix_eigenvalues;
 
 public:   
 	structure() {
@@ -33,6 +34,7 @@ public:
 	std::vector<double> getInterPartDist() const { return interPartDist; }
 	std::vector< std::vector<int> > getAdjMatrix() const { return structureAdjMatrix; }
 	std::vector<int> getBondVector() const { return structureBondVector; }
+	std::vector<double> getAdjMatrix_eigenvalues() const { return structureAdjMatrix_eigenvalues; }
 
 	void setNumber (int number) { structureNumber = number; }
 	void setEnergy (double energy) { structureEnergy = energy; }
@@ -42,6 +44,7 @@ public:
 	void setInterPartDist (std::vector<double> distances) { interPartDist = distances;}
 	void setAdjMatrix (std::vector< std::vector<int> > adjMatrix) { structureAdjMatrix = adjMatrix; }
 	void setBondVector (std::vector<int> bondVector) { structureBondVector = bondVector; }
+	void setAdjMatrix_eigenvalues (std::vector<double> eigenvalues) { structureAdjMatrix_eigenvalues = eigenvalues; }
 
 	int nAtoms() { return (this->getCoordinates()).size(); }
 
@@ -74,6 +77,7 @@ public:
 
 	std::vector< std::vector<int> > createAdjMatrix (std::vector<double> &p);
 	std::vector<int> createBondVector ();
+	std::vector<double> createAdjMatrix_egenvalues ();
 
 };
 

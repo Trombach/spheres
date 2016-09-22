@@ -31,6 +31,7 @@ container_output(vector);
 
 typedef map <pair < double, vector<double> >, unsigned int, function<bool( pair < double, vector<double> > a, pair < double, vector<double> > b)> > energyMap;
 
+
 //MAIN FUNCTION BEGINS HERE
 
 int main (int argc, char *argv[]) {
@@ -270,7 +271,7 @@ int main (int argc, char *argv[]) {
 	//		cout << i << j << " " << test2(i,j) << endl;
 
 
-	//calculate all interparticle distances for minimum structures
+	//calculate all interparticle distances, adj Matrix, bond vector and eigenvalues of adj Matrix for minimum structures
 	for (vector<structure>::size_type i=0; i<optKS.size(); i++) {
 		vector<double> interPartDist;
 		vector<coord3d> currentCoord=optKS[i].getCoordinates();
@@ -281,12 +282,30 @@ int main (int argc, char *argv[]) {
 		}
 		sort(interPartDist.begin(), interPartDist.end());
 		optKS[i].setInterPartDist(interPartDist);
+
+		
+		optKS[i].setAdjMatrix(optKS[i].createAdjMatrix(p));
+
+
+		vector<int> bondVector = optKS[i].createBondVector();
+		sort(bondVector.begin(), bondVector.end());
+		optKS[i].setBondVector(bondVector);
+
+
+		optKS[i].setAdjMatrix_eigenvalues(optKS[i].createAdjMatrix_egenvalues());
 	}
 	
 
-	//compare function for distance vectors
-	auto compare_interPartDist = [&] (vector<double> a, vector<double> b) {
+
+
+
+
+
+
+	//compare function for vectors of doubles
+	auto compare_vector_double = [&] (vector<double> a, vector<double> b) {
 		assert (a.size() == b.size());
+		//if (a.size() != b.size()) { cout << "Size mismatch" << endl; return false; }
 		double eps = 1e-3;
 		vector<double> diff;
 		for (vector<double>::size_type i = 0; i < a.size(); i++) {
@@ -299,12 +318,12 @@ int main (int argc, char *argv[]) {
 
 	//sort all minimum structures into vector< vector <structure> > according to distance vector
 	vector< vector<structure> > eqClasses_dist;
-	vector<structure> one;
-	one.push_back(optKS[0]);
-	eqClasses_dist.push_back(one);
+	vector<structure> optKS0;
+	optKS0.push_back(optKS[0]);
+	eqClasses_dist.push_back(optKS0);
 	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
 		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_dist.size(); j++) {
-			if (compare_interPartDist (optKS[i].getInterPartDist(), eqClasses_dist[j][0].getInterPartDist())) {
+			if (compare_vector_double (optKS[i].getInterPartDist(), eqClasses_dist[j][0].getInterPartDist())) {
 				eqClasses_dist[j].push_back(optKS[i]);
 				break;
 			}
@@ -331,20 +350,11 @@ int main (int argc, char *argv[]) {
 
 
 
-	//calculate adj Matrix
-	for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
-		optKS[i].setAdjMatrix(optKS[i].createAdjMatrix(p));
-		vector<int> bondVector = optKS[i].createBondVector();
-		sort(bondVector.begin(), bondVector.end());
-		optKS[i].setBondVector(bondVector);
-	}
-
-
 	
 
-	//sort all minimum structures into vector< vector<struckter> > according to squared adj matrix
+	//sort all minimum structures into vector< vector<structure> > according to squared adj matrix
 	vector< vector<structure> > eqClasses_adjMat2;
-	eqClasses_adjMat2.push_back(one);
+	eqClasses_adjMat2.push_back(optKS0);
 	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
 		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_adjMat2.size(); j++) {
 			if (optKS[i].getBondVector() == eqClasses_adjMat2[j][0].getBondVector()) {
@@ -365,6 +375,30 @@ int main (int argc, char *argv[]) {
 	tsort3=clock();
 	float sort3Time ((float)tsort3-(float)tsort2);
 	cout << "\tTime for sorting by square of adjacency Matrix: " << sort3Time/CLOCKS_PER_SEC << " s" << endl << endl;
+
+	
+
+	
+	//sort all minimum structures into vector< vector<structure> > according to adj matrix eigenvalues
+	vector< vector<structure> > eqClasses_adjMatEv;
+	eqClasses_adjMatEv.push_back(optKS0);
+	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
+		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_adjMatEv.size(); j++) {
+			//cout << optKS[i].getAdjMatrix_eigenvalues() << endl << eqClasses_adjMatEv[j][0].getAdjMatrix_eigenvalues() << endl;
+			if (compare_vector_double (optKS[i].getAdjMatrix_eigenvalues(), eqClasses_adjMatEv[j][0].getAdjMatrix_eigenvalues())) {
+				eqClasses_adjMatEv[j].push_back(optKS[i]);
+				break;
+			}
+			if (j + 1 == eqClasses_adjMatEv.size()) {
+				vector<structure> newEqClass;
+				newEqClass.push_back(optKS[i]);
+				eqClasses_adjMatEv.push_back(newEqClass);
+			}
+		}
+	}
+	cout << "\tNumber of equality classes for adjacency matrix eigenvalues: " << eqClasses_adjMatEv.size() << endl;
+
+
 
 
 	////WRITE OUTPUT STRUCTURES

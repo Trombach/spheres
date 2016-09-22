@@ -1,4 +1,5 @@
 #include "structure.h"
+#include "lina.h"
 
 using namespace std;
 
@@ -145,4 +146,14 @@ vector<int> structure::createBondVector () {
 }
 
 
+vector<double> structure::createAdjMatrix_egenvalues () {
+	vector< vector<int> > adjMatrix = this->getAdjMatrix();
+	vector< vector<double> > adjMatrix_double;
+	for (vector< vector<int> >::size_type i = 0; i < adjMatrix.size(); i++) {
+		vector<double> row (adjMatrix[i].begin(), adjMatrix[i].end());
+		adjMatrix_double.push_back(row);
+	}
+	vector<double> adjMatrix_eigenvalues = diag (adjMatrix_double);
+	return adjMatrix_eigenvalues;
+}
 
