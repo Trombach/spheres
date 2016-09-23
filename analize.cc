@@ -35,7 +35,7 @@ typedef map <pair < double, vector<double> >, unsigned int, function<bool( pair 
 //MAIN FUNCTION BEGINS HERE
 
 int main (int argc, char *argv[]) {
-	clock_t tstart, tend, topt, tsort1, tsort2, tsort3;
+	clock_t tstart, tend, topt, tsort1, tsort2, tsort3, tsort4;
 	tstart=clock();
 
 
@@ -111,7 +111,7 @@ int main (int argc, char *argv[]) {
 
 
 
-	//HESSIAN
+	//HESSIAN, etc
 	ofstream energystats;
 	unsigned int hessianWarnings = 0;
 	vector<int> notMinimum;
@@ -305,7 +305,6 @@ int main (int argc, char *argv[]) {
 	//compare function for vectors of doubles
 	auto compare_vector_double = [&] (vector<double> a, vector<double> b) {
 		assert (a.size() == b.size());
-		//if (a.size() != b.size()) { cout << "Size mismatch" << endl; return false; }
 		double eps = 1e-3;
 		vector<double> diff;
 		for (vector<double>::size_type i = 0; i < a.size(); i++) {
@@ -334,16 +333,13 @@ int main (int argc, char *argv[]) {
 			}
 		}
 	}
-	cout << "\tNumber of equality classes for particle distances: " << eqClasses_dist.size() << endl;
 
 
-
-
-
-
+	cout << "\tParticle distance analysis" << endl;
+	cout << "\t\tEquality classes: " << eqClasses_dist.size() << endl;
 	tsort2=clock();
 	float sort2Time ((float)tsort2-(float)tsort1);
-	cout << "\tTime for sorting by inter-particle distances: " << sort2Time/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << sort2Time/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
 
@@ -368,13 +364,13 @@ int main (int argc, char *argv[]) {
 			}
 		}
 	}
-	cout << "\tNumber of equality classes for number of bonds: " << eqClasses_adjMat2.size() << endl;
 
 
-
+	cout << "\tBond number analysis" << endl;
+	cout << "\t\tEquality classes: " << eqClasses_adjMat2.size() << endl;
 	tsort3=clock();
 	float sort3Time ((float)tsort3-(float)tsort2);
-	cout << "\tTime for sorting by square of adjacency Matrix: " << sort3Time/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << sort3Time/CLOCKS_PER_SEC << " s" << endl << endl;
 
 	
 
@@ -396,7 +392,13 @@ int main (int argc, char *argv[]) {
 			}
 		}
 	}
-	cout << "\tNumber of equality classes for adjacency matrix eigenvalues: " << eqClasses_adjMatEv.size() << endl;
+
+
+	cout << "\tAdjacency matrix eigen analysis" << endl;
+	cout << "\t\tEquality classes: " << eqClasses_adjMatEv.size() << endl;
+	tsort4=clock();
+	float sort4Time ((float)tsort4-(float)tsort3);
+	cout << "\t\tTiming: " << sort4Time/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
 
