@@ -138,6 +138,33 @@ int main (int argc, char *argv[]) {
 		optKS[i].setMomentOfInertia(inertia);
 
 		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
+
+
+		//inter-particle distance
+		vector<double> interPartDist;
+		vector<coord3d> currentCoord=optKS[i].getCoordinates();
+		for (vector<coord3d>::size_type j=0; j<currentCoord.size(); j++) {
+			for (vector<coord3d>::size_type k=j+1; k<currentCoord.size(); k++) {
+				interPartDist.push_back(coord3d::dist(currentCoord[j], currentCoord[k]));	
+			}
+		}
+		sort(interPartDist.begin(), interPartDist.end());
+		optKS[i].setInterPartDist(interPartDist);
+
+
+		//calculate adj matrix
+		optKS[i].setAdjMatrix(optKS[i].createAdjMatrix(p));
+
+		//calculate bond vector from adj matrix
+		vector<int> bondVector = optKS[i].createBondVector();
+		sort(bondVector.begin(), bondVector.end());
+		optKS[i].setBondVector(bondVector);
+
+
+		//calculate eigenvalues of adj matrix
+		optKS[i].setAdjMatrix_eigenvalues(optKS[i].createAdjMatrix_egenvalues());
+		
+		
 		#pragma omp critical
 		{
 			if (!optKS[i].isMinimum()) {
@@ -271,29 +298,6 @@ int main (int argc, char *argv[]) {
 	//		cout << i << j << " " << test2(i,j) << endl;
 
 
-	//calculate all interparticle distances, adj Matrix, bond vector and eigenvalues of adj Matrix for minimum structures
-	for (vector<structure>::size_type i=0; i<optKS.size(); i++) {
-		vector<double> interPartDist;
-		vector<coord3d> currentCoord=optKS[i].getCoordinates();
-		for (vector<coord3d>::size_type j=0; j<currentCoord.size(); j++) {
-			for (vector<coord3d>::size_type k=j+1; k<currentCoord.size(); k++) {
-				interPartDist.push_back(coord3d::dist(currentCoord[j], currentCoord[k]));	
-			}
-		}
-		sort(interPartDist.begin(), interPartDist.end());
-		optKS[i].setInterPartDist(interPartDist);
-
-		
-		optKS[i].setAdjMatrix(optKS[i].createAdjMatrix(p));
-
-
-		vector<int> bondVector = optKS[i].createBondVector();
-		sort(bondVector.begin(), bondVector.end());
-		optKS[i].setBondVector(bondVector);
-
-
-		optKS[i].setAdjMatrix_eigenvalues(optKS[i].createAdjMatrix_egenvalues());
-	}
 	
 
 
