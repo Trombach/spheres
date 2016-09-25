@@ -95,7 +95,7 @@ vector<structure> readallstruct (const std::string& fileName) {
 	    }
 	}
     infile.close();
-	cout << "\t" << "Number of structures: " << allKissingSpheres.size() << endl;
+	//cout << "\t" << "Number of structures: " << allKissingSpheres.size() << endl;
 	return allKissingSpheres;
 }
 

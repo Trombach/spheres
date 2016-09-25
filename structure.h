@@ -67,6 +67,8 @@ public:
 
 	std::vector< std::vector<double> > hessian (const std::vector<double> &p);
 
+
+
 	coord3d centreOfMass ();
 	void shiftToCoM (coord3d &CoM);
 	std::vector< std::vector<double> > momentOfInertia ();

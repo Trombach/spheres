@@ -94,7 +94,9 @@ int main (int argc, char *argv[]) {
 
     
 	//READ IN ALL STRUCTURES AT ONCE
+	cout << "\t+ Reading structures" << endl;
     vector<structure> optKS = readallstruct(fileName);
+	cout << "\t\t#structures :" << optKS.size() << endl;
 	
 	//if scaling is found in settings file scale all coordinates accordingly
 	switch (scaling_switch) {
@@ -182,7 +184,7 @@ int main (int argc, char *argv[]) {
 
 	topt=clock();
 	float optTime ((float)topt-(float)tstart);
-	cout << "\tTime for Hessian and energy calculation: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
 	
@@ -277,12 +279,14 @@ int main (int argc, char *argv[]) {
 	energies.close();
 	energystats.close();
 
+
+
 	
-
-
+	cout << "\t+ Energy and moment of inertia analysis:" << endl;
+	cout << "\t\tUnique structures: " << energyStat.size() << endl;
 	tsort1=clock();
 	float sort1Time ((float)tsort1-(float)topt);
-	cout << "\tTime for sorting by energy and moment of intertia: " << sort1Time/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << sort1Time/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
 
@@ -339,7 +343,7 @@ int main (int argc, char *argv[]) {
 	}
 
 
-	cout << "\tParticle distance analysis" << endl;
+	cout << "\t+ Particle distance analysis" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_dist.size() << endl;
 	tsort2=clock();
 	float sort2Time ((float)tsort2-(float)tsort1);
@@ -370,7 +374,7 @@ int main (int argc, char *argv[]) {
 	}
 
 
-	cout << "\tBond number analysis" << endl;
+	cout << "\t+ Bond number analysis" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_adjMat2.size() << endl;
 	tsort3=clock();
 	float sort3Time ((float)tsort3-(float)tsort2);
@@ -398,7 +402,7 @@ int main (int argc, char *argv[]) {
 	}
 
 
-	cout << "\tAdjacency matrix eigen analysis" << endl;
+	cout << "\t+ Adjacency matrix eigen analysis" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_adjMatEv.size() << endl;
 	tsort4=clock();
 	float sort4Time ((float)tsort4-(float)tsort3);
@@ -440,7 +444,7 @@ int main (int argc, char *argv[]) {
 	
 	tend=clock();
 	float totalTime ((float)tend-(float)tstart);
-	cout << "\tTotal rumtime: " << totalTime/CLOCKS_PER_SEC << " s" << endl;
+	cout << "\t+ Total rumtime: " << totalTime/CLOCKS_PER_SEC << " s" << endl;
     return 0; 
 
     

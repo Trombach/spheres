@@ -95,6 +95,7 @@ int main (int argc, char *argv[]) {
     
 	//READ IN ALL STRUCTURES AT ONCE
     vector<structure> allKS = readallstruct(fileName);
+	cout << "\t#structures :" << allKS.size() << endl;
 	
 	//if scaling is found in settings file scale all coordinates accordingly
 	switch (scaling_switch) {

@@ -156,6 +156,7 @@ struct matrix3d {
 		return ys;
 	}
   
+
 	//structure operator*(structure &xs) const {
 	//const matrix3d &A(*this);
 	//structure ys;
