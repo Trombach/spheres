@@ -94,7 +94,7 @@ int main (int argc, char *argv[]) {
 
     
 	//READ IN ALL STRUCTURES AT ONCE
-	cout << "\t+ Reading structures" << endl;
+	cout << "\t+ Reading and processing structures" << endl;
     vector<structure> optKS = readallstruct(fileName);
 	cout << "\t\t#structures :" << optKS.size() << endl;
 	
@@ -292,20 +292,6 @@ int main (int argc, char *argv[]) {
 
 
 
-	////test for inversion matrix
-	//matrix3d test = optKS[0].m3d_momentOfInertia();
-	//matrix3d test1 = m3d_diagv(test);
-	//matrix3d test2 = test1.inverse();
-
-	//for (int i=0; i<3; i++) 
-	//	for (int j=0; j<3; j++)
-	//		cout << i << j << " " << test2(i,j) << endl;
-
-
-	
-
-
-
 
 
 
@@ -407,6 +393,23 @@ int main (int argc, char *argv[]) {
 	tsort4=clock();
 	float sort4Time ((float)tsort4-(float)tsort3);
 	cout << "\t\tTiming: " << sort4Time/CLOCKS_PER_SEC << " s" << endl << endl;
+
+
+
+
+
+
+	////test for inversion matrix
+	//matrix3d test = optKS[0].m3d_momentOfInertia();
+	//matrix3d test1 = m3d_diagv(test);
+	//matrix3d test2 = test1.inverse();
+
+	//for (int i=0; i<3; i++) 
+	//	for (int j=0; j<3; j++)
+	//		cout << i << j << " " << test2(i,j) << endl;
+
+
+
 
 
 
