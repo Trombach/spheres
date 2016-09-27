@@ -181,7 +181,7 @@ int main (int argc, char *argv[]) {
 
 
 
-
+	cout << "\t\t#non-minimum structures: " << notMinimumKS.size() << endl;
 	topt=clock();
 	float optTime ((float)topt-(float)tstart);
 	cout << "\t\tTiming: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
@@ -217,7 +217,7 @@ int main (int argc, char *argv[]) {
 
 	//STATISTICS ON ENERGIES
 	auto compare_map = [&] (pair < double, vector<double> > a, pair < double, vector<double> > b) { //sort by energy and inertia function
-		double eps = 1e-3;
+		double eps = 1e-7;
 		if (b.first-a.first > eps) return true;
 		if (a.first-b.first < eps && b.second[0]-a.second[0] > eps) return true;
 		if (a.first-b.first < eps && a.second[0]-b.second[0] < eps && b.second[1]-a.second[1] > eps) return true;
@@ -299,7 +299,7 @@ int main (int argc, char *argv[]) {
 	//compare function for vectors of doubles
 	auto compare_vector_double = [&] (vector<double> a, vector<double> b) {
 		assert (a.size() == b.size());
-		double eps = 1e-3;
+		double eps = 1e-7;
 		vector<double> diff;
 		for (vector<double>::size_type i = 0; i < a.size(); i++) {
 			diff.push_back(abs(a[i]-b[i]));
@@ -309,24 +309,44 @@ int main (int argc, char *argv[]) {
 		return false;
 	};
 
+
 	//sort all minimum structures into vector< vector <structure> > according to distance vector
 	vector< vector<structure> > eqClasses_dist;
 	vector<structure> optKS0;
 	optKS0.push_back(optKS[0]);
 	eqClasses_dist.push_back(optKS0);
 	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
+		bool matched(0);
 		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_dist.size(); j++) {
 			if (compare_vector_double (optKS[i].getInterPartDist(), eqClasses_dist[j][0].getInterPartDist())) {
 				eqClasses_dist[j].push_back(optKS[i]);
+				matched = 1;
 				break;
 			}
-			if (j + 1 == eqClasses_dist.size()) {
-				vector<structure> newEqClass;
-				newEqClass.push_back(optKS[i]);
-				eqClasses_dist.push_back(newEqClass);
-			}
+		}
+		if (matched == 0) {
+			vector<structure> newEqClass;
+			newEqClass.push_back(optKS[i]);
+			eqClasses_dist.push_back(newEqClass);
 		}
 	}
+	ofstream similarStructures;
+	similarStructures.open("similar");
+	for (vector< vector<structure> >::size_type i = 0; i < eqClasses_dist.size(); i++) {
+		if (eqClasses_dist[i].size() > 1) {
+			for (vector<structure>::size_type j = 0; j < eqClasses_dist[i].size(); j++) {
+				xyzout (eqClasses_dist[i][j],"eq" + to_string(i) + "N" + to_string(j) + ".xyz");
+				vector<coord3d> currentCoord = eqClasses_dist[i][j].getCoordinates();
+				vector<double> currentInertia = eqClasses_dist[i][j].getMomentOfInertia();
+				vector<double> currentInterPartDist = eqClasses_dist[i][j].getInterPartDist();
+				for (vector<coord3d>::size_type k = 0; k < currentCoord.size(); k++) {
+					similarStructures << currentCoord[k] << endl;
+				}
+				similarStructures << endl << currentInertia << endl << currentInterPartDist << endl << endl;
+			}	
+		}
+	}
+	similarStructures.close();
 
 
 	cout << "\t+ Particle distance analysis" << endl;
@@ -346,16 +366,18 @@ int main (int argc, char *argv[]) {
 	vector< vector<structure> > eqClasses_adjMat2;
 	eqClasses_adjMat2.push_back(optKS0);
 	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
+		bool matched(0);
 		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_adjMat2.size(); j++) {
 			if (optKS[i].getBondVector() == eqClasses_adjMat2[j][0].getBondVector()) {
 				eqClasses_adjMat2[j].push_back(optKS[i]);
+				matched = 1;
 				break;
 			}
-			if (j + 1 == eqClasses_adjMat2.size()) {
-				vector<structure> newEqClass;
-				newEqClass.push_back(optKS[i]);
-				eqClasses_adjMat2.push_back(newEqClass);
-			}
+		}
+		if (matched == 0) {
+			vector<structure> newEqClass;
+			newEqClass.push_back(optKS[i]);
+			eqClasses_adjMat2.push_back(newEqClass);
 		}
 	}
 
@@ -373,17 +395,18 @@ int main (int argc, char *argv[]) {
 	vector< vector<structure> > eqClasses_adjMatEv;
 	eqClasses_adjMatEv.push_back(optKS0);
 	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
+		bool matched(0);
 		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_adjMatEv.size(); j++) {
-			//cout << optKS[i].getAdjMatrix_eigenvalues() << endl << eqClasses_adjMatEv[j][0].getAdjMatrix_eigenvalues() << endl;
 			if (compare_vector_double (optKS[i].getAdjMatrix_eigenvalues(), eqClasses_adjMatEv[j][0].getAdjMatrix_eigenvalues())) {
 				eqClasses_adjMatEv[j].push_back(optKS[i]);
+				matched = 1;
 				break;
 			}
-			if (j + 1 == eqClasses_adjMatEv.size()) {
-				vector<structure> newEqClass;
-				newEqClass.push_back(optKS[i]);
-				eqClasses_adjMatEv.push_back(newEqClass);
-			}
+		}
+		if (matched == 0) {
+			vector<structure> newEqClass;
+			newEqClass.push_back(optKS[i]);
+			eqClasses_adjMatEv.push_back(newEqClass);
 		}
 	}
 
