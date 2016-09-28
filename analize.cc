@@ -217,7 +217,7 @@ int main (int argc, char *argv[]) {
 
 	//STATISTICS ON ENERGIES
 	auto compare_map = [&] (pair < double, vector<double> > a, pair < double, vector<double> > b) { //sort by energy and inertia function
-		double eps = 1e-7;
+		double eps = 1e-5;
 		if (b.first-a.first > eps) return true;
 		if (a.first-b.first < eps && b.second[0]-a.second[0] > eps) return true;
 		if (a.first-b.first < eps && a.second[0]-b.second[0] < eps && b.second[1]-a.second[1] > eps) return true;
@@ -299,7 +299,7 @@ int main (int argc, char *argv[]) {
 	//compare function for vectors of doubles
 	auto compare_vector_double = [&] (vector<double> a, vector<double> b) {
 		assert (a.size() == b.size());
-		double eps = 1e-7;
+		double eps = 1e-5;
 		vector<double> diff;
 		for (vector<double>::size_type i = 0; i < a.size(); i++) {
 			diff.push_back(abs(a[i]-b[i]));

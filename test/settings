@@ -10,9 +10,9 @@ potential: {
 };
 opt: {
     name = "BFGS";
-    dforce = 1e-4;
-    stepsize = 0.01;
-    nsteps = 1000;
+    dforce = 1e-5;
+    stepsize = 0.001;
+    nsteps = 1000000000;
 };
 //output: {
 //	number = [228];
