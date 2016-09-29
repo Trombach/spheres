@@ -26,13 +26,13 @@ double matrix3d::det() const {
 
 	double det = 0;
 
-	det += M(0,0) * M(1,1) * M(3,3);
-	det += M(1,2) * M(2,3) * M(3,1);
-	det += M(1,3) * M(2,1) * M(3,2);
+	det += M(0,0) * M(1,1) * M(2,2);
+	det += M(0,1) * M(1,2) * M(2,0);
+	det += M(0,2) * M(1,0) * M(2,1);
 
-	det -= M(1,3) * M(2,2) * M(3,1);
-	det -= M(1,2) * M(2,1) * M(3,3);
-	det -= M(1,1) * M(2,3) * M(3,2);
+	det -= M(0,2) * M(1,1) * M(2,0);
+	det -= M(0,1) * M(1,0) * M(2,2);
+	det -= M(0,0) * M(1,2) * M(2,1);
 
 	return det;
 }
@@ -42,6 +42,7 @@ matrix3d matrix3d::inverse() {
 	matrix3d Mi;
 
 	double det = M.det();	
+	std::cout << det << std::endl;
 
 	Mi(0,0) = M(1,1) * M(2,2) - M(1,2) * M(2,1);
 	Mi(0,1) = - (M(1,0) * M(2,2) - M(1,2) * M(2,0));
