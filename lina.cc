@@ -84,9 +84,10 @@ vector<pair<double, vector<double> > > diagv (vector< vector<double> > &matrix) 
     
 	vector<pair<double, vector<double> > > eval_evec;
     for (int i = 0; i < matrixSize; i++) {
+		gsl_vector_view evec_i = gsl_matrix_column (evec, i);
 		vector<double> eigv;
 		for (int j = 0; j < matrixSize; j++) {
-			eigv.push_back(gsl_matrix_get(evec, i, j));
+			eigv.push_back(gsl_vector_get (&evec_i.vector, j));
 		}
 		eval_evec.push_back(make_pair(gsl_vector_get (eval, i), eigv));
 	}
@@ -114,9 +115,13 @@ matrix3d m3d_diagv (matrix3d &matrix) {
 	gsl_eigen_symmv_free (w);
 
 	matrix3d diag;
-	for (int i=0; i<3; i++)
-		for (int j=0; j<3; j++)
-			diag(i,j) =	gsl_matrix_get(evec, i, j);
+
+	for (int i=0; i <3; i++) {
+		gsl_vector_view evec_i = gsl_matrix_column (evec, i);
+		diag(0,i) = gsl_vector_get (&evec_i.vector, 0); 
+		diag(1,i) = gsl_vector_get (&evec_i.vector, 1);
+		diag(2,i) = gsl_vector_get (&evec_i.vector, 2);
+	}
 
 	gsl_vector_free (eval);
 	gsl_matrix_free (evec);
