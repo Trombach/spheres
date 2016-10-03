@@ -132,6 +132,9 @@ int main (int argc, char *argv[]) {
 		eigenValues = diag(hessian);
 		optKS[i].setHessian (eigenValues);
 
+		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
+
+
 		//Inertia
 		coord3d CoM = optKS[i].centreOfMass();
 		optKS[i].shiftToCoM(CoM);
@@ -139,8 +142,10 @@ int main (int argc, char *argv[]) {
 		vector<double> inertia = diag(inertiaTensor);
 		optKS[i].setMomentOfInertia(inertia);
 
-		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 
+		//move to principal axis system
+		matrix3d principalAxis = optKS[i].m3d_principalAxis();
+		optKS[i].rotateToPrincipalAxis (principalAxis);
 
 		//inter-particle distance
 		vector<double> interPartDist;
@@ -187,8 +192,103 @@ int main (int argc, char *argv[]) {
 	cout << "\t\tTiming: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
+
+
+
+	//SORT BY direct structure comparison
+	vector< vector<structure> > eqClasses_coord;
+	vector<structure> optKS0;
+	optKS0.push_back(optKS[0]);
+	eqClasses_coord.push_back(optKS0);
+	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
+		bool matched(0);
+		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_coord.size(); j++) {
+			if (optKS[i].compareCoordinates(eqClasses_coord[j][0])) {
+				eqClasses_coord[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+			structure sig0;
+			vector<coord3d> coord_sig0 = optKS[i].sig(0);
+			sig0.setCoordinates(coord_sig0);
+			if (sig0.compareCoordinates(eqClasses_coord[j][0])) {
+				eqClasses_coord[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+			structure sig1;
+			vector<coord3d> coord_sig1 = optKS[i].sig(1);
+			sig1.setCoordinates(coord_sig1);
+			if (sig1.compareCoordinates(eqClasses_coord[j][0])) {
+				eqClasses_coord[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+			structure sig2;
+			vector<coord3d> coord_sig2 = optKS[i].sig(2);
+			sig2.setCoordinates(coord_sig2);
+			if (sig2.compareCoordinates(eqClasses_coord[j][0])) {
+				eqClasses_coord[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+			structure c201;
+			vector<coord3d> coord_c201 = optKS[i].c2(0,1);
+			c201.setCoordinates(coord_c201);
+			if (c201.compareCoordinates(eqClasses_coord[j][0])) {
+				eqClasses_coord[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+			structure c202;
+			vector<coord3d> coord_c202 = optKS[i].c2(0,2);
+			c202.setCoordinates(coord_c202);
+			if (c202.compareCoordinates(eqClasses_coord[j][0])) {
+				eqClasses_coord[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+			structure c212;
+			vector<coord3d> coord_c212 = optKS[i].c2(1,2);
+			c212.setCoordinates(coord_c212);
+			if (c212.compareCoordinates(eqClasses_coord[j][0])) {
+				eqClasses_coord[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+			structure inverse;
+			vector<coord3d> coord_inv = optKS[i].inv();
+			inverse.setCoordinates(coord_inv);
+			if (inverse.compareCoordinates(eqClasses_coord[j][0])) {
+				eqClasses_coord[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+			
+		}
+		if (matched == 0) {
+			vector<structure> newEqClass;
+			newEqClass.push_back(optKS[i]);
+			eqClasses_coord.push_back(newEqClass);
+		}
+	}
+
+	vector<structure> structure0;
+	for (vector< vector<structure> >::size_type i = 0; i < eqClasses_coord.size(); i++) {
+		structure0.push_back(eqClasses_coord[i][0]);
+		vector<double> inertia = eqClasses_coord[i][0].getMomentOfInertia();
+		stringstream in;
+		in << inertia << endl;
+		xyzout (eqClasses_coord[i][0], in.str() + to_string(i) + ".xyz");
+	}
+
 	
 
+	cout << "\t+ Comparison of coordinates" << endl;
+	cout << "\t\tEquality classes: " << eqClasses_coord.size() << endl;
+	clock_t trot=clock();
+	float rotTime ((float)trot-(float)topt);
+	cout << "\t\tTiming: " << rotTime/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
 
@@ -312,8 +412,6 @@ int main (int argc, char *argv[]) {
 
 	//sort all minimum structures into vector< vector <structure> > according to distance vector
 	vector< vector<structure> > eqClasses_dist;
-	vector<structure> optKS0;
-	optKS0.push_back(optKS[0]);
 	eqClasses_dist.push_back(optKS0);
 	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
 		bool matched(0);
@@ -418,18 +516,6 @@ int main (int argc, char *argv[]) {
 	cout << "\t\tTiming: " << sort4Time/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
-
-
-
-
-	////test for inversion matrix
-	//matrix3d test = optKS[0].m3d_momentOfInertia();
-	//matrix3d test1 = m3d_diagv(test);
-	//matrix3d test2 = test1.inverse();
-
-	//for (int i=0; i<3; i++) 
-	//	for (int j=0; j<3; j++)
-	//		cout << i << j << " " << test2(i,j) << endl;
 
 
 

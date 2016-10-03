@@ -54,6 +54,24 @@ matrix3d structure::m3d_momentOfInertia () {
 	return inertiaMatrix;
 }
 
+matrix3d structure::m3d_principalAxis () {
+	matrix3d I = this->m3d_momentOfInertia();
+	matrix3d V = m3d_diagv (I);
+	return V;
+}
+
+void structure::rotateToPrincipalAxis (matrix3d &principalAxis) {
+	matrix3d transMatrix = principalAxis.inverse();
+	//matrix3d test =  principalAxis * transMatrix;
+	vector<coord3d> coord = this->getCoordinates(), newCoord;
+
+	for (vector<coord3d>::size_type i = 0; i < coord.size(); i++) {
+		newCoord.push_back (transMatrix * coord[i]);
+	}
+
+	structureCoordinates = newCoord;	
+}	
+
 vector< vector<double> > structure::hessian (const vector<double> &p) {
 	const double epsilon = p[0];
 	const double rm = p[1];
@@ -157,3 +175,50 @@ vector<double> structure::createAdjMatrix_egenvalues () {
 	return adjMatrix_eigenvalues;
 }
 
+bool structure::compareCoordinates (structure &y) const {
+	vector<coord3d> a = this->getCoordinates();
+	vector<coord3d> b = y.getCoordinates();
+
+	for (vector<coord3d>::size_type i = 0; i < a.size(); i++) {
+		bool match(0);
+		for (vector<coord3d>::size_type j = 0; j < b.size(); j++) {
+			coord3d diff = a[i] - b[j];
+			//cout << i << " " << diff.norm() << endl;
+			if (diff.norm() < 1e-4) {
+				match = 1;
+				break;
+			}
+		}
+		if (match == 0) return false;
+	}
+	return true;
+}
+
+//symmetry
+//sig mirror; i: 0=yz 1=xz, 2=xy
+vector<coord3d> structure::sig (int a) {
+	vector<coord3d> coord = structureCoordinates;
+	for (int i = 0; i < this->nAtoms(); i++) { 
+		coord[i][a] = - structureCoordinates[i][a];
+	}
+	return coord;
+}
+
+//c2 rotation; ab: 12=x, 02=y, 01=z
+vector<coord3d> structure::c2 (int a, int b) {
+	vector<coord3d> coord = structureCoordinates;
+	for (int i = 0; i < this->nAtoms(); i++) { 
+		coord[i][a] = -structureCoordinates[i][a];
+		coord[i][b] = -structureCoordinates[i][b];
+	}
+	return coord;
+}
+
+//inversion
+vector<coord3d> structure::inv () {
+	vector<coord3d> coord = structureCoordinates;
+	for (int i = 0; i < this->nAtoms(); i++) { 
+		coord[i] = - structureCoordinates[i];
+	}
+	return coord;
+}

@@ -42,7 +42,6 @@ matrix3d matrix3d::inverse() {
 	matrix3d Mi;
 
 	double det = M.det();	
-	std::cout << det << std::endl;
 
 	Mi(0,0) = M(1,1) * M(2,2) - M(1,2) * M(2,1);
 	Mi(0,1) = - (M(1,0) * M(2,2) - M(1,2) * M(2,0));

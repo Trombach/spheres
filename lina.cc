@@ -114,13 +114,28 @@ matrix3d m3d_diagv (matrix3d &matrix) {
 
 	gsl_eigen_symmv_free (w);
 
+
+	vector<pair<double, vector<double> > > eval_evec;
+    for (int i = 0; i < 3; i++) {
+		gsl_vector_view evec_i = gsl_matrix_column (evec, i);
+		vector<double> eigv;
+		for (int j = 0; j < 3; j++) {
+			eigv.push_back(gsl_vector_get (&evec_i.vector, j));
+		}
+		eval_evec.push_back(make_pair(gsl_vector_get (eval, i), eigv));
+	}
+	
+	auto pairCompare = [&] (const pair<double, vector<double> > a, const pair<double, vector<double> > b) {
+				return a.first < b.first;
+	};
+	sort (eval_evec.begin(), eval_evec.end(), pairCompare); 
+
 	matrix3d diag;
 
-	for (int i=0; i <3; i++) {
-		gsl_vector_view evec_i = gsl_matrix_column (evec, i);
-		diag(0,i) = gsl_vector_get (&evec_i.vector, 0); 
-		diag(1,i) = gsl_vector_get (&evec_i.vector, 1);
-		diag(2,i) = gsl_vector_get (&evec_i.vector, 2);
+	for (int i = 0; i < 3; i++) {
+		diag(0,i) = eval_evec[i].second[0]; 
+		diag(1,i) = eval_evec[i].second[1]; 
+		diag(2,i) = eval_evec[i].second[2];
 	}
 
 	gsl_vector_free (eval);
