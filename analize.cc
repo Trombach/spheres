@@ -273,14 +273,6 @@ int main (int argc, char *argv[]) {
 		}
 	}
 
-	vector<structure> structure0;
-	for (vector< vector<structure> >::size_type i = 0; i < eqClasses_coord.size(); i++) {
-		structure0.push_back(eqClasses_coord[i][0]);
-		vector<double> inertia = eqClasses_coord[i][0].getMomentOfInertia();
-		stringstream in;
-		in << inertia << endl;
-		xyzout (eqClasses_coord[i][0], in.str() + to_string(i) + ".xyz");
-	}
 
 	
 
@@ -289,6 +281,65 @@ int main (int argc, char *argv[]) {
 	clock_t trot=clock();
 	float rotTime ((float)trot-(float)topt);
 	cout << "\t\tTiming: " << rotTime/CLOCKS_PER_SEC << " s" << endl << endl;
+
+
+
+
+
+
+
+
+	//compare function for vectors of doubles
+	auto compare_vector_double = [&] (vector<double> a, vector<double> b) {
+		assert (a.size() == b.size());
+		double eps = 1e-3;
+		vector<double> diff;
+		for (vector<double>::size_type i = 0; i < a.size(); i++) {
+			diff.push_back(abs(a[i]-b[i]));
+		}
+		auto max = max_element (begin(diff), end(diff));
+		if (*max < eps) return true;
+		return false;
+	};
+
+
+	//post analysis of distance vector
+	vector< vector<structure> > eqClasses_coord_dist;
+	eqClasses_coord_dist.push_back(eqClasses_coord[0]);
+	for (vector< vector<structure> >::size_type i = 1; i < eqClasses_coord.size(); i++) {
+		bool matched(0);
+		for (vector< vector<structure> >::size_type j = 0; j < eqClasses_coord_dist.size(); j++) {
+			if (compare_vector_double (eqClasses_coord[i][0].getInterPartDist(), eqClasses_coord_dist[j][0].getInterPartDist())) {
+				eqClasses_coord_dist[j].insert (eqClasses_coord_dist[j].end(), eqClasses_coord[i].begin(), eqClasses_coord[i].end());
+				matched = 1;
+				break;
+			}
+		}
+		if (matched == 0) {
+			eqClasses_coord_dist.push_back(eqClasses_coord[i]);
+		}
+	}
+
+
+	vector<structure> structure0;
+	for (vector< vector<structure> >::size_type i = 0; i < eqClasses_coord_dist.size(); i++) {
+		structure0.push_back(eqClasses_coord_dist[i][0]);
+		vector<double> inertia = eqClasses_coord_dist[i][0].getMomentOfInertia();
+		stringstream in;
+		in << inertia << endl;
+		xyzout (eqClasses_coord[i][0], in.str() + to_string(i) + ".xyz");
+	}
+
+	cout << "\t+ Comparison of coordinates and distance vector" << endl;
+	cout << "\t\tEquality classes: " << eqClasses_coord_dist.size() << endl;
+	clock_t trotdist=clock();
+	float rotdistTime ((float)trotdist-(float)trot);
+	cout << "\t\tTiming: " << rotdistTime/CLOCKS_PER_SEC << " s" << endl << endl;
+	
+
+
+
+
 
 
 
@@ -385,7 +436,7 @@ int main (int argc, char *argv[]) {
 	cout << "\t+ Energy and moment of inertia analysis:" << endl;
 	cout << "\t\tUnique structures: " << energyStat.size() << endl;
 	tsort1=clock();
-	float sort1Time ((float)tsort1-(float)topt);
+	float sort1Time ((float)tsort1-(float)trotdist);
 	cout << "\t\tTiming: " << sort1Time/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
@@ -396,18 +447,6 @@ int main (int argc, char *argv[]) {
 
 
 
-	//compare function for vectors of doubles
-	auto compare_vector_double = [&] (vector<double> a, vector<double> b) {
-		assert (a.size() == b.size());
-		double eps = 1e-5;
-		vector<double> diff;
-		for (vector<double>::size_type i = 0; i < a.size(); i++) {
-			diff.push_back(abs(a[i]-b[i]));
-		}
-		auto max = max_element (begin(diff), end(diff));
-		if (*max < eps) return true;
-		return false;
-	};
 
 
 	//sort all minimum structures into vector< vector <structure> > according to distance vector
@@ -428,23 +467,23 @@ int main (int argc, char *argv[]) {
 			eqClasses_dist.push_back(newEqClass);
 		}
 	}
-	ofstream similarStructures;
-	similarStructures.open("similar");
-	for (vector< vector<structure> >::size_type i = 0; i < eqClasses_dist.size(); i++) {
-		if (eqClasses_dist[i].size() > 1) {
-			for (vector<structure>::size_type j = 0; j < eqClasses_dist[i].size(); j++) {
-				xyzout (eqClasses_dist[i][j],"eq" + to_string(i) + "N" + to_string(j) + ".xyz");
-				vector<coord3d> currentCoord = eqClasses_dist[i][j].getCoordinates();
-				vector<double> currentInertia = eqClasses_dist[i][j].getMomentOfInertia();
-				vector<double> currentInterPartDist = eqClasses_dist[i][j].getInterPartDist();
-				for (vector<coord3d>::size_type k = 0; k < currentCoord.size(); k++) {
-					similarStructures << currentCoord[k] << endl;
-				}
-				similarStructures << endl << currentInertia << endl << currentInterPartDist << endl << endl;
-			}	
-		}
-	}
-	similarStructures.close();
+	//ofstream similarStructures;
+	//similarStructures.open("similar");
+	//for (vector< vector<structure> >::size_type i = 0; i < eqClasses_dist.size(); i++) {
+	//	if (eqClasses_dist[i].size() > 1) {
+	//		for (vector<structure>::size_type j = 0; j < eqClasses_dist[i].size(); j++) {
+	//			xyzout (eqClasses_dist[i][j],"eq" + to_string(i) + "N" + to_string(j) + ".xyz");
+	//			vector<coord3d> currentCoord = eqClasses_dist[i][j].getCoordinates();
+	//			vector<double> currentInertia = eqClasses_dist[i][j].getMomentOfInertia();
+	//			vector<double> currentInterPartDist = eqClasses_dist[i][j].getInterPartDist();
+	//			for (vector<coord3d>::size_type k = 0; k < currentCoord.size(); k++) {
+	//				similarStructures << currentCoord[k] << endl;
+	//			}
+	//			similarStructures << endl << currentInertia << endl << currentInterPartDist << endl << endl;
+	//		}	
+	//	}
+	//}
+	//similarStructures.close();
 
 
 	cout << "\t+ Particle distance analysis" << endl;
