@@ -2,6 +2,7 @@
 #include "lina.h"
 
 using namespace std;
+using namespace boost;
 
 coord3d structure::centreOfMass () {
 	double totalMass = nAtoms(); 
@@ -134,6 +135,27 @@ bool structure::isMinimum () {
 	return false;
 }
 
+
+structure::undirectedGraph structure::createGraph (vector<double> &p) {
+	vector<coord3d> currentCoord = this->getCoordinates();
+	typedef pair<int, int> edge;
+	vector<edge> edgeVec;
+	for (vector<coord3d>::size_type i = 0; i < currentCoord.size(); i++) {
+		for (vector<coord3d>::size_type j = i + 1; j < currentCoord.size(); j++) {
+			double diff = fabs(coord3d::dist (currentCoord[i], currentCoord[j]) - p[1]);
+			if (diff < 0.05) edgeVec.push_back(edge(i,j));
+		}
+	}
+
+	undirectedGraph g (edgeVec.begin(), edgeVec.end(), this->nAtoms());
+
+	//cout << num_edges(g) << " " << num_vertices(g) << endl;
+
+	return g;
+}
+
+
+
 vector< vector<int> > structure::createAdjMatrix (vector<double> &p) {
 	vector< vector<int> > adjMatrix;
 	vector<coord3d> currentCoord = this->getCoordinates();
@@ -143,7 +165,7 @@ vector< vector<int> > structure::createAdjMatrix (vector<double> &p) {
 			if (j == k) currentRow.push_back(1);
 			else {
 				double diff = fabs(coord3d::dist (currentCoord[j], currentCoord[k]) - p[1]);
-				if (diff < 0.1) currentRow.push_back(1);
+				if (diff < 0.05) currentRow.push_back(1);
 				else currentRow.push_back(0);
 			}
 		}

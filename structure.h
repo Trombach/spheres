@@ -1,6 +1,8 @@
 #ifndef STRUCTURE
 #define STRUCTURE
 
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
 #include "geometry.h"
 
 class structure {    
@@ -28,6 +30,9 @@ public:
 		structureAdjMatrix_eigenvalues = {};
 	};
 	structure(int number, double energy, std::vector<coord3d> coordinates, std::vector<double> momentOfInertia, std::vector<double> hessian) { structureNumber = number; structureEnergy = energy; structureCoordinates = coordinates; structureMomentOfInertia = momentOfInertia; structureHessian = hessian;}
+
+	
+	typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> undirectedGraph;
 
 	int getNumber() const { return structureNumber; }
 	double getEnergy() const { return structureEnergy; }
@@ -84,6 +89,7 @@ public:
 
 
 	std::vector< std::vector<int> > createAdjMatrix (std::vector<double> &p);
+	undirectedGraph createGraph (std::vector<double> &p);
 	std::vector<int> createBondVector ();
 	std::vector<double> createAdjMatrix_egenvalues ();
 

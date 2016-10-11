@@ -8,6 +8,7 @@
 #include <map>
 #include <functional>
 #include <cassert>
+#include <boost/graph/isomorphism.hpp>
 #include "structure.h"
 #include "iop.h"
 #include "lina.h"
@@ -162,6 +163,7 @@ int main (int argc, char *argv[]) {
 		//calculate adj matrix
 		optKS[i].setAdjMatrix(optKS[i].createAdjMatrix(p));
 
+
 		//calculate bond vector from adj matrix
 		vector<int> bondVector = optKS[i].createBondVector();
 		sort(bondVector.begin(), bondVector.end());
@@ -190,8 +192,6 @@ int main (int argc, char *argv[]) {
 	topt=clock();
 	float optTime ((float)topt-(float)tstart);
 	cout << "\t\tTiming: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
-
-
 
 
 
@@ -285,8 +285,40 @@ int main (int argc, char *argv[]) {
 
 
 
+	vector< vector<structure> > eqClasses_graph;
+	eqClasses_graph.push_back(optKS0);
+	for (vector<structure>::size_type i = 1; i < optKS.size(); i++) {
+		bool matched(0);
+		structure::undirectedGraph g0 = optKS[i].createGraph(p);
+		for (vector<structure>::size_type j = 0; j < eqClasses_graph.size(); j++) {
+			structure::undirectedGraph g1 = optKS[j].createGraph(p);
+
+			typename boost::property_map<structure::undirectedGraph, boost::vertex_index_t>::type
+			v0_index_map = boost::get (boost::vertex_index, g0);
+			//v1_index_map = boost::get (boost::vertex_index, test1);
+
+			vector<boost::graph_traits<structure::undirectedGraph>::vertex_descriptor> f(num_vertices(g0));
+	
+			if (boost::isomorphism (g0, g1, boost::isomorphism_map (make_iterator_property_map(f.begin(), v0_index_map, f[0])))) {
+				eqClasses_graph[j].push_back(optKS[i]);
+				matched = 1;
+				break;
+			}
+		}
+		if (matched == 0) {
+			vector<structure> newEqClass;
+			newEqClass.push_back(optKS[i]);
+			eqClasses_graph.push_back(newEqClass);
+		}
+
+	}
 
 
+	cout << "\t+ Graph isomorphism" << endl;
+	cout << "\t\tEquality classes: " << eqClasses_graph.size() << endl;
+	clock_t tgraph=clock();
+	float graphTime ((float)tgraph-(float)trot);
+	cout << "\t\tTiming: " << graphTime/CLOCKS_PER_SEC << " s" << endl << endl;
 
 
 	//compare function for vectors of doubles
@@ -333,7 +365,7 @@ int main (int argc, char *argv[]) {
 	cout << "\t+ Comparison of coordinates and distance vector" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_coord_dist.size() << endl;
 	clock_t trotdist=clock();
-	float rotdistTime ((float)trotdist-(float)trot);
+	float rotdistTime ((float)trotdist-(float)tgraph);
 	cout << "\t\tTiming: " << rotdistTime/CLOCKS_PER_SEC << " s" << endl << endl;
 	
 
