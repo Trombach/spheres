@@ -161,6 +161,8 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 	switch (algo_switch) {
 		case 1:
 	        T = gsl_multimin_fdfminimizer_vector_bfgs2;
+		case 2:
+			T = gsl_multimin_fdfminimizer_conjugate_fr;
 			break;
 		default:
 			cerr << "Error, bad input of algorithm name!" << endl;
@@ -175,16 +177,21 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 	gsl_multimin_fdfminimizer_set (s, &min_function, x, stepSize, accuracy);
 
 	size_t i = 0;
+	min << "N " << "E" << endl;
 	do {
 		i++;
 		status = gsl_multimin_fdfminimizer_iterate (s);
 		
 		if (status) {
 			cerr << "Structure " << this->getNumber() << ": GSL error:\n\t" << status << ": " << gsl_strerror(status) << endl;
-			break;
 		}
-        
+
 		status = gsl_multimin_test_gradient (s->gradient, absoluteTolerance);
+		
+		double min_grad(0), max_grad(0);
+		gsl_vector_minmax(s->gradient, &min_grad, &max_grad);
+		min.precision(15);
+		min << i << " " << scientific << s->f << " " << min_grad << " " << max_grad << endl;
 
 		if (status == GSL_SUCCESS) {
 			min << "Minimum found at:\n" << endl;

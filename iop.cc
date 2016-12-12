@@ -207,6 +207,9 @@ int readsettings (vector<double> &opt, vector<double> &p, vector<int> &switches,
 		if (algo == "BFGS") {
 			algo_switch = 1;
 		}
+		if (algo == "CG") {
+			algo_switch = 2;
+		}
 		cout << "\tAlgo: " << algo << endl;
 	}
 	else {
