@@ -119,7 +119,7 @@ const column_vector LJGradient_dlib (const column_vector &v, void *params) {
 //initialize gsl minimizer function
 //
 structure structure::optimize (ostream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
-	structure newGeometry(*this);
+	structure newGeometry;
 	size_t nsteps = static_cast<size_t>(opt[3]);
 
 
@@ -165,11 +165,11 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 			//call optimizer
 			try {
 				dlib::find_min(dlib::cg_search_strategy(), 
-					dlib::gradient_norm_stop_strategy(absoluteTolerance, nsteps).be_verbose(), 
+					dlib::objective_delta_stop_strategy(absoluteTolerance, nsteps).be_verbose(), 
 					f_params, df_params, x, -(this->nAtoms()) * 1000);
 			}
 			catch (std::exception &e) {
-				cerr << e.what() << endl;
+				cerr << "Structure " << this->getNumber() << ": " << e.what() << endl;
 			}
 
 			//reset cout
@@ -180,15 +180,17 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 			cerr << "Error, bad input of algorithm name!" << endl;
 			return newGeometry;
 	}
-    
-	for (long i = 0; i < x.size(); i++) {
+	min << "Stationary point at:" << endl; 
+	for (long i = 0; i < x.size() / 3; i++) {
 		coord3d sphere (x(3 * i), x(3 * i + 1), x(3 * i + 2)); 
+		min << sphere << endl;
 		newGeometry.push_back(sphere);
 	}
     
     min << "-----------------------------------------------" << endl;
     min << "LJ Energy is: " << f_params(x) << endl;
 	newGeometry.setEnergy(f_params(x));
+	newGeometry.setNumber(this->getNumber());
 
 
     return newGeometry;

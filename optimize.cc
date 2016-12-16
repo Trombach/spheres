@@ -134,6 +134,7 @@ int main (int argc, char *argv[]) {
         threadKS = allKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
 		threadKS.setNumber( allKS[i].getNumber() );
 
+
 		hessian = threadKS.hessian(p);
 		eigenValues = diag(hessian);
 		threadKS.setHessian (eigenValues);
@@ -346,6 +347,7 @@ int main (int argc, char *argv[]) {
 	simpleout(reoptKS, out);
 
 	ofstream coord;
+	coord.precision(14);
 	coord.open("coord");
 	coord << out.rdbuf();
 	coord.close();

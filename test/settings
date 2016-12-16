@@ -10,7 +10,7 @@ potential: {
 };
 opt: {
     name = "CG";
-    dforce = 1e-7;
+    dforce = 1e-12;
     stepsize = 0.05;
     nsteps = 1500;
 };
