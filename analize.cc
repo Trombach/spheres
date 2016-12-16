@@ -12,6 +12,7 @@
 #include "structure.h"
 #include "iop.h"
 #include "lina.h"
+#include "timer.h"
 
 
 using namespace std; 
@@ -36,9 +37,7 @@ typedef map <pair < double, vector<double> >, unsigned int, function<bool( pair 
 //MAIN FUNCTION BEGINS HERE
 
 int main (int argc, char *argv[]) {
-	clock_t tstart, tend, topt, tsort1, tsort2, tsort3, tsort4;
-	tstart=clock();
-
+	timer T;
 
 
 
@@ -189,9 +188,7 @@ int main (int argc, char *argv[]) {
 
 
 	cout << "\t\t#non-minimum structures: " << notMinimumKS.size() << endl;
-	topt=clock();
-	float optTime ((float)topt-(float)tstart);
-	cout << "\t\tTiming: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
 
 
@@ -278,9 +275,7 @@ int main (int argc, char *argv[]) {
 
 	cout << "\t+ Comparison of coordinates" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_coord.size() << endl;
-	clock_t trot=clock();
-	float rotTime ((float)trot-(float)topt);
-	cout << "\t\tTiming: " << rotTime/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
 
 
@@ -316,9 +311,7 @@ int main (int argc, char *argv[]) {
 
 	cout << "\t+ Graph isomorphism" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_graph.size() << endl;
-	clock_t tgraph=clock();
-	float graphTime ((float)tgraph-(float)trot);
-	cout << "\t\tTiming: " << graphTime/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
 
 	//compare function for vectors of doubles
@@ -364,9 +357,7 @@ int main (int argc, char *argv[]) {
 
 	cout << "\t+ Comparison of coordinates and distance vector" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_coord_dist.size() << endl;
-	clock_t trotdist=clock();
-	float rotdistTime ((float)trotdist-(float)tgraph);
-	cout << "\t\tTiming: " << rotdistTime/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 	
 
 
@@ -467,9 +458,7 @@ int main (int argc, char *argv[]) {
 	
 	cout << "\t+ Energy and moment of inertia analysis:" << endl;
 	cout << "\t\tUnique structures: " << energyStat.size() << endl;
-	tsort1=clock();
-	float sort1Time ((float)tsort1-(float)trotdist);
-	cout << "\t\tTiming: " << sort1Time/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
 
 
@@ -520,9 +509,7 @@ int main (int argc, char *argv[]) {
 
 	cout << "\t+ Particle distance analysis" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_dist.size() << endl;
-	tsort2=clock();
-	float sort2Time ((float)tsort2-(float)tsort1);
-	cout << "\t\tTiming: " << sort2Time/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
 
 
@@ -553,9 +540,7 @@ int main (int argc, char *argv[]) {
 
 	cout << "\t+ Bond number analysis" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_adjMat2.size() << endl;
-	tsort3=clock();
-	float sort3Time ((float)tsort3-(float)tsort2);
-	cout << "\t\tTiming: " << sort3Time/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
 	
 
@@ -582,9 +567,7 @@ int main (int argc, char *argv[]) {
 
 	cout << "\t+ Adjacency matrix eigen analysis" << endl;
 	cout << "\t\tEquality classes: " << eqClasses_adjMatEv.size() << endl;
-	tsort4=clock();
-	float sort4Time ((float)tsort4-(float)tsort3);
-	cout << "\t\tTiming: " << sort4Time/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
 
 
@@ -625,9 +608,7 @@ int main (int argc, char *argv[]) {
 
 	
 	
-	tend=clock();
-	float totalTime ((float)tend-(float)tstart);
-	cout << "\t+ Total rumtime: " << totalTime/CLOCKS_PER_SEC << " s" << endl;
+	cout << "\t+ Total rumtime: " << T.total_timing() << " s" << endl;
     return 0; 
 
     

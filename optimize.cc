@@ -10,6 +10,7 @@
 #include "structure.h"
 #include "iop.h"
 #include "lina.h"
+#include "timer.h"
 
 
 using namespace std; 
@@ -31,9 +32,7 @@ container_output(vector);
 //MAIN FUNCTION BEGINS HERE
 
 int main (int argc, char *argv[]) {
-	clock_t tstart, tend, topt;
-	tstart=clock();
-
+	timer T;
 
 
 
@@ -330,9 +329,7 @@ int main (int argc, char *argv[]) {
 	}
 	remin.close();
 
-	topt=clock();
-	float optTime ((float)topt-(float)tstart);
-	cout << "\tTime for structure optimization: " << optTime/CLOCKS_PER_SEC << " s" << endl << endl;
+	cout << "\tTime for structure optimization: " << T.timing() << " s" << endl << endl;
 
 
 
@@ -353,9 +350,7 @@ int main (int argc, char *argv[]) {
 	coord.close();
 	
 	
-	tend=clock();
-	float totalTime ((float)tend-(float)tstart);
-	cout << "\tTotal rumtime: " << totalTime/CLOCKS_PER_SEC << " s" << endl;
+	cout << "\tTotal rumtime: " << T.total_timing() << " s" << endl;
     return 0; 
 
     
