@@ -119,6 +119,7 @@ int main (int argc, char *argv[]) {
 	vector<int> notMinimum;
 	vector<structure> notMinimumKS;
 	min.open ("opt");
+	min.precision(14);
 
 	#pragma omp parallel for
 	for (vector<structure>::size_type i = 0; i < allKS.size(); i++) {
@@ -159,7 +160,7 @@ int main (int argc, char *argv[]) {
 			min << "***************End of Opt***************" << endl;
 		}
 	}
-	
+
 
 
 

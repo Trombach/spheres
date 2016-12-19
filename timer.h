@@ -3,6 +3,8 @@
 
 #include <ctime>
 
+
+//creates object that can keep track of time in program
 class timer {
 
 	private:

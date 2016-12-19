@@ -121,6 +121,8 @@ const column_vector LJGradient_dlib (const column_vector &v, void *params) {
 structure structure::optimize (ostream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
 	structure newGeometry;
 	size_t nsteps = static_cast<size_t>(opt[3]);
+	size_t maxsteps = static_cast<size_t>(opt[3]);
+
 
 
 	double absoluteTolerance = opt[1];
@@ -155,25 +157,15 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 			cerr << "Not yet implemented" << endl;
 			return newGeometry;
 		case 2: {
-			cout.precision(14);
-			min.precision(14);	
-
-			//redirect cout
-			streambuf *coutbuf = cout.rdbuf();
-			cout.rdbuf(min.rdbuf());	
-
 			//call optimizer
 			try {
 				dlib::find_min(dlib::cg_search_strategy(), 
-					dlib::objective_delta_stop_strategy(absoluteTolerance, nsteps).be_verbose(), 
+					dlib::objective_delta_stop_strategy(absoluteTolerance, nsteps), 
 					f_params, df_params, x, -(this->nAtoms()) * 1000);
 			}
 			catch (std::exception &e) {
 				cerr << "Structure " << this->getNumber() << ": " << e.what() << endl;
 			}
-
-			//reset cout
-			cout.rdbuf(coutbuf);
 			break;
 		}
 		default:
@@ -188,7 +180,12 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 	}
     
     min << "-----------------------------------------------" << endl;
-    min << "LJ Energy is: " << f_params(x) << endl;
+    min << "E: " << f_params(x) << endl;
+	min << "g norm after " << nsteps << " steps: " << scientific << dlib::length (df_params(x)) << endl;
+	if (nsteps == maxsteps) {
+		min << "Warning, maxsteps reached!!!" << endl;
+	}
+	
 	newGeometry.setEnergy(f_params(x));
 	newGeometry.setNumber(this->getNumber());
 

@@ -33,8 +33,9 @@ opt
 reopt
 optimize
 energies
-Makefile
+Makefile*
 energystats
 coord
 analize
 core
+.dep

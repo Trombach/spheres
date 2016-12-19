@@ -99,9 +99,6 @@ public:
 	std::vector<coord3d> c2 (int a, int b);
 	std::vector<coord3d> inv ();
 
-		
-			
-
 };
 
 #endif
