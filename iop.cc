@@ -34,6 +34,7 @@ void xyzout (structure &outputStructure, const string &name = "structure.xyz") {
 
 
 void simpleout (vector<structure> &outputStructures, stringstream &output) {
+	output.precision(14);
 	for (vector<structure>::size_type i=0; i < outputStructures.size(); i++) {
 		for (int j=0; j < outputStructures[i].nAtoms(); j++) {
 			output << outputStructures[i][j][0] << " " << outputStructures[i][j][1] << " " << outputStructures[i][j][2] << endl;

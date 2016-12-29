@@ -112,18 +112,12 @@ const column_vector LJGradient_dlib (const column_vector &v, void *params) {
 ////////////////////////////////////////////////////////////
 
 
-
-
-
 //
 //initialize gsl minimizer function
 //
 structure structure::optimize (ostream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
 	structure newGeometry;
 	size_t nsteps = static_cast<size_t>(opt[3]);
-	size_t maxsteps = static_cast<size_t>(opt[3]);
-
-
 
 	double absoluteTolerance = opt[1];
     
@@ -172,6 +166,7 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 			cerr << "Error, bad input of algorithm name!" << endl;
 			return newGeometry;
 	}
+
 	min << "Stationary point at:" << endl; 
 	for (long i = 0; i < x.size() / 3; i++) {
 		coord3d sphere (x(3 * i), x(3 * i + 1), x(3 * i + 2)); 
@@ -180,15 +175,16 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 	}
     
     min << "-----------------------------------------------" << endl;
+	min.precision(14);
     min << "E: " << f_params(x) << endl;
-	min << "g norm after " << nsteps << " steps: " << scientific << dlib::length (df_params(x)) << endl;
-	if (nsteps == maxsteps) {
-		min << "Warning, maxsteps reached!!!" << endl;
-	}
+	min << "g: " << scientific << dlib::length (df_params(x)) << endl;
+	//min << "n: " << nsteps << endl;
+	//if (nsteps == maxsteps) {
+	//	min << "Warning, maxsteps reached!!!" << endl;
+	//}
 	
 	newGeometry.setEnergy(f_params(x));
 	newGeometry.setNumber(this->getNumber());
-
 
     return newGeometry;
 }
