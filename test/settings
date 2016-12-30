@@ -9,7 +9,7 @@ potential: {
 	exp2 = 6.0;
 };
 opt: {
-    name = "CG";
+    name = "BFGS";
     dforce = 1e-16;
     stepsize = 0.05;
     nsteps = 1500;

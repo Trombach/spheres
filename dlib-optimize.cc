@@ -114,7 +114,7 @@ const column_vector LJGradient_dlib (const column_vector &v, void *params) {
 
 
 //
-//initialize gsl minimizer function
+//initialize dlib minimizer function
 //
 structure structure::optimize (ostream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
 	structure newGeometry;
@@ -152,8 +152,15 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 
 	switch (algo_switch) {
 		case 1:
-			cerr << "Not yet implemented" << endl;
-			return newGeometry;
+			try {
+				dlib::find_min(dlib::bfgs_search_strategy(), 
+					dlib::stop_strategy(absoluteTolerance, nsteps).be_verbose(min), 
+					f_params, df_params, x, -(this->nAtoms()) * 1000);
+			}
+			catch (std::exception &e) {
+				cerr << "Structure " << this->getNumber() << ": " << e.what() << endl;
+			}
+			break;
 		case 2: {
 			//call optimizer
 			try {
