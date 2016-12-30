@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <functional>
 #include "structure.h"
+#include "stop_strategy.h"
 
 
 using namespace std;
@@ -119,6 +120,8 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 	structure newGeometry;
 	size_t nsteps = static_cast<size_t>(opt[3]);
 
+	min.precision(16);
+
 	double absoluteTolerance = opt[1];
     
 	column_vector x((this->nAtoms()) * 3);
@@ -145,6 +148,7 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 		}
 	}
 
+	min << "    E                        g" << endl;
 
 	switch (algo_switch) {
 		case 1:
@@ -154,7 +158,7 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 			//call optimizer
 			try {
 				dlib::find_min(dlib::cg_search_strategy(), 
-					dlib::objective_delta_stop_strategy(absoluteTolerance, nsteps), 
+					dlib::stop_strategy(absoluteTolerance, nsteps).be_verbose(min), 
 					f_params, df_params, x, -(this->nAtoms()) * 1000);
 			}
 			catch (std::exception &e) {
@@ -167,15 +171,12 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 			return newGeometry;
 	}
 
-	min << "Stationary point at:" << endl; 
 	for (long i = 0; i < x.size() / 3; i++) {
 		coord3d sphere (x(3 * i), x(3 * i + 1), x(3 * i + 2)); 
-		min << sphere << endl;
 		newGeometry.push_back(sphere);
 	}
     
     min << "-----------------------------------------------" << endl;
-	min.precision(14);
     min << "E: " << f_params(x) << endl;
 	min << "g: " << scientific << dlib::length (df_params(x)) << endl;
 	//min << "n: " << nsteps << endl;

@@ -129,6 +129,8 @@ int main (int argc, char *argv[]) {
 		structure threadKS;
 		stringstream threadstream;
 
+		threadstream.precision(14);
+
 		threadstream << "Optimization for structure no " << allKS[i].getNumber() << endl;
 
         threadKS = allKS[i].optimize(threadstream, algo_switch, potential_switch, p, opt);
@@ -140,7 +142,7 @@ int main (int argc, char *argv[]) {
 		threadKS.setHessian (eigenValues);
 
 
-		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
+		//threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 
 
 
