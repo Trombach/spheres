@@ -113,7 +113,8 @@ matrix3d m3d_diagv (matrix3d &matrix) {
 		eval_evec.push_back(make_pair(eval(i), eigv));
 	}
 	
-	auto pairCompare = [&] (const pair<double, vector<double> > a, const pair<double, vector<double> > b) {
+	auto pairCompare = [&] (const pair<double, vector<double> > a, const pair<double, vector<double> > b) 
+	{
 				return a.first < b.first;
 	};
 	sort (eval_evec.begin(), eval_evec.end(), pairCompare); 

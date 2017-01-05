@@ -37,5 +37,6 @@ Makefile*
 energystats
 coord
 analize
+comp
 core
 .dep

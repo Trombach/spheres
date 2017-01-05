@@ -32,8 +32,8 @@ container_output(vector);
 //MAIN FUNCTION BEGINS HERE
 
 int main (int argc, char *argv[]) {
-	timer T;
 
+	timer T;
 
 
 	cout << endl;
@@ -331,7 +331,6 @@ int main (int argc, char *argv[]) {
 		remin << threadstream.rdbuf() << endl;	
 	}
 	remin.close();
-
 	cout << "\tTime for structure optimization: " << T.timing() << " s" << endl << endl;
 
 
