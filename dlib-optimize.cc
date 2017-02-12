@@ -117,7 +117,6 @@ const column_vector LJGradient_dlib (const column_vector &v, void *params) {
 //initialize dlib minimizer function
 //
 structure structure::optimize (ostream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
-	structure newGeometry;
 	size_t nsteps = static_cast<size_t>(opt[3]);
 
 	min.precision(16);
@@ -138,6 +137,7 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 			break;
 		default:
 			cerr << "Error, probably bad input of potential name!" << endl;
+	        structure newGeometry;
 			return newGeometry;
     }
 
@@ -175,14 +175,18 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 		}
 		default:
 			cerr << "Error, bad input of algorithm name!" << endl;
+	        structure newGeometry;
 			return newGeometry;
 	}
-
+    
+    vector<coord3d> coordinates;
 	for (long i = 0; i < x.size() / 3; i++) {
 		coord3d sphere (x(3 * i), x(3 * i + 1), x(3 * i + 2)); 
-		newGeometry.push_back(sphere);
+		coordinates.push_back(sphere);
 	}
     
+	structure newGeometry(this->getNumber(), coordinates);
+
     min << "-----------------------------------------------" << endl;
     min << "E: " << f_params(x) << endl;
 	min << "g: " << scientific << dlib::length (df_params(x)) << endl;
@@ -192,7 +196,6 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 	//}
 	
 	newGeometry.setEnergy(f_params(x));
-	newGeometry.setNumber(this->getNumber());
 
     return newGeometry;
 }

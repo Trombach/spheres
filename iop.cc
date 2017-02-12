@@ -74,7 +74,6 @@ vector<structure> readallstruct (const std::string& fileName) {
 	//double while loop, inner loop goes over all coordinates of one structure, outer loop goes over all 
 	//structures till eof
 	while (true) {
-	    structure kissingSphere; //kissingSphere refers to 1 cluster of kissing Spheres
 		vector<coord3d> coordinates;
 	    while (true) {
 	        getline(infile,line);
@@ -86,8 +85,7 @@ vector<structure> readallstruct (const std::string& fileName) {
 				coordinates.push_back(sphere);
 	        }
 	    }
-		kissingSphere.setCoordinates(coordinates);
-		kissingSphere.setNumber(number);
+	    structure kissingSphere(number, coordinates); //kissingSphere refers to 1 cluster of kissing Spheres
 		if (infile.eof()) break; //does last line has to be blank? break works for files with blank line at 
 		                         //the end
 		else {

@@ -135,17 +135,6 @@ int main (int argc, char *argv[]) {
 		threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 
 
-		//Inertia
-		coord3d CoM = optKS[i].centreOfMass();
-		optKS[i].shiftToCoM(CoM);
-		vector< vector<double> > inertiaTensor = optKS[i].momentOfInertia();
-		vector<double> inertia = diag(inertiaTensor);
-		optKS[i].setMomentOfInertia(inertia);
-
-
-		//move to principal axis system
-		matrix3d principalAxis = optKS[i].m3d_principalAxis();
-		optKS[i].rotateToPrincipalAxis (principalAxis);
 
 		//inter-particle distance
 		vector<double> interPartDist;

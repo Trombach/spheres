@@ -236,12 +236,6 @@ int main (int argc, char *argv[]) {
 			newKS.setNumber(notMinimumKS[i].getNumber());
 
 
-			//Inertia
-			coord3d CoM = newKS.centreOfMass();
-			newKS.shiftToCoM(CoM);
-			vector< vector<double> > inertiaTensor = newKS.momentOfInertia();
-			vector<double> inertia = diag(inertiaTensor);
-			newKS.setMomentOfInertia(inertia);
 
 		}
 		while (reopts < 6 && !newKS.isMinimum());
@@ -312,12 +306,6 @@ int main (int argc, char *argv[]) {
 			newKS.setNumber(notMinimumKS[i].getNumber());
 
 
-			//Inertia
-			coord3d CoM = newKS.centreOfMass();
-			newKS.shiftToCoM(CoM);
-			vector< vector<double> > inertiaTensor = newKS.momentOfInertia();
-			vector<double> inertia = diag(inertiaTensor);
-			newKS.setMomentOfInertia(inertia);
 
 		}
 		while (reopts < 6 && !newKS.isMinimum());

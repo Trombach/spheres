@@ -3,7 +3,9 @@
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <vector>
 #include "geometry.h"
+#include "lina.h"
 
 class structure {    
     
@@ -19,17 +21,32 @@ private:
 	std::vector<double> structureAdjMatrix_eigenvalues;
 
 public:   
-	structure() {
-		structureEnergy = 0;
-		structureNumber = 0;
-		structureCoordinates = {};
-		structureMomentOfInertia = {0,0,0};
-		structureHessian = {0};
-		structureInterPartDist = {};
-		structureBondVector = {};
-		structureAdjMatrix_eigenvalues = {};
-	};
-	structure(int number, double energy, std::vector<coord3d> coordinates, std::vector<double> momentOfInertia, std::vector<double> hessian) { structureNumber = number; structureEnergy = energy; structureCoordinates = coordinates; structureMomentOfInertia = momentOfInertia; structureHessian = hessian;}
+	structure() :   structureEnergy(0), 
+                    structureNumber(0), 
+                    structureCoordinates(), 
+                    structureMomentOfInertia {0,0,0},
+                    structureHessian(0),
+                    structureInterPartDist(),
+                    structureBondVector(),
+                    structureAdjMatrix_eigenvalues()
+    {}
+	
+	structure (int number, std::vector<coord3d> coordinates) :  structureNumber(number), 
+                                                                structureCoordinates(coordinates), 
+                                                                structureHessian(0),
+                                                                structureInterPartDist(),
+                                                                structureBondVector(),
+                                                                structureAdjMatrix_eigenvalues()
+    { 
+        coord3d CoM = this->centreOfMass();
+        this->shiftToCoM(CoM);
+
+        std::vector< std::vector<double> > inertiaTensor = this->momentOfInertia();
+        structureMomentOfInertia = diag(inertiaTensor);
+
+	    matrix3d axis = this->m3d_principalAxis ();
+	    this->rotateToPrincipalAxis(axis);
+    }
 
 	
 	typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> undirectedGraph;
@@ -58,7 +75,8 @@ public:
 
 	void push_back(coord3d spheres) { structureCoordinates.push_back(spheres); }
 
-	structure &operator*= (const double &y) {
+	structure &operator*= (const double &y) 
+    {
 		for (int i = 0; i < this->nAtoms(); i++) { (*this)[i] *= y; }
 		return *this;
 	}
