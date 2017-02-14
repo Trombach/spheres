@@ -4,6 +4,9 @@
 #include <sstream>
 #include <libconfig.h++>
 #include "iop.h"
+#include "parameter.h"
+
+using namespace std;
 
 #define container_output(container) \
 template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
@@ -99,7 +102,7 @@ vector<structure> readallstruct (const std::string& fileName) {
 }
 
 //function to read settings file
-int readsettings (vector<double> &opt, vector<double> &p, vector<int> &switches, double &scalingFactor) {
+int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &switches, double &scalingFactor) {
 
 	libconfig::Config cfg;
 	try {
@@ -168,7 +171,7 @@ int readsettings (vector<double> &opt, vector<double> &p, vector<int> &switches,
 		double exp1(12), exp2(6), rm, epsilon;
 		if (cfg.lookupValue("potential.epsilon", epsilon)) {
 			p.push_back(epsilon);
-			cout << "\t\tEpsilon: " << p[0] << endl;
+			cout << "\t\tEpsilon: " << epsilon << endl;
 		}
 		else {
 			cout << "\tNo 'epsilon' in configuration file." << endl;
@@ -176,7 +179,7 @@ int readsettings (vector<double> &opt, vector<double> &p, vector<int> &switches,
 		}
 		if (cfg.lookupValue("potential.rm", rm)) {
 			p.push_back(rm);
-			cout << "\t\tRm: " << p[1] << endl;
+			cout << "\t\tRm: " << rm << endl;
 		}
 		else {
 			cout << "\tNo 'rm' in configuration file." << endl;
@@ -243,15 +246,15 @@ int readsettings (vector<double> &opt, vector<double> &p, vector<int> &switches,
 	else {
 		cout << "\t\tNsteps: " << nsteps << endl;
 	}
-    opt.push_back(accuracy); //opt[0] should not be touched, not very important for opt
-	opt.push_back(dforce);   //opt[1] for some reason can't be set below 10e-5, don't know why, GSL error
-	opt.push_back(stepsize); //opt[2]
-	opt.push_back(nsteps);   //opt[3]
+    opt.set("accuracy", accuracy); //opt[0] should not be touched, not very important for opt
+	opt.set("convergence", dforce);   //opt[1] 
+	opt.set("stepsize", stepsize); //opt[2]
+	opt.set("nsteps", nsteps);   //opt[3]
 
-	switches.push_back(potential_switch); 
-	switches.push_back(algo_switch);
-	switches.push_back(scaling_switch);
-	switches.push_back(output_switch);
+	switches.set("potential", potential_switch); 
+	switches.set("algo", algo_switch);
+	switches.set("scaling", scaling_switch);
+	switches.set("output", output_switch);
 
 	cout << endl;
 

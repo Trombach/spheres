@@ -6,6 +6,7 @@
 #include <vector>
 #include "geometry.h"
 #include "lina.h"
+#include "parameter.h"
 
 class structure {    
     
@@ -30,7 +31,8 @@ public:
                     structureBondVector(),
                     structureAdjMatrix_eigenvalues()
     {}
-	
+
+/* constructor calculates several properties based on coordinates on creation */    
 	structure (int number, std::vector<coord3d> coordinates) :  structureNumber(number), 
                                                                 structureCoordinates(coordinates), 
                                                                 structureHessian(0),
@@ -90,7 +92,7 @@ public:
 	//function to sum over all gradients to get gradient for each sphere
 	std::vector<coord3d> sumOverAllGradients (const std::vector<double> &p);
 	//initialize gsl minimizer function
-	structure optimize (std::ostream &min, const int &algo_switch, const int &potential_switch, const std::vector<double> parameters, const std::vector<double> opt);
+    structure optimize (std::ostream &min, parameter<int> switches, std::vector<double> parameters, parameter<double> opt);
 
 	std::vector< std::vector<double> > hessian (const std::vector<double> &p);
 

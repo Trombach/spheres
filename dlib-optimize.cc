@@ -3,6 +3,7 @@
 #include <functional>
 #include "structure.h"
 #include "stop_strategy.h"
+#include "parameter.h"
 
 
 using namespace std;
@@ -116,12 +117,15 @@ const column_vector LJGradient_dlib (const column_vector &v, void *params) {
 //
 //initialize dlib minimizer function
 //
-structure structure::optimize (ostream &min, const int &algo_switch, const int &potential_switch, vector<double> parameters, const vector<double> opt) {
-	size_t nsteps = static_cast<size_t>(opt[3]);
+structure structure::optimize (ostream &min, parameter<int> switches, vector<double> parameters, parameter<double> opt) {
+	const size_t nsteps = static_cast<const size_t>(opt.get("nsteps"));
 
 	min.precision(16);
 
-	double absoluteTolerance = opt[1];
+	const double stop_crit = opt.get("convergence");
+
+    const int potential_switch = switches.get("potential");
+    const int algo_switch = switches.get("algo");
     
 	column_vector x((this->nAtoms()) * 3);
 	void *params = static_cast<void*>(&parameters);
@@ -154,7 +158,7 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 		case 1:
 			try {
 				dlib::find_min(dlib::bfgs_search_strategy(), 
-					dlib::stop_strategy(absoluteTolerance, nsteps).be_verbose(min), 
+					dlib::stop_strategy(stop_crit, nsteps).be_verbose(min), 
 					f_params, df_params, x, -(this->nAtoms()) * 1000);
 			}
 			catch (std::exception &e) {
@@ -165,7 +169,7 @@ structure structure::optimize (ostream &min, const int &algo_switch, const int &
 			//call optimizer
 			try {
 				dlib::find_min(dlib::cg_search_strategy(), 
-					dlib::stop_strategy(absoluteTolerance, nsteps).be_verbose(min), 
+					dlib::stop_strategy(stop_crit, nsteps).be_verbose(min), 
 					f_params, df_params, x, -(this->nAtoms()) * 1000);
 			}
 			catch (std::exception &e) {

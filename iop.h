@@ -4,15 +4,14 @@
 #include <string>
 #include <vector>
 #include "structure.h"
+#include "parameter.h"
 
-using namespace std;
 
-void xyzout (structure &outputStructure, const string &name);
-void simpleout (vector<structure> &outputStructures, stringstream &ouput);
+void xyzout (structure &outputStructure, const std::string &name);
+void simpleout (std::vector<structure> &outputStructures, std::stringstream &ouput);
 
-bool justempty(string str);
+bool justempty(std::string str);
 bool fexists (const std::string &fileName);
-vector<structure> readallstruct (const std::string& fileName);
-int readsettings (vector<double> &opt, vector<double> &p, vector<int> &switches, double &scalingFactor);
-
+std::vector<structure> readallstruct (const std::string& fileName);
+int readsettings (parameter<double> &opt, std::vector<double> &p, parameter<int> &switches, double &scalingFactor);
 #endif

@@ -13,6 +13,7 @@
 #include "iop.h"
 #include "lina.h"
 #include "timer.h"
+#include "parameter.h"
 
 
 using namespace std; 
@@ -77,12 +78,11 @@ int main (int argc, char *argv[]) {
 	}
 
 	vector<double> p;
-	vector<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize, 3 == nsteps
-	vector<int> switches; //vector of switches, 0 == potential, 1 == algo, 2 == scaling
+	parameter<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize, 3 == nsteps
+	parameter<int> switches; //vector of switches, 0 == potential, 1 == algo, 2 == scaling
 	double scalingFactor(1.0);
 
 	readsettings(opt, p, switches, scalingFactor);
-	int potential_switch(switches[0]), algo_switch(switches[1]), scaling_switch(switches[2]);
 	
 	
 	cout << endl;
@@ -99,6 +99,7 @@ int main (int argc, char *argv[]) {
 	cout << "\t\t#structures :" << optKS.size() << endl;
 	
 	//if scaling is found in settings file scale all coordinates accordingly
+    const int scaling_switch = switches.get("scaling");
 	switch (scaling_switch) {
 		case 1:
 			for (vector<structure>::size_type i = 0; i < optKS.size(); i++) {
