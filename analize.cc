@@ -137,16 +137,17 @@ int main (int argc, char *argv[]) {
 
 
 
-		//inter-particle distance
-		vector<double> interPartDist;
-		vector<coord3d> currentCoord=optKS[i].getCoordinates();
-		for (vector<coord3d>::size_type j=0; j<currentCoord.size(); j++) {
-			for (vector<coord3d>::size_type k=j+1; k<currentCoord.size(); k++) {
-				interPartDist.push_back(coord3d::dist(currentCoord[j], currentCoord[k]));	
-			}
-		}
-		sort(interPartDist.begin(), interPartDist.end());
-		optKS[i].setInterPartDist(interPartDist);
+		////inter-particle distance
+		//vector<double> interPartDist;
+		//vector<coord3d> currentCoord=optKS[i].getCoordinates();
+		//for (vector<coord3d>::size_type j=0; j<currentCoord.size(); j++) {
+		//	for (vector<coord3d>::size_type k=j+1; k<currentCoord.size(); k++) {
+		//		interPartDist.push_back(coord3d::dist(currentCoord[j], currentCoord[k]));	
+		//	}
+		//}
+		//sort(interPartDist.begin(), interPartDist.end());
+		//optKS[i].setInterPartDist(interPartDist);
+		optKS[i].propertyInterPartDist();
 
 
 		//calculate adj matrix

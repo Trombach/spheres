@@ -70,7 +70,7 @@ void structure::rotateToPrincipalAxis (matrix3d &principalAxis) {
 		newCoord.push_back (transMatrix * coord[i]);
 	}
 
-	structureCoordinates = newCoord;	
+	_coordinates = newCoord;	
 }	
 
 vector< vector<double> > structure::hessian (const vector<double> &p) {
@@ -219,28 +219,28 @@ bool structure::compareCoordinates (structure &y) const {
 //symmetry
 //sig mirror; i: 0=yz 1=xz, 2=xy
 vector<coord3d> structure::sig (int a) {
-	vector<coord3d> coord = structureCoordinates;
+	vector<coord3d> coord = _coordinates;
 	for (int i = 0; i < this->nAtoms(); i++) { 
-		coord[i][a] = - structureCoordinates[i][a];
+		coord[i][a] = - _coordinates[i][a];
 	}
 	return coord;
 }
 
 //c2 rotation; ab: 12=x, 02=y, 01=z
 vector<coord3d> structure::c2 (int a, int b) {
-	vector<coord3d> coord = structureCoordinates;
+	vector<coord3d> coord = _coordinates;
 	for (int i = 0; i < this->nAtoms(); i++) { 
-		coord[i][a] = -structureCoordinates[i][a];
-		coord[i][b] = -structureCoordinates[i][b];
+		coord[i][a] = -_coordinates[i][a];
+		coord[i][b] = -_coordinates[i][b];
 	}
 	return coord;
 }
 
 //inversion
 vector<coord3d> structure::inv () {
-	vector<coord3d> coord = structureCoordinates;
+	vector<coord3d> coord = _coordinates;
 	for (int i = 0; i < this->nAtoms(); i++) { 
-		coord[i] = - structureCoordinates[i];
+		coord[i] = - _coordinates[i];
 	}
 	return coord;
 }

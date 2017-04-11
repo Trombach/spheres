@@ -11,40 +11,40 @@
 class structure {    
     
 private:
-	double structureEnergy;
-	int structureNumber;
-	std::vector<coord3d> structureCoordinates;
-	std::vector<double> structureMomentOfInertia;
-	std::vector<double> structureHessian;
-	std::vector<double> structureInterPartDist;
-	std::vector< std::vector<int> > structureAdjMatrix;
-	std::vector<int> structureBondVector;
-	std::vector<double> structureAdjMatrix_eigenvalues;
+	double _energy;
+	int _number;
+	std::vector<coord3d> _coordinates;
+	std::vector<double> _momentOfInertia;
+	std::vector<double> _hessian;
+	std::vector<double> _interPartDist;
+	std::vector< std::vector<int> > _adjMatrix;
+	std::vector<int> _bondVector;
+	std::vector<double> _adjMatrix_eigenvalues;
 
 public:   
-	structure() :   structureEnergy(0), 
-                    structureNumber(0), 
-                    structureCoordinates(), 
-                    structureMomentOfInertia {0,0,0},
-                    structureHessian(0),
-                    structureInterPartDist(),
-                    structureBondVector(),
-                    structureAdjMatrix_eigenvalues()
+	structure() :   _energy(0), 
+                    _number(0), 
+                    _coordinates(), 
+                    _momentOfInertia {0,0,0},
+                    _hessian(0),
+                    _interPartDist(),
+                    _bondVector(),
+                    _adjMatrix_eigenvalues()
     {}
 
 /* constructor calculates several properties based on coordinates on creation */    
-	structure (int number, std::vector<coord3d> coordinates) :  structureNumber(number), 
-                                                                structureCoordinates(coordinates), 
-                                                                structureHessian(0),
-                                                                structureInterPartDist(),
-                                                                structureBondVector(),
-                                                                structureAdjMatrix_eigenvalues()
+	structure (int number, std::vector<coord3d> coordinates) :  _number(number), 
+                                                                _coordinates(coordinates), 
+                                                                _hessian(0),
+                                                                _interPartDist(),
+                                                                _bondVector(),
+                                                                _adjMatrix_eigenvalues()
     { 
         coord3d CoM = this->centreOfMass();
         this->shiftToCoM(CoM);
 
         std::vector< std::vector<double> > inertiaTensor = this->momentOfInertia();
-        structureMomentOfInertia = diag(inertiaTensor);
+        _momentOfInertia = diag(inertiaTensor);
 
 	    matrix3d axis = this->m3d_principalAxis ();
 	    this->rotateToPrincipalAxis(axis);
@@ -53,29 +53,42 @@ public:
 	
 	typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> undirectedGraph;
 
-	int getNumber() const { return structureNumber; }
-	double getEnergy() const { return structureEnergy; }
-	std::vector<coord3d> getCoordinates() const { return structureCoordinates; }
-	std::vector<double> getMomentOfInertia() const { return structureMomentOfInertia; }
-	std::vector<double> getHessian() const { return structureHessian; }
-	std::vector<double> getInterPartDist() const { return structureInterPartDist; }
-	std::vector< std::vector<int> > getAdjMatrix() const { return structureAdjMatrix; }
-	std::vector<int> getBondVector() const { return structureBondVector; }
-	std::vector<double> getAdjMatrix_eigenvalues() const { return structureAdjMatrix_eigenvalues; }
+	int getNumber() const { return _number; }
+	double getEnergy() const { return _energy; }
+	std::vector<coord3d> getCoordinates() const { return _coordinates; }
+	std::vector<double> getMomentOfInertia() const { return _momentOfInertia; }
+	std::vector<double> getHessian() const { return _hessian; }
+	std::vector<double> getInterPartDist() const { return _interPartDist; }
+	std::vector< std::vector<int> > getAdjMatrix() const { return _adjMatrix; }
+	std::vector<int> getBondVector() const { return _bondVector; }
+	std::vector<double> getAdjMatrix_eigenvalues() const { return _adjMatrix_eigenvalues; }
 
-	void setNumber (int number) { structureNumber = number; }
-	void setEnergy (double energy) { structureEnergy = energy; }
-	void setCoordinates (std::vector<coord3d> coordinates) { structureCoordinates = coordinates; }
-	void setMomentOfInertia (std::vector<double> inertiaEigenvalues) { structureMomentOfInertia = inertiaEigenvalues; }
-	void setHessian (std::vector<double> hessianEigenvalues) {structureHessian = hessianEigenvalues; }
-	void setInterPartDist (std::vector<double> distances) { structureInterPartDist = distances;}
-	void setAdjMatrix (std::vector< std::vector<int> > adjMatrix) { structureAdjMatrix = adjMatrix; }
-	void setBondVector (std::vector<int> bondVector) { structureBondVector = bondVector; }
-	void setAdjMatrix_eigenvalues (std::vector<double> eigenvalues) { structureAdjMatrix_eigenvalues = eigenvalues; }
+	void setNumber (int number) { _number = number; }
+	void setEnergy (double energy) { _energy = energy; }
+	void setCoordinates (std::vector<coord3d> coordinates) { _coordinates = coordinates; }
+	void setMomentOfInertia (std::vector<double> inertiaEigenvalues) { _momentOfInertia = inertiaEigenvalues; }
+	void setHessian (std::vector<double> hessianEigenvalues) {_hessian = hessianEigenvalues; }
+	void setInterPartDist (std::vector<double> distances) { _interPartDist = distances;}
+	void setAdjMatrix (std::vector< std::vector<int> > adjMatrix) { _adjMatrix = adjMatrix; }
+	void setBondVector (std::vector<int> bondVector) { _bondVector = bondVector; }
+	void setAdjMatrix_eigenvalues (std::vector<double> eigenvalues) { _adjMatrix_eigenvalues = eigenvalues; }
+
+    void propertyInterPartDist() 
+    {
+        for (std::vector<coord3d>::size_type i = 0; i < this->nAtoms(); i++)
+        {
+            for (std::vector<coord3d>::size_type j = i + 1; j < this->nAtoms(); j++)
+            {
+                _interPartDist.push_back(coord3d::dist(_coordinates[i], _coordinates[j]));
+            }
+        }
+        sort(_interPartDist.begin(), _interPartDist.end());
+    }
+
 
 	int nAtoms() { return (this->getCoordinates()).size(); }
 
-	void push_back(coord3d spheres) { structureCoordinates.push_back(spheres); }
+	void push_back(coord3d spheres) { _coordinates.push_back(spheres); }
 
 	structure &operator*= (const double &y) 
     {
@@ -83,7 +96,7 @@ public:
 		return *this;
 	}
 	structure operator* (const double &y) const { return structure(*this) *= y; }
-	coord3d& operator[] (unsigned int i) { return structureCoordinates[i]; }
+	coord3d& operator[] (unsigned int i) { return _coordinates[i]; }
 	bool operator< (const structure y) const { return (this->getEnergy() < y.getEnergy()); }
 	bool compareCoordinates (structure &y) const;
 
