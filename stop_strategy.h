@@ -36,7 +36,7 @@ namespace dlib {
 					);
 			}
 
-			stop_strategy& be_verbose(std::ostream &out)
+			stop_strategy& be_verbose(std::ostream &out = std::cout)
 			{
 				_verbose = true;
 				output = &out;

@@ -49,25 +49,6 @@ int main (int argc, char *argv[])
 	for (vector<structure>::size_type i = 0; i < optKS1.size(); i++)
 	{
 
-		//Inertia
-		coord3d CoM1 = optKS1[i].centreOfMass();
-		coord3d CoM2 = optKS2[i].centreOfMass();
-		optKS1[i].shiftToCoM(CoM1);
-		optKS2[i].shiftToCoM(CoM2);
-		vector< vector<double> > inertiaTensor1 = optKS1[i].momentOfInertia();
-		vector< vector<double> > inertiaTensor2 = optKS2[i].momentOfInertia();
-		vector<double> inertia1 = diag(inertiaTensor1);
-		vector<double> inertia2 = diag(inertiaTensor2);
-		optKS1[i].setMomentOfInertia(inertia1);
-		optKS2[i].setMomentOfInertia(inertia2);
-
-
-		//move to principal axis system
-		matrix3d principalAxis1 = optKS1[i].m3d_principalAxis();
-		matrix3d principalAxis2 = optKS2[i].m3d_principalAxis();
-		optKS1[i].rotateToPrincipalAxis (principalAxis1);
-		optKS2[i].rotateToPrincipalAxis (principalAxis2);
-
 
 		//inter-particle distance
 		vector<double> interPartDist1;

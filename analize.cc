@@ -172,6 +172,9 @@ int main (int argc, char *argv[]) {
 	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
 
+
+
+
 	vector<structure> optKS0;
 	optKS0.push_back(optKS[0]);
 
@@ -182,7 +185,7 @@ int main (int argc, char *argv[]) {
 	//compare function for vectors of doubles
 	auto compare_vector_double = [&] (vector<double> a, vector<double> b) {
 		assert (a.size() == b.size());
-		double eps = 1e-3;
+		double eps = 1e-5;
 		vector<double> diff;
 		for (vector<double>::size_type i = 0; i < a.size(); i++) {
 			diff.push_back(abs(a[i]-b[i]));
@@ -319,7 +322,21 @@ int main (int argc, char *argv[]) {
 	cout << "\t\tEquality classes: " << eqClasses_dist.size() << endl;
 	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
+    //output of groups for matching
+    vector<structure> outputStructures;
+    for (vector<structure> i : eqClasses_dist)
+    {
+        outputStructures.push_back(i[0]);
+    } 
 
+    stringstream out;
+    simpleout(outputStructures, out); 
+
+    ofstream optCoord;
+    optCoord.precision(14);
+    optCoord.open("optCoord");
+    optCoord << out.rdbuf();
+    optCoord.close();
 
 
 	
@@ -330,7 +347,7 @@ int main (int argc, char *argv[]) {
     
 }
 
-
+//END
 
 
 

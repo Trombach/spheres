@@ -40,14 +40,15 @@ public:
                                                                 _bondVector(),
                                                                 _adjMatrix_eigenvalues()
     { 
-        coord3d CoM = this->centreOfMass();
-        this->shiftToCoM(CoM);
+        this->shiftToCoM();
 
         std::vector< std::vector<double> > inertiaTensor = this->momentOfInertia();
         _momentOfInertia = diag(inertiaTensor);
 
 	    matrix3d axis = this->m3d_principalAxis ();
 	    this->rotateToPrincipalAxis(axis);
+
+        this->propertyInterPartDist();
     }
 
 	
@@ -112,7 +113,7 @@ public:
 
 
 	coord3d centreOfMass ();
-	void shiftToCoM (coord3d &CoM);
+	void shiftToCoM ();
 	std::vector< std::vector<double> > momentOfInertia ();
 	matrix3d m3d_momentOfInertia ();
 	bool isMinimum ();

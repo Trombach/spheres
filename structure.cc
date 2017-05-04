@@ -14,7 +14,8 @@ coord3d structure::centreOfMass () {
 }
 
 
-void structure::shiftToCoM (coord3d &CoM) {
+void structure::shiftToCoM () {
+    coord3d CoM = this->centreOfMass();
 	vector<coord3d> shiftedCoordinates;
 	for (int i = 0; i < nAtoms(); i++) {
 		shiftedCoordinates.push_back((*this)[i] - CoM);
