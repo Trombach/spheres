@@ -166,12 +166,16 @@ int main (int argc, char *argv[]) {
 		}
 	}
 
+    //remove non-min structures from optKS
+    for (unsigned int i = 0; i < notMinimum.size(); i++)
+    {
+        optKS.erase(remove_if(optKS.begin(), optKS.end(), [&] (const structure &s)
+                -> bool {return (s.getNumber() == notMinimum[i]);}), optKS.end());
+    }
 
 
 	cout << "\t\t#non-minimum structures: " << notMinimumKS.size() << endl;
 	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
-
-
 
 
 
