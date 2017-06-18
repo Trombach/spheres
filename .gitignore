@@ -36,6 +36,7 @@ energies
 Makefile*
 energystats
 coord
+optCoord
 analyze
 comp
 match

@@ -1,12 +1,34 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <map>
 #include "structure.h"
 #include "iop.h"
 #include "timer.h"
 #include "lina.h"
 
 using namespace std;
+
+#define container_output(container) \
+template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
+	{ \
+	s << "{"; \
+	for(typename container<T>::const_iterator x(v.begin());x!=v.end();){ \
+		s << *x; \
+		if(++x!=v.end()) s << ","; \
+	} \
+	s << "}"; \
+	return s; \
+	}
+container_output(vector);
+
+struct matchingStructure
+{
+    matchingStructure() : matched(false) {}
+    matchingStructure(structure x) : matched(false) {KS = x;}
+    bool matched;
+    structure KS;
+};
 
 int main (int argc, char *argv[]) 
 {
@@ -36,7 +58,7 @@ int main (int argc, char *argv[])
 
 	cout << endl;
 
-	//read structures
+	//read structures and sort sets according to size
 	cout << "\tReading structures" << endl;
 	vector<structure> optKS1 = readallstruct(file1), optKS2 = readallstruct(file2), set1 = optKS1, set2 = optKS2;
     cout << endl << "\tFile " << file1 << ": " << optKS1.size() << endl;
@@ -55,7 +77,19 @@ int main (int argc, char *argv[])
         cout << "\tSet 2: " << set2.size() << endl;
 	}
 
+    //put sets in data structures
+    vector<matchingStructure> set1_match, set2_match;
+    for (vector<structure>::size_type i = 0; i < set1.size(); i++)
+    {
+        matchingStructure KS(set1[i]);
+        set1_match.push_back(KS);
+    }
 
+    for (vector<structure>::size_type i = 0; i < set2.size(); i++)
+    {
+        matchingStructure KS(set2[i]);
+        set2_match.push_back(KS);
+    }
 
 	cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 	cout << "\tComparison of distance vectors" << endl;
@@ -64,9 +98,8 @@ int main (int argc, char *argv[])
 	//compare function for vectors of doubles
 	auto compare_vector_double = [&] (vector<double> a, vector<double> b) 
     {
-        //cout << a.size() << " " << b.size() << endl;
 		assert (a.size() == b.size());
-		double eps = 1e-5;
+		double eps = 1e-4;
 		vector<double> diff;
 		for (vector<double>::size_type i = 0; i < a.size(); i++) 
         {
@@ -78,36 +111,52 @@ int main (int argc, char *argv[])
 	};
 
 
-	vector< pair<structure, structure> > matchingKS;
+    //matching
+	vector< pair<matchingStructure, matchingStructure> > matchingKS;
 	unsigned int fail(0);
-	for (vector<structure>::size_type i = 0; i < set1.size(); i++)
+	for (vector<matchingStructure>::size_type i = 0; i < set1_match.size(); i++)
 	{
 		bool matched(false);
-		for (vector<structure>::size_type j = 0; j < set2.size(); j++)
+		for (vector<matchingStructure>::size_type j = 0; j < set2_match.size(); j++)
 		{
-			matched = compare_vector_double (set1[i].getInterPartDist(), set2[j].getInterPartDist());	
+            if (set2_match[j].matched) continue;
+			matched = compare_vector_double (set1_match[i].KS.getInterPartDist(), set2_match[j].KS.getInterPartDist());	
 			if (matched)
 			{
-				matchingKS.push_back(make_pair(set1[i], set2[j]));
+                set1_match[i].matched = true;
+                set2_match[j].matched = true;
+				matchingKS.push_back(make_pair(set1_match[i], set2_match[j]));
 				break;
 			}
 		}
 		if (matched == false)
 		{
-			cout << "\t\tNo match found for structure " << set1[i].getNumber() << " in set1." << endl;
+			//cout << "\t\tNo match found for structure " << set1[i].getNumber() << " in set1." << endl;
 			fail++;
 		}
 	}
 
 	if (fail > 0)
 	{
-		cout << "\tMismatches: " << fail << endl;
-        cout << "\t\t" << setw(4) << "set1" << setw(4) << "set2" << endl;
-        for (vector< pair<structure, structure> >::size_type i = 0; i < matchingKS.size(); i++)
+		cout << "\tUnmatched: " << fail << endl;
+        cout << "\t\tset1:" << endl;
+        for (vector<matchingStructure>::size_type i = 0; i < set1_match.size(); i++)
         {
-            cout << "\t\t" << setw(4) << matchingKS[i].first.getNumber() << setw(4) << matchingKS[i].second.getNumber() << endl;
+            if (!set1_match[i].matched) cout << "\t\t" << set1_match[i].KS.getNumber() << " " << set1_match[i].KS.getMomentOfInertia() << endl;
         }
-        cout << "\tMatches: " << matchingKS.size() << endl;
+
+        cout << "\t\tset2:" << endl;
+        for (vector<matchingStructure>::size_type i = 0; i < set2_match.size(); i++)
+        {
+            if (!set2_match[i].matched) cout << "\t\t" << set2_match[i].KS.getNumber() << " " << set2_match[i].KS.getMomentOfInertia() << endl;
+        }
+
+        cout << "\tMatched: " << matchingKS.size() << endl;
+        cout << "\t\t" << setw(4) << "set1" << setw(4) << "set2" << endl;
+        for (vector< pair<matchingStructure, matchingStructure> >::size_type i = 0; i < matchingKS.size(); i++)
+        {
+            cout << "\t\t" << setw(4) << matchingKS[i].first.KS.getNumber() << setw(4) << matchingKS[i].second.KS.getNumber() << endl;
+        }
 	} else
 	{
 		cout << "\tIdentical." << endl;
