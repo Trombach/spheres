@@ -84,7 +84,7 @@ vector<pair<double, vector<double> > > diagv (vector< vector<double> > &matrix)
 	}
 
 
-	return eval_evec;//this will return the wrong thing if eigenvalues and eigenvectors are not paired up in dlib, check!!!
+	return eval_evec;
 }
 
 matrix3d m3d_diagv (matrix3d &matrix) {

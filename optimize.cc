@@ -158,6 +158,8 @@ int main (int argc, char *argv[]) {
 				notMinimum.push_back(threadKS.getNumber());
 				notMinimumKS.push_back(threadKS);
 				threadstream << "Structure did not converge to minimum, will reoptimize later." << endl;
+                threadstream << "Negative eigenvalues: " << threadKS.countNegativeEval() << endl;
+                threadstream << threadKS.getHessian() << endl;
 			}
 			min << threadstream.rdbuf() << endl;
 			min << "***************End of Opt***************" << endl;
@@ -221,7 +223,7 @@ int main (int argc, char *argv[]) {
 
 			vector<coord3d> displacement;
 
-			threadstream << "negative deflection" << endl;
+			threadstream << "positive deflection" << endl;
 			for (vector<coord3d>::size_type	j = 0; j < coords.size(); j++) {
 				displacement.push_back(coords[j] + (gradients[j] * 0.1));
 			}

@@ -136,6 +136,17 @@ bool structure::isMinimum () {
 	return false;
 }
 
+int structure::countNegativeEval ()
+{
+    int count(0);
+    vector<double> hessian = this->getHessian();
+    for (vector<double>::size_type i = 0; i < hessian.size(); i++)
+    {
+        if (hessian[i] < -0.001) count++;
+    }
+    return count;
+}
+
 
 structure::undirectedGraph structure::createGraph (vector<double> &p) {
 	vector<coord3d> currentCoord = this->getCoordinates();

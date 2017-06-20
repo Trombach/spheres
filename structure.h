@@ -117,6 +117,7 @@ public:
 	std::vector< std::vector<double> > momentOfInertia ();
 	matrix3d m3d_momentOfInertia ();
 	bool isMinimum ();
+    int countNegativeEval ();
 
 	matrix3d m3d_principalAxis ();
 	void rotateToPrincipalAxis (matrix3d &principalAxis);
