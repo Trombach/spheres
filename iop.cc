@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <libconfig.h++>
+#include "structure.h"
 #include "iop.h"
 #include "parameter.h"
 

@@ -195,7 +195,9 @@ int main (int argc, char *argv[])
                         + to_string(set1_match[i].KS.getNumber()) + ".xyz");
                 set1_match[i].KS.propertyAdjMatrix(p);
                 vector< vector<int> > adjMatrix = set1_match[i].KS.getAdjMatrix();
+                vector< vector<double> > distMatrix = set1_match[i].KS.getDistMatrix();
                 matrixout<int> (adjMatrix);
+                matrixout<double> (distMatrix);
             }
         }
 
@@ -211,7 +213,9 @@ int main (int argc, char *argv[])
                         + to_string(set2_match[i].KS.getNumber()) + ".xyz");
                 set2_match[i].KS.propertyAdjMatrix(p);
                 vector< vector<int> > adjMatrix = set2_match[i].KS.getAdjMatrix();
+                vector< vector<double> > distMatrix = set2_match[i].KS.getDistMatrix();
                 matrixout<int> (adjMatrix);
+                matrixout<double> (distMatrix);
             }
         }
 

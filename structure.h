@@ -18,6 +18,7 @@ private:
     std::vector<double> _hessian;
     std::vector<double> _interPartDist;
     std::vector< std::vector<int> > _adjMatrix;
+    std::vector< std::vector<double> > _distMatrix;
     std::vector<int> _bondVector;
     std::vector<double> _adjMatrix_eigenvalues;
 
@@ -50,6 +51,8 @@ public:
         this->rotateToPrincipalAxis(axis);
 
         this->propertyInterPartDist();
+
+        this->propertyDistMatrix();
     }
 
     
@@ -64,6 +67,7 @@ public:
     std::vector< std::vector<int> > getAdjMatrix() const { return _adjMatrix; }
     std::vector<int> getBondVector() const { return _bondVector; }
     std::vector<double> getAdjMatrix_eigenvalues() const { return _adjMatrix_eigenvalues; }
+    std::vector< std::vector<double> > getDistMatrix() const { return _distMatrix; }
 
     void setNumber (int number) { _number = number; }
     void setEnergy (double energy) { _energy = energy; }
@@ -74,10 +78,12 @@ public:
     void setAdjMatrix (std::vector< std::vector<int> > adjMatrix) { _adjMatrix = adjMatrix; }
     void setBondVector (std::vector<int> bondVector) { _bondVector = bondVector; }
     void setAdjMatrix_eigenvalues (std::vector<double> eigenvalues) { _adjMatrix_eigenvalues = eigenvalues; }
+    void setDistMatrix (std::vector< std::vector<double> > distMatrix) { _distMatrix = distMatrix; }
 
 
     void propertyInterPartDist();
     void propertyAdjMatrix (std::vector<double> &p);
+    void propertyDistMatrix();
 
     int nAtoms() { return (this->getCoordinates()).size(); }
 

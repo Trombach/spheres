@@ -251,6 +251,20 @@ void structure::propertyAdjMatrix (vector<double> &p)
     _adjMatrix = adjMatrix;
 }
 
+void structure::propertyDistMatrix()
+{
+    for (int i = 0; i < this->nAtoms(); i++)
+    {
+        vector<double> currentRow;
+        for (int j = 0; j < this->nAtoms(); j++)
+        {
+            currentRow.push_back(coord3d::dist(_coordinates[i], _coordinates[j]));
+        }
+        _distMatrix.push_back(currentRow);
+    }
+}
+
+
 
 //symmetry
 //sig mirror; i: 0=yz 1=xz, 2=xy
