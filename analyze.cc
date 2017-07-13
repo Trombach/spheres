@@ -136,22 +136,18 @@ int main (int argc, char *argv[]) {
         threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 
 
-
-        optKS[i].propertyInterPartDist();
-
-
         //calculate adj matrix
-        optKS[i].setAdjMatrix(optKS[i].createAdjMatrix(p));
+        //optKS[i].propertyAdjMatrix(p);
 
 
         //calculate bond vector from adj matrix
-        vector<int> bondVector = optKS[i].createBondVector();
-        sort(bondVector.begin(), bondVector.end());
-        optKS[i].setBondVector(bondVector);
+        //vector<int> bondVector = optKS[i].createBondVector();
+        //sort(bondVector.begin(), bondVector.end());
+        //optKS[i].setBondVector(bondVector);
 
 
         //calculate eigenvalues of adj matrix
-        optKS[i].setAdjMatrix_eigenvalues(optKS[i].createAdjMatrix_egenvalues());
+        //optKS[i].setAdjMatrix_eigenvalues(optKS[i].createAdjMatrix_egenvalues());
         
         
         #pragma omp critical
