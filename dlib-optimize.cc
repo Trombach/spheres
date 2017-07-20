@@ -19,7 +19,7 @@ typedef dlib::matrix<double,0,1> column_vector;
 //function to calculate LJ Energy, needs rij,rm and epsilon
 //
 double LJEnergy (const double distance, const double epsilon, const double rm, const double exp1, const double exp2) {
-    return epsilon * ( (pow (rm / distance, exp1)) - 2 * (pow (rm / distance, exp2)) );
+    return (epsilon / (exp1/exp2 - 1)) * ( (pow (rm / distance, exp1)) - (exp1/exp2) * (pow (rm / distance, exp2)) );
 }
 
 double structure::sumOverAllInteractions (const vector<double> &p) {
@@ -68,7 +68,7 @@ double LJEnergy_dlib (const column_vector &v, void *params) {
 coord3d LJGradient(const coord3d ri, const coord3d rj, const double epsilon, const double rm, const double exp1, const double exp2) {
     double distance = coord3d::dist (ri , rj);
     coord3d distanceVector = rj - ri;
-    double LJGradientValue = ( epsilon / rm ) * ( exp1 * (pow (rm / distance, exp1 + 1)) - 2 * exp2 * (pow (rm / distance, exp2 + 1)) );
+    double LJGradientValue = ( epsilon / (rm * (exp1/exp2-1)) ) * ( exp1 * (pow (rm / distance, exp1 + 1)) - exp1 * (pow (rm / distance, exp2 + 1)) );
     return distanceVector / distanceVector.norm() * LJGradientValue;
 }
 

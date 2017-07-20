@@ -87,10 +87,10 @@ vector< vector<double> > structure::hessian (const vector<double> &p) {
             const double r = coord3d::dist((*this)[i], (*this)[j]);
 
             //calculate first derivative
-            double dE_dr = - ( epsilon / rm ) * ( exp1 * (pow (rm / r, exp1 + 1)) - 2 * exp2 * (pow (rm / r, exp2 + 1)) );
+            double dE_dr = - ( epsilon / (rm * (exp1/exp2-1)) ) * ( exp1 * (pow (rm / r, exp1 + 1)) - exp1 * (pow (rm / r, exp2 + 1)) );
 
             //calculate second derivative
-            double d2E_dr2 = epsilon / pow (rm, 2) * ( (pow (exp1, 2) + exp1) * pow (rm / r, exp1 + 2) - (2 * pow (exp2, 2) + 2 * exp2) * pow (rm / r, exp2 + 2) );
+            double d2E_dr2 = epsilon / (pow (rm, 2) * (exp1/exp2-1)) * ( (pow (exp1, 2) + exp1) * pow (rm / r, exp1 + 2) - (exp1 * exp2 + exp1) * pow (rm / r, exp2 + 2) );
 
             //calculate derivatives of r
             coord3d dvecr_dr = coord3d::dnorm(vecr);
