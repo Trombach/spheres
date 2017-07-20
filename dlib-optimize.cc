@@ -174,12 +174,14 @@ structure structure::optimize (ostream &min, parameter<int> switches, vector<dou
             }
             catch (std::exception &e) {
                 cerr << "Structure " << this->getNumber() << ": " << e.what() << endl;
+                structure newGeometry(this->getNumber(), this->getCoordinates());
+                return newGeometry;
             }
             break;
         }
         default:
             cerr << "Error, bad input of algorithm name!" << endl;
-            structure newGeometry;
+            structure newGeometry(this->getNumber(), this->getCoordinates());
             return newGeometry;
     }
     

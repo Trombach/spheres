@@ -179,16 +179,18 @@ int main (int argc, char *argv[])
 
     cout << "\t\tTiming: " << T.timing() << " s" << endl << endl;
 
+    ofstream unmatched;
+    unmatched.open("unmatched");
 
     if (fail > 0)
     {
         cout << "\tUnmatched: " << fail << endl;
-        cout << "\t\tset1:" << endl;
+        unmatched << "\t\tset1:" << endl;
         for (vector<matchingStructure>::size_type i = 0; i < set1_match.size(); i++)
         {
             if (!set1_match[i].matched) 
             {
-                cout << "\t\t" << set1_match[i].KS.getNumber() << " " << "E: "
+                unmatched << "\t\t" << set1_match[i].KS.getNumber() << " " << "E: "
                     << set1_match[i].KS.getEnergy() << endl;
                 xyzout (set1_match[i].KS, "N" +
                         to_string(set1_match[i].KS.nAtoms()) + "set1structure"
@@ -196,17 +198,18 @@ int main (int argc, char *argv[])
                 set1_match[i].KS.propertyAdjMatrix(p);
                 vector< vector<int> > adjMatrix = set1_match[i].KS.getAdjMatrix();
                 vector< vector<double> > distMatrix = set1_match[i].KS.getDistMatrix();
-                matrixout<int> (adjMatrix);
-                matrixout<double> (distMatrix);
+                matrixout<int> (adjMatrix,unmatched);
+                matrixout<double> (distMatrix,unmatched);
             }
         }
 
-        cout << "\t\tset2:" << endl;
+        unmatched << "\t\tset2:" << endl;
+
         for (vector<matchingStructure>::size_type i = 0; i < set2_match.size(); i++)
         {
             if (!set2_match[i].matched) 
             {
-                cout << "\t\t" << set2_match[i].KS.getNumber() << "E: " <<
+                unmatched << "\t\t" << set2_match[i].KS.getNumber() << "E: " <<
                     set2_match[i].KS.getEnergy() << endl;
                 xyzout (set2_match[i].KS, "N" +
                         to_string(set2_match[i].KS.nAtoms()) + "set2structure"
@@ -214,10 +217,11 @@ int main (int argc, char *argv[])
                 set2_match[i].KS.propertyAdjMatrix(p);
                 vector< vector<int> > adjMatrix = set2_match[i].KS.getAdjMatrix();
                 vector< vector<double> > distMatrix = set2_match[i].KS.getDistMatrix();
-                matrixout<int> (adjMatrix);
-                matrixout<double> (distMatrix);
+                matrixout<int> (adjMatrix,unmatched);
+                matrixout<double> (distMatrix,unmatched);
             }
         }
+
 
         cout << "\tMatched: " << matchingKS.size() << endl;
         cout << "\t\t" << setw(5) << "set1" << setw(10) << "E" << setw(5) << "set2" << setw(10) << "E" << endl;

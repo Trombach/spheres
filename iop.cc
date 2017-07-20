@@ -291,19 +291,25 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
 
 template <typename T> void matrixout (vector< vector<T> > &matrix, ostream &out)
 {
+    //ios::fmtflags f(out.flags());
+    ios oldState(nullptr);
+    oldState.copyfmt(out);
+    out << fixed;
     for (typename vector< vector<T> >::size_type i = 0; i < matrix.size(); i++)
     {
         for (typename vector<T>::size_type j = 0; j < matrix[i].size(); j++)
         {
             if (j == matrix[i].size() - 1)
             {
-                out << setw(3) << matrix[i][j] << "\\\\";
+                out << setw(3) << ( (matrix[i][j] == 0) ? setprecision(0) :
+                        setprecision(4) ) << matrix[i][j] << "\\\\"; 
                 continue;
             }
-            out << setw(3) << matrix[i][j] << " &";
-        }
+            out << setw(3) << ( (matrix[i][j] == 0) ? setprecision(0) :
+                    setprecision(4) ) << matrix[i][j] << " &"; }
         out << endl;
     }
+    out.copyfmt(oldState);
 }
 
 template void matrixout<int> (vector< vector<int> > &matrix, ostream &out);
