@@ -20,7 +20,7 @@ void structure::shiftToCoM () {
     for (int i = 0; i < nAtoms(); i++) {
         shiftedCoordinates.push_back((*this)[i] - CoM);
     }
-    setCoordinates(shiftedCoordinates);
+    _coordinates = shiftedCoordinates;
 }
 
 vector< vector<double> > structure::momentOfInertia () {

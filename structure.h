@@ -71,7 +71,21 @@ public:
 
     void setNumber (int number) { _number = number; }
     void setEnergy (double energy) { _energy = energy; }
-    void setCoordinates (std::vector<coord3d> coordinates) { _coordinates = coordinates; }
+    void setCoordinates (std::vector<coord3d> coordinates) 
+    { 
+        _coordinates = coordinates; 
+        this->shiftToCoM();
+
+        std::vector< std::vector<double> > inertiaTensor = this->momentOfInertia();
+        _momentOfInertia = diag(inertiaTensor);
+
+        matrix3d axis = this->m3d_principalAxis ();
+        this->rotateToPrincipalAxis(axis);
+
+        this->propertyInterPartDist();
+
+        this->propertyDistMatrix();
+    }
     void setMomentOfInertia (std::vector<double> inertiaEigenvalues) { _momentOfInertia = inertiaEigenvalues; }
     void setHessian (std::vector<double> hessianEigenvalues) {_hessian = hessianEigenvalues; }
     void setInterPartDist (std::vector<double> distances) { _interPartDist = distances;}
