@@ -40,6 +40,7 @@ optCoord
 analyze
 comp
 match
+potential
 core
 .dep
 getxyz

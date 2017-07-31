@@ -119,6 +119,7 @@ public:
     std::vector<coord3d> sumOverAllGradients (const std::vector<double> &p);
     //initialize minimizer function
     structure optimize (std::ostream &min, parameter<int> switches, std::vector<double> parameters, parameter<double> opt);
+    structure optimize_test (std::ostream &min, parameter<int> switches, parameter<double> opt, pairPotential *potential)
 
     std::vector< std::vector<double> > hessian (const std::vector<double> &p);
 
