@@ -152,6 +152,7 @@ int main (int argc, char *argv[]) {
         {
             if (threadKS.isMinimum()) {
                 optKS.push_back(threadKS);
+                threadstream << threadKS.getHessian() << endl;
             }
             else {
                 hessianWarnings += 1;
