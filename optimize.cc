@@ -161,6 +161,7 @@ int main (int argc, char *argv[]) {
                 threadstream << "Structure did not converge to minimum, will reoptimize later." << endl;
                 threadstream << "Negative eigenvalues: " << threadKS.countNegativeEval() << endl;
                 threadstream << "H: " << threadKS.getHessian() << endl;
+                threadstream << "coords: " << threadKS.getCoordinates() << endl;
             }
             min << threadstream.rdbuf() << endl;
             min << "***************End of Opt***************" << endl;
