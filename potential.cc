@@ -5,26 +5,19 @@
 #include "structure.h"
 #include "parameter.h"
 #include "stop_strategy.h"
+#include "potential.h"
 
 using namespace std;
 
-typedef dlib::matrix<double,0,1> column_vector;
 
-class pairPotential 
-{
-    private:
-        virtual double E (double distance) {return distance;};
-        virtual double dE_dr (double distance) {return distance;};
-        //double d2E_dr2 () {};
 
-    public:
-        pairPotential();
-        double calcEnergy (const column_vector &v);
-        const column_vector calcGradient (const column_vector &v);
-        //std::vector< std::vector<double> > calcHessian ();
-};
+/*--------------------------------------------------------------------------------------*/
+//                          pair potential base class
+/*--------------------------------------------------------------------------------------*/
 
 pairPotential::pairPotential (void) {}
+
+/*----------------------------------Energy----------------------------------------------*/
 
 double pairPotential::calcEnergy (const column_vector &v)
 {
@@ -42,6 +35,8 @@ double pairPotential::calcEnergy (const column_vector &v)
     }
     return f;
 }
+
+/*----------------------------------Gradient--------------------------------------------*/
 
 const column_vector pairPotential::calcGradient (const column_vector &v)
 {
@@ -75,31 +70,149 @@ const column_vector pairPotential::calcGradient (const column_vector &v)
 }
 
 
+/*----------------------------------Hessian---------------------------------------------*/
 
-
-
-
-
-
-
-class LJ : public pairPotential 
+vector< vector<double> > pairPotential::calcHessian (structure &S)
 {
-    private:
-        double _epsilon;
-        double _rm;
-        double _exp1;
-        double _exp2;
-        double E (double distance);
-        double dE_dr (double distance);
-        
+    vector< vector<double> > hessianMatrix (S.nAtoms() * 3, vector<double> (S.nAtoms() * 3, 0));
 
-    public:
-        LJ() :  _epsilon(1),
-                _rm(1),
-                _exp1(12),
-                _exp2(6)
-        {}
-};
+    for (int i = 0; i < S.nAtoms(); i++)
+    {
+        for (int j = i + 1; j < S.nAtoms(); j++)
+        {
+            const coord3d vecr = S[i] - S[j];
+            const double r = coord3d::dist(S[i], S[j]);
+
+            //calculate first and second derivative values
+            double dE_dr = this->dE_dr(r);
+            double d2E_dr2 = this->d2E_dr2(r);
+
+            //calculate derivatives of r
+            coord3d dvecr_dr = coord3d::dnorm(vecr);
+            vector<double> d2rvecr_dr2(9, double());
+            coord3d::ddnorm(vecr, d2rvecr_dr2);
+
+            //calculation of hessian elements
+            //loop over all 6 coordinates of 1 atom pair
+            for (int k = 0; k < 3; k++)
+            {
+                for (int l = 0; l < 3; l++)
+                {
+                    //calculate the value first, which will always only differ by sign
+                    const double hessianValue = dE_dr * d2rvecr_dr2[3 * k + l] 
+                                                + d2E_dr2 * dvecr_dr[k] * dvecr_dr[l];
+
+                    /*write hessian
+                     this is basically a 2 atom hessian, where the diagonal quadrants are the same and the
+                     remaining quadrants are of the opposite sign
+                     each quadrant can have contributions from different atom pairs
+                     eg atom pair 1/2 and 1/3 both have non zero second derivatives with respect to the 
+                     coordinates of atom 1*/
+                    hessianMatrix[3 * i + k][3 * i + l] += hessianValue;
+                    hessianMatrix[3 * i + k][3 * j + l] -= hessianValue;
+                    hessianMatrix[3 * j + k][3 * i + l] -= hessianValue;
+                    hessianMatrix[3 * j + k][3 * j + l] += hessianValue;
+                }
+            }
+        }
+    }
+    return hessianMatrix;
+}
+
+
+/*----------------------------------Optimization----------------------------------------*/
+
+template <class T> structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt)
+{
+    min.precision(16);
+
+    const size_t nsteps = static_cast<const size_t>(opt.get("nsteps"));
+    const double stop_crit = opt.get("convergence");
+
+    const int algo_switch = switches.get("algo");
+
+    column_vector x((S.nAtoms()) * 3);
+    for (int i = 0; i < S.nAtoms(); i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            x(3 * i + j) = S[i][j];
+        }
+    }
+
+    
+    auto f = [this] (column_vector v) -> const double { return this->calcEnergy(v); };
+    auto df = [this] (column_vector v) -> column_vector { return this->calcGradient(v); };
+
+
+    switch (algo_switch)
+    {
+        case 1:
+            {
+                try
+                {
+                    dlib::find_min( dlib::bfgs_search_strategy(),
+                                    dlib::stop_strategy(stop_crit, nsteps).be_verbose(min),
+                                    f, df, x, -(S.nAtoms()) * 1000);
+                }
+                catch (std::exception &e)
+                {
+                    cerr << "Structure " << S.getNumber() << ": " << e.what() << endl;
+                    structure newS(S.getNumber(), S.getCoordinates());
+                    return newS;
+                }
+                break;
+            }
+        case 2:
+            {
+                try
+                {
+                    dlib::find_min( dlib::cg_search_strategy(),
+                                    dlib::stop_strategy(stop_crit, nsteps).be_verbose(min),
+                                    f, df, x, -(S.nAtoms()) * 1000);
+                }
+                catch (std::exception &e)
+                {
+                    cerr << "Structure " << S.getNumber() << ": " << e.what() << endl;
+                    structure newS(S.getNumber(), S.getCoordinates());
+                    return newS;
+                }
+                break;
+            }
+        default:
+            {
+                cerr << "Bad input of algorithm name" << endl;
+                structure newS(S.getNumber(), S.getCoordinates());
+                return newS;
+            }
+    }
+
+    vector<coord3d> newCoordinates;
+    for (long i = 0; i < x.size() / 3; i++)
+    {
+        coord3d sphere (x(3 * i), x(3 * i + 1), x(3 * i + 2));
+        newCoordinates.push_back(sphere);
+    }
+
+    structure newS(S.getNumber(), newCoordinates);
+    double finalEnergy = this->calcEnergy(x);
+    column_vector finalGradient = this->calcGradient(x);
+
+    min << "-----------------------------------------------" << endl;
+    min << "E: " << finalEnergy << endl;
+    min << "g: " << scientific << dlib::length(finalGradient) << endl;
+
+    newS.setEnergy(finalEnergy);
+
+
+    return newS;
+}
+
+
+/*--------------------------------------------------------------------------------------*/
+//                          LJ potential derived class
+/*--------------------------------------------------------------------------------------*/
+
 
 double LJ::E (double distance)
 {
@@ -113,51 +226,45 @@ double LJ::dE_dr (double distance)
     return ( _epsilon / (_rm * (_exp1/_exp2 - 1)) ) * ( _exp1 * (pow (_rm / distance, _exp1 + 1)) - _exp1 * (pow (_rm / distance, _exp2 + 1)) );
 }
 
-
-structure structure::optimize_test (ostream &min, parameter<int> switches, parameter<double> opt, pairPotential *potential)
+double LJ::d2E_dr2 (double distance)
 {
-    min.precision(16);
-
-    const size_t nsteps = static_cast<const size_t>(opt.get("nsteps"));
-    const double stop_crit = opt.get("convergence");
-
-    column_vector x((this->nAtoms()) * 3);
-    for (int i = 0; i < this->nAtoms(); i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            x(3 * i + j) = (*this)[i][j];
-        }
-    }
-
-    dlib::find_min(dlib::bfgs_search_strategy(),
-            dlib::stop_strategy(stop_crit, nsteps),
-            potential->calcEnergy(x), potential->calcGradient(x), x, -(this->nAtoms) * 1000);
-
+    cout << "this is LJ hess" << endl;
+    return _epsilon / (pow (_rm, 2) * (_exp1/_exp2-1)) * ( (pow (_exp1, 2) + _exp1) * pow (_rm / distance, _exp1 + 2) - (_exp1 * _exp2 + _exp1) * pow (_rm / distance, _exp2 + 2) );
 }
 
-int main ()
-{
-    vector<coord3d> coords;
-    coords.push_back(coord3d(0,0,0));
-    coords.push_back(coord3d(1,0,0));
-    coords.push_back(coord3d(1,0.87,0));
-    structure test(1,coords);
+/*--------------------------------------------------------------------------------------*/
+//                          main function for testing
+/*--------------------------------------------------------------------------------------*/
 
-    column_vector x(test.nAtoms() * 3);
-    for (int i = 0; i < test.nAtoms(); ++i) 
-    {
-        for (int j = 0; j<=2; ++j) 
-        {
-            x(3 * i + j) = (test)[i][j];
-        }
-    }
 
-    LJ len;
-    cout << len.calcEnergy(x) << endl;
-    const column_vector grad = len.calcGradient(x);
-    cout << grad << endl;
-
-return 0;
-}
+//int main ()
+//{
+//    vector<coord3d> coords;
+//    coords.push_back(coord3d(0,0,0));
+//    coords.push_back(coord3d(1,0,0));
+//    coords.push_back(coord3d(1,0.87,0));
+//    structure test(1,coords);
+//
+//    column_vector x(test.nAtoms() * 3);
+//    for (int i = 0; i < test.nAtoms(); ++i) 
+//    {
+//        for (int j = 0; j<=2; ++j) 
+//        {
+//            x(3 * i + j) = (test)[i][j];
+//        }
+//    }
+//    pairPotential pp;
+//    LJ len;
+//    cout << len.calcEnergy(x) << endl;
+//    const column_vector grad = len.calcGradient(x);
+//    cout << grad << endl;
+//
+//
+//    //len.optimize<LJ>(std::cout, test);
+//    //pp.optimize<pairPotential>(std::cout, test);
+//    
+//    len.calcHessian(test);
+//
+//return 0;
+//}
 

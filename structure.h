@@ -33,7 +33,7 @@ public:
                     _adjMatrix_eigenvalues()
     {}
 
-/* constructor calculates several properties based on coordinates on creation */    
+    /* constructor calculates several properties based on coordinates on creation */    
     structure (int number, std::vector<coord3d> coordinates) :  _energy(0),
                                                                 _number(number), 
                                                                 _coordinates(coordinates), 
@@ -119,7 +119,6 @@ public:
     std::vector<coord3d> sumOverAllGradients (const std::vector<double> &p);
     //initialize minimizer function
     structure optimize (std::ostream &min, parameter<int> switches, std::vector<double> parameters, parameter<double> opt);
-    structure optimize_test (std::ostream &min, parameter<int> switches, parameter<double> opt, pairPotential *potential)
 
     std::vector< std::vector<double> > hessian (const std::vector<double> &p);
 
