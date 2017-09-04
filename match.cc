@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "lina.h"
 #include "parameter.h"
+#include "potential.h"
 
 using namespace std;
 
@@ -76,7 +77,17 @@ int main (int argc, char *argv[])
     parameter<int> switches; //vector of switches, 0 == potential, 1 == algo, 2 == scaling
     double scalingFactor(1.0);
 
-    readsettings(opt, p, switches, scalingFactor);
+    int status = readsettings(opt, p, switches, scalingFactor);
+    std::unique_ptr< pairPotential > potential;
+    switch (status)
+    {
+        case 0:
+            cerr << "Failed reading settings file" << endl;
+            return 1;
+        case 1:
+            potential.reset( LJ::readPotential() );
+            break;
+    }
     
     
     cout << endl;
@@ -88,17 +99,37 @@ int main (int argc, char *argv[])
     cout << "\tFile " << file2 << ": " << optKS2.size() << endl;
 
     //compute energies
-#pragma omp parallel for
+//#pragma omp parallel for
     for (vector<structure>::size_type i = 0; i < set1.size(); i++)
     {
-        set1[i].setEnergy(set1[i].sumOverAllInteractions(p));
+        vector<coord3d> coords = set1[i].getCoordinates();
+        column_vector x (coords.size() * 3);
+        for (int j = 0; j < set1[i].nAtoms(); j++)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                x(3 * j + k) = coords[j][k];
+            }
+        }
+        
+        set1[i].setEnergy(potential->calcEnergy(x));
     }
     
 
-#pragma omp parallel for
+//#pragma omp parallel for
     for (vector<structure>::size_type i = 0; i < set2.size(); i++)
     {
-        set2[i].setEnergy(set2[i].sumOverAllInteractions(p));
+        vector<coord3d> coords = set2[i].getCoordinates();
+        column_vector x (coords.size() * 3);
+        for (int j = 0; j < set2[i].nAtoms(); j++)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                x(3 * j + k) = coords[j][k];
+            }
+        }
+        
+        set2[i].setEnergy(potential->calcEnergy(x));
     }
 
 

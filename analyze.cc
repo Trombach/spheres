@@ -14,6 +14,7 @@
 #include "lina.h"
 #include "timer.h"
 #include "parameter.h"
+#include "potential.h"
 
 
 using namespace std; 
@@ -82,7 +83,17 @@ int main (int argc, char *argv[]) {
     parameter<int> switches; //vector of switches, 0 == potential, 1 == algo, 2 == scaling
     double scalingFactor(1.0);
 
-    readsettings(opt, p, switches, scalingFactor);
+    int status = readsettings(opt, p, switches, scalingFactor);
+    std::unique_ptr< pairPotential > potential;
+    switch (status)
+    {
+        case 0:
+            cerr << "Failed reading settings file" << endl;
+            return 1;
+        case 1:
+            potential.reset( LJ::readPotential() );
+            break;
+    }
     
     
     cout << endl;
@@ -129,25 +140,13 @@ int main (int argc, char *argv[]) {
 
         optKS[i].setEnergy (optKS[i].sumOverAllInteractions(p));
 
-        hessian = optKS[i].hessian(p);
+        hessian = potential->calcHessian(optKS[i]);
         eigenValues = diag(hessian);
         optKS[i].setHessian (eigenValues);
 
         threadstream << "Eigenvalues of the hessian are:" << endl << eigenValues << endl;
 
 
-        //calculate adj matrix
-        //optKS[i].propertyAdjMatrix(p);
-
-
-        //calculate bond vector from adj matrix
-        //vector<int> bondVector = optKS[i].createBondVector();
-        //sort(bondVector.begin(), bondVector.end());
-        //optKS[i].setBondVector(bondVector);
-
-
-        //calculate eigenvalues of adj matrix
-        //optKS[i].setAdjMatrix_eigenvalues(optKS[i].createAdjMatrix_egenvalues());
         
         
         #pragma omp critical

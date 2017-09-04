@@ -87,7 +87,6 @@ int main (int argc, char *argv[]) {
 
     int status = readsettings(opt, p, switches, scalingFactor);
     
-    //pairPotential potential;
     std::unique_ptr< pairPotential > potential;
     switch (status)
     {
@@ -95,9 +94,6 @@ int main (int argc, char *argv[]) {
             cerr << "Failed reading settings file" << endl;
             return 1;
         case 1:
-            //LJ pot = LJ::readPotential();
-            //potential.reset( new LJ );
-            //copy( pot, LJ );
             potential.reset( LJ::readPotential() );
             break;
     }
@@ -224,7 +220,8 @@ int main (int argc, char *argv[]) {
 
             threadstream << "Reoptimization attempt " << reopts << endl;
             coords = KS.getCoordinates();
-            hessian = KS.hessian(p);
+            //hessian = KS.hessian(p);
+            hessian = potential->calcHessian(KS);
             vector<pair<double, vector<double> > > eval_evec = diagv(hessian);
 
             auto pairCompare = [&] (const pair<double, vector<double> > a, const pair<double, vector<double> > b) {
@@ -251,9 +248,9 @@ int main (int argc, char *argv[]) {
 
             KS.setCoordinates(displacement);
 
-            newKS = KS.optimize(threadstream, switches, p, opt);
+            newKS = potential->optimize(threadstream, KS, switches, opt);
 
-            hessian = newKS.hessian(p);
+            hessian = potential->calcHessian(newKS);
             eigenValues = diag(hessian);
             newKS.setHessian (eigenValues);
             
@@ -294,7 +291,7 @@ int main (int argc, char *argv[]) {
 
             threadstream << "Reoptimization attempt " << reopts << endl;
             coords = KS.getCoordinates();
-            hessian = KS.hessian(p);
+            hessian = potential->calcHessian(KS);
             vector<pair<double, vector<double> > > eval_evec = diagv(hessian);
 
             auto pairCompare = [&] (const pair<double, vector<double> > a, const pair<double, vector<double> > b) {
@@ -321,9 +318,9 @@ int main (int argc, char *argv[]) {
 
             KS.setCoordinates(displacement);
 
-            newKS = KS.optimize(threadstream, switches, p, opt);
+            newKS = potential->optimize(threadstream, KS, switches, opt);
 
-            hessian = newKS.hessian(p);
+            hessian = potential->calcHessian(newKS);
             eigenValues = diag(hessian);
             newKS.setHessian (eigenValues);
             

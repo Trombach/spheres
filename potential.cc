@@ -84,7 +84,7 @@ vector< vector<double> > pairPotential::calcHessian (structure &S)
             const double r = coord3d::dist(S[i], S[j]);
 
             //calculate first and second derivative values
-            double dE_dr = this->dE_dr(r);
+            double dE_dr = - (this->dE_dr(r));
             double d2E_dr2 = this->d2E_dr2(r);
 
             //calculate derivatives of r
@@ -216,23 +216,20 @@ structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &s
 
 double LJ::E (double distance)
 {
-    cout << "this is LJ" << endl;
     return (_epsilon / (_exp1/_exp2 - 1)) * ( (pow (_rm / distance, _exp1)) - (_exp1/_exp2) * (pow (_rm / distance, _exp2)) );
 }
 
 double LJ::dE_dr (double distance)
 {
-    cout << "this is LJ grad" << endl;
     return ( _epsilon / (_rm * (_exp1/_exp2 - 1)) ) * ( _exp1 * (pow (_rm / distance, _exp1 + 1)) - _exp1 * (pow (_rm / distance, _exp2 + 1)) );
 }
 
 double LJ::d2E_dr2 (double distance)
 {
-    cout << "this is LJ hess" << endl;
     return _epsilon / (pow (_rm, 2) * (_exp1/_exp2-1)) * ( (pow (_exp1, 2) + _exp1) * pow (_rm / distance, _exp1 + 2) - (_exp1 * _exp2 + _exp1) * pow (_rm / distance, _exp2 + 2) );
 }
 
-LJ * LJ::readPotential ()
+LJ *LJ::readPotential ()
 {
     libconfig::Config cfg;
     try {
@@ -250,8 +247,7 @@ LJ * LJ::readPotential ()
     cfg.lookupValue("potential.exp1", exp1);
     cfg.lookupValue("potential.exp2", exp2);
 
-    //LJ potential(epsilon, rm, exp1, exp2); 
-    LJ * potential = new LJ(epsilon, rm, exp1, exp2); 
+    LJ *potential = new LJ(epsilon, rm, exp1, exp2); 
 
     return potential;
 }
