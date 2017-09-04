@@ -51,7 +51,7 @@ const column_vector pairPotential::calcGradient (const column_vector &v)
     {
         for (int j = i + 1; j < S.nAtoms(); j++)
         {
-            coord3d distanceVector = S[j]-S[i];
+            coord3d distanceVector = S[i]-S[j];
             double gradValue = this->dE_dr (coord3d::dist(S[i],S[j]));
             coord3d twoBodyGradient = distanceVector / distanceVector.norm() * gradValue;
             gradients[i] += twoBodyGradient;
@@ -84,7 +84,7 @@ vector< vector<double> > pairPotential::calcHessian (structure &S)
             const double r = coord3d::dist(S[i], S[j]);
 
             //calculate first and second derivative values
-            double dE_dr = - (this->dE_dr(r));
+            double dE_dr = this->dE_dr(r);
             double d2E_dr2 = this->d2E_dr2(r);
 
             //calculate derivatives of r
@@ -221,7 +221,7 @@ double LJ::E (double distance)
 
 double LJ::dE_dr (double distance)
 {
-    return ( _epsilon / (_rm * (_exp1/_exp2 - 1)) ) * ( _exp1 * (pow (_rm / distance, _exp1 + 1)) - _exp1 * (pow (_rm / distance, _exp2 + 1)) );
+    return - (( _epsilon / (_rm * (_exp1/_exp2 - 1)) ) * ( _exp1 * (pow (_rm / distance, _exp1 + 1)) - _exp1 * (pow (_rm / distance, _exp2 + 1)) ));
 }
 
 double LJ::d2E_dr2 (double distance)
