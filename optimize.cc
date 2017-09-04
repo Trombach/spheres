@@ -169,6 +169,7 @@ int main (int argc, char *argv[]) {
         {
             if (threadKS.isMinimum()) {
                 optKS.push_back(threadKS);
+                threadstream << "H: " << threadKS.getHessian() << endl;
             }
             else {
                 hessianWarnings += 1;
@@ -176,7 +177,8 @@ int main (int argc, char *argv[]) {
                 notMinimumKS.push_back(threadKS);
                 threadstream << "Structure did not converge to minimum, will reoptimize later." << endl;
                 threadstream << "Negative eigenvalues: " << threadKS.countNegativeEval() << endl;
-                threadstream << threadKS.getHessian() << endl;
+                threadstream << "H: " << threadKS.getHessian() << endl;
+                threadstream << "coords: " << threadKS.getCoordinates() << endl;
             }
             min << threadstream.rdbuf() << endl;
             min << "***************End of Opt***************" << endl;
@@ -266,6 +268,7 @@ int main (int argc, char *argv[]) {
             cerr << "Reopt failure, structure " << newKS.getNumber() << ", positive displacement" << endl;
         }
         reoptKS.push_back(newKS);
+        threadstream << "H: " << newKS.getHessian() << endl;
         threadstream << "***************End of Opt***************" << endl;
         remin << threadstream.rdbuf() << endl;  
     }
@@ -336,6 +339,7 @@ int main (int argc, char *argv[]) {
             cerr << "Reopt failure, structure " << newKS.getNumber() << ", negative displacement" << endl;
         }
         reoptKS.push_back(newKS);
+        threadstream << "H: " << newKS.getHessian() << endl;
         threadstream << "***************End of Opt***************" << endl;
         remin << threadstream.rdbuf() << endl;  
     }
