@@ -7,11 +7,13 @@
 #include <algorithm>
 #include <map>
 #include <functional>
+#include <memory>
 #include "structure.h"
 #include "iop.h"
 #include "lina.h"
 #include "timer.h"
 #include "parameter.h"
+#include "potential.h"
 
 
 using namespace std; 
@@ -76,13 +78,30 @@ int main (int argc, char *argv[]) {
         return 1;
     }
 
-    vector<double> p;
+    vector<double> p; 
     parameter<double> opt; //vector of algo settings, 0 == accuracy, 1 == dforce, 2 == stepsize, 3 == nsteps
     parameter<int> switches; //vector of switches, 0 == potential, 1 == algo, 2 == scaling
     double scalingFactor(1.0);
 
-    readsettings(opt, p, switches, scalingFactor);
     
+
+    int status = readsettings(opt, p, switches, scalingFactor);
+    
+    //pairPotential potential;
+    std::unique_ptr< pairPotential > potential;
+    switch (status)
+    {
+        case 0:
+            cerr << "Failed reading settings file" << endl;
+            return 1;
+        case 1:
+            //LJ pot = LJ::readPotential();
+            //potential.reset( new LJ );
+            //copy( pot, LJ );
+            potential.reset( LJ::readPotential() );
+            break;
+    }
+
     
     cout << endl;
 
@@ -134,11 +153,13 @@ int main (int argc, char *argv[]) {
 
         threadstream << "Optimization for structure no " << allKS[i].getNumber() << endl;
 
-        threadKS = allKS[i].optimize(threadstream, switches, p, opt);
+        //threadKS = allKS[i].optimize(threadstream, switches, p, opt);
+        threadKS = potential->optimize(threadstream, allKS[i], switches, opt);
         threadKS.setNumber( allKS[i].getNumber() );
 
 
-        hessian = threadKS.hessian(p);
+        //hessian = threadKS.hessian(p);
+        hessian = potential->calcHessian(threadKS);
         eigenValues = diag(hessian);
         threadKS.setHessian (eigenValues);
 

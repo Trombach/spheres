@@ -24,7 +24,8 @@ class pairPotential
         const column_vector calcGradient (const column_vector &v);
         std::vector< std::vector<double> > calcHessian (structure &S);
         
-        template <class T> structure optimize (std::ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt);
+        structure optimize (std::ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt);
+
 };
 
 
@@ -50,11 +51,13 @@ class LJ : public pairPotential
                 _exp2(6)
         {}
 
-        LJ (double epsilon = 1, double rm = 1, double exp1 = 12, double exp2 = 6) : _epsilon(epsilon),
-                                                                                    _rm(rm),
-                                                                                    _exp1(exp1),
-                                                                                    _exp2(exp2)
+        LJ (double epsilon, double rm, double exp1, double exp2) : _epsilon(epsilon),
+                                                                   _rm(rm),
+                                                                   _exp1(exp1),
+                                                                   _exp2(exp2)
         {}
+
+        static LJ *readPotential ();
 };
 
 #endif

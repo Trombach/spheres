@@ -128,7 +128,14 @@ vector<structure> readallstruct (const std::string& fileName) {
     return allKissingSpheres;
 }
 
-//function to read settings file
+/*-------------------------------------------------------------------------------------*/
+//                        function to read settings file
+//                        return value determins potential
+//                        0 = fail
+//                        1 = LJ
+//                        2 = ELJ
+/*-------------------------------------------------------------------------------------*/
+
 int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &switches, double &scalingFactor) {
 
     libconfig::Config cfg;
@@ -137,39 +144,19 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
     }
     catch(const FileIOException &fioex) {
         cerr << "\tI/O error while reading file." << endl;
-        return(EXIT_FAILURE);
+        return 0;
     }
     catch(const ParseException &pex) {
         cerr << "\tParse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
-        return(EXIT_FAILURE);
+        return 0;
     }
 
     const Setting &root = cfg.getRoot();
 
     string potential, algo;
     double accuracy(0.1), dforce(1e-3), stepsize(0.01);
-    int potential_switch, algo_switch, scaling_switch, output_switch(1);
+    int potential_switch(0), algo_switch, scaling_switch, output_switch(1);
     int nsteps(100);
-    //bool printInput(false);
-    
-    //try {
-    //  const Setting &numbers = root["output"]["number"];
-    //  int count = numbers.getLength();
-    //  for (int i = 0; i < count; i++) {
-    //      structureNumbers.push_back (numbers[i]);
-    //  }
-    //}
-    //catch (const SettingNotFoundException &nfex) {
-    //  cerr << "\tOutput setting not Found." << endl;
-    //  output_switch = 0;
-    //}
-    //cout << "\tStructures to print: " << structureNumbers;
-    //if (cfg.lookupValue ("output.input", printInput)) {
-    //  cout << ", including input coordinates" << endl;
-    //}
-    //else {
-    //  cout << ", excluding input coordinates" << endl;
-    //}
 
 
     cout << endl;
@@ -186,11 +173,16 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
         if (potential == "LJ") {
             potential_switch = 1;
         }
+        else
+        {
+            cerr << potential << " is not a valid name for a potential." << endl;
+            return 0;
+        }
         cout << "\tPotential: " << potential << endl;
     }
     else {
         cout << "\tNo 'potential' setting in configuration file." << endl;
-        return 1;
+        return 0;
     }
 
     
@@ -202,7 +194,7 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
         }
         else {
             cout << "\tNo 'epsilon' in configuration file." << endl;
-            return 1;
+            return 0;
         }
         if (cfg.lookupValue("potential.rm", rm)) {
             p.push_back(rm);
@@ -210,7 +202,7 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
         }
         else {
             cout << "\tNo 'rm' in configuration file." << endl;
-            return 1;
+            return 0;
         }
         if (cfg.lookupValue("potential.exp1", exp1)) {
             p.push_back(exp1);
@@ -243,7 +235,7 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
     }
     else {
         cout << "\tNo 'opt' setting in configuration file." << endl;
-        return 1;
+        return 0;
     }
 
     if (cfg.lookupValue("opt.accuracy", accuracy)) {
@@ -285,8 +277,10 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
 
     cout << endl;
 
-    return 0;
+    return potential_switch;
 }
+
+
 
 
 template <typename T> void matrixout (vector< vector<T> > &matrix, ostream &out)

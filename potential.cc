@@ -1,6 +1,7 @@
 #include <dlib/optimization.h>
 #include <vector>
 #include <iostream>
+#include <libconfig.h++>
 #include "geometry.h"
 #include "structure.h"
 #include "parameter.h"
@@ -8,7 +9,6 @@
 #include "potential.h"
 
 using namespace std;
-
 
 
 /*--------------------------------------------------------------------------------------*/
@@ -122,7 +122,7 @@ vector< vector<double> > pairPotential::calcHessian (structure &S)
 
 /*----------------------------------Optimization----------------------------------------*/
 
-template <class T> structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt)
+structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt)
 {
     min.precision(16);
 
@@ -230,6 +230,30 @@ double LJ::d2E_dr2 (double distance)
 {
     cout << "this is LJ hess" << endl;
     return _epsilon / (pow (_rm, 2) * (_exp1/_exp2-1)) * ( (pow (_exp1, 2) + _exp1) * pow (_rm / distance, _exp1 + 2) - (_exp1 * _exp2 + _exp1) * pow (_rm / distance, _exp2 + 2) );
+}
+
+LJ * LJ::readPotential ()
+{
+    libconfig::Config cfg;
+    try {
+        cfg.readFile("settings");
+    }
+    catch(const libconfig::FileIOException &fioex) {
+        cerr << "\tI/O error while reading file." << endl;
+    }
+    catch(const libconfig::ParseException &pex) {
+        cerr << "\tParse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
+    }
+    double epsilon, rm, exp1, exp2;
+    cfg.lookupValue("potential.epsilon", epsilon);
+    cfg.lookupValue("potential.rm", rm);
+    cfg.lookupValue("potential.exp1", exp1);
+    cfg.lookupValue("potential.exp2", exp2);
+
+    //LJ potential(epsilon, rm, exp1, exp2); 
+    LJ * potential = new LJ(epsilon, rm, exp1, exp2); 
+
+    return potential;
 }
 
 /*--------------------------------------------------------------------------------------*/
