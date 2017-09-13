@@ -45,7 +45,7 @@ struct coord3d {
             H[i*3+j] = -x[i]*x[j]*n3 + (i==j? n : 0);
     }
 
-    friend std::ostream& operator<<(std::ostream &s, const coord3d& x){ s << std::fixed << "{" << x[0] << "," << x[1] << "," << x[2]<< "}"; return s; }
+    friend std::ostream& operator<<(std::ostream &s, const coord3d& x){ s << std::fixed << x[0] << " " << x[1] << " " << x[2]; return s; }
     friend std::istream& operator>>(std::istream &s, coord3d& x){ for(int i=0;i<3;i++){ s >> x[i]; } return s; }
 
 };
