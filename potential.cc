@@ -7,6 +7,7 @@
 #include "parameter.h"
 #include "stop_strategy.h"
 #include "potential.h"
+#include "iop.h"
 
 using namespace std;
 
@@ -251,6 +252,65 @@ LJ *LJ::readPotential ()
 
     return potential;
 }
+
+
+/*--------------------------------------------------------------------------------------*/
+//                          extended LJ potential derived class
+/*--------------------------------------------------------------------------------------*/
+
+double ELJ::E (double distance)
+{
+    double en(0);
+    for (vector<double>::size_type i = 0; i < _c.size(); i++)
+    {
+        en += _c[i] * pow(1 / distance, i);
+    }
+    return en;
+}
+
+double ELJ::dE_dr (double distance)
+{
+    double grad(0);
+    for (vector<double>::size_type i = 0; i < _c.size(); i++)
+    {
+        grad -=  i * _c[i] * pow(1 / distance, i + 1);
+    }
+    return grad;
+}
+
+double ELJ::d2E_dr2 (double distance)
+{
+    double hess(0);
+    for (vector<double>::size_type i = 0; i < _c.size(); i++)
+    {
+        hess += i * (i + 1) * _c[i] * pow(1 / distance, i + 2);
+    }
+    return hess;
+    }
+
+ELJ *ELJ::readPotential ()
+{
+    ifstream input;
+    vector<double> c(30);
+
+    if (!fexists("ext"))
+    {
+        cerr << "No extended LJ parameters found" << endl;
+    }
+    input.open("ext");
+
+    int n;
+    double c_value;
+    while (input >> n >> c_value)
+    {
+        c[n] = c_value;
+    }
+
+    ELJ *potential = new ELJ(c);
+
+    return potential;
+}
+
 
 /*--------------------------------------------------------------------------------------*/
 //                          main function for testing

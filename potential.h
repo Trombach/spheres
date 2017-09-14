@@ -60,4 +60,28 @@ class LJ : public pairPotential
         static LJ *readPotential ();
 };
 
+/*--------------------------------------------------------------------------------------*/
+//                          extended LJ potential derived class
+/*--------------------------------------------------------------------------------------*/
+
+class ELJ : public pairPotential
+{
+    private:
+        std::vector<double> _c;
+        double E (double distance);
+        double dE_dr (double distance);
+        double d2E_dr2 (double distance);
+
+    public:
+        ELJ() : _c(30)
+        {}
+
+        ELJ(std::vector<double> c) : _c(c)
+        {} 
+
+        static ELJ *readPotential ();
+};
+
+
+
 #endif

@@ -170,8 +170,13 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
     }
 
     if (cfg.lookupValue("potential.name", potential)) {
-        if (potential == "LJ") {
+        if (potential == "LJ") 
+        {
             potential_switch = 1;
+        }
+        else if (potential == "ELJ") 
+        {
+            potential_switch = 2;
         }
         else
         {

@@ -96,6 +96,10 @@ int main (int argc, char *argv[]) {
         case 1:
             potential.reset( LJ::readPotential() );
             break;
+        case 2:
+            potential.reset( ELJ::readPotential() );
+            break;
+
     }
 
     
