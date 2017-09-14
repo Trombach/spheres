@@ -47,7 +47,7 @@ namespace dlib {
 
             template <typename T>
             bool should_continue_search (
-                const T& ,
+                const T& coordinates,
                 const double funct_value,
                 const T& funct_derivative
             )
@@ -55,8 +55,14 @@ namespace dlib {
                 if (_verbose)
                 {
                     *output << std::setw(4) << std::setfill(' ') << std::left;
-                    *output << _cur_iter 
+                    *output << coordinates.size() / 3 << std::endl;
+                    *output << _cur_iter << " "
                         << std::setw(25) << funct_value << length(funct_derivative) << std::endl;
+                    for (int i = 0; i < coordinates.size() / 3; i++)
+                    { 
+                        *output << "X " << coordinates(3 * i) << " "  << coordinates(3 * i +1) << " " <<
+                        coordinates(3 * i +2) << std::endl;
+                    }
                 }
 
                 ++_cur_iter;

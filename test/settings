@@ -1,13 +1,16 @@
 scaling: {
 	factor = 1.0;
 };
+//potential: {
+//    name = "LJ";
+//    epsilon = 1.0;
+//    rm =  1.0;
+//	exp1 = 12.0;
+//	exp2 = 6.0;
+//};
 potential: {
-    name = "LJ";
-    epsilon = 1.0;
-    rm =  1.0;
-	exp1 = 12.0;
-	exp2 = 6.0;
-};
+    name = "ELJ";
+}
 opt: {
     name = "BFGS";
     dforce = 1e-16;
