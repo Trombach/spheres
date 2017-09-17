@@ -37,6 +37,20 @@ double pairPotential::calcEnergy (const column_vector &v)
     return f;
 }
 
+/*----------------------------------Energy from structure-------------------------------*/
+
+double pairPotential::calcEnergy (structure &S)
+{
+    double f(0);
+    for (int i = 0; i < S.nAtoms(); ++i) {
+        for (int j = i + 1; j < S.nAtoms(); ++j) {
+            f += this->E (coord3d::dist (S[i],S[j]));
+        }
+    }
+    return f;
+}
+
+
 /*----------------------------------Gradient--------------------------------------------*/
 
 const column_vector pairPotential::calcGradient (const column_vector &v)
@@ -70,6 +84,32 @@ const column_vector pairPotential::calcGradient (const column_vector &v)
     return df;
 }
 
+/*----------------------------------Gradient from structure-----------------------------*/
+
+const column_vector pairPotential::calcGradient (structure &S)
+{
+    vector<coord3d> gradients (S.nAtoms(), coord3d());
+    for (int i = 0; i < S.nAtoms(); i++)
+    {
+        for (int j = i + 1; j < S.nAtoms(); j++)
+        {
+            coord3d distanceVector = S[i]-S[j];
+            double gradValue = this->dE_dr (coord3d::dist(S[i],S[j]));
+            coord3d twoBodyGradient = distanceVector / distanceVector.norm() * gradValue;
+            gradients[i] += twoBodyGradient;
+            gradients[j] -= twoBodyGradient;
+        }
+    }
+    column_vector df (gradients.size() * 3);
+    for (vector<coord3d>::size_type i = 0; i< gradients.size(); i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            df(3 * i + j) = gradients[i][j];
+        }
+    }
+    return df;
+}
 
 /*----------------------------------Hessian---------------------------------------------*/
 

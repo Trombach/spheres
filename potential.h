@@ -21,7 +21,9 @@ class pairPotential
     public:
         pairPotential();
         double calcEnergy (const column_vector &v);
+        double calcEnergy (structure &S);
         const column_vector calcGradient (const column_vector &v);
+        const column_vector calcGradient (structure &S);
         std::vector< std::vector<double> > calcHessian (structure &S);
         
         structure optimize (std::ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt);

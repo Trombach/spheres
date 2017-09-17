@@ -93,6 +93,9 @@ int main (int argc, char *argv[]) {
         case 1:
             potential.reset( LJ::readPotential() );
             break;
+        case 2:
+            potential.reset( ELJ::readPotential() );
+            break;
     }
     
     
@@ -138,7 +141,7 @@ int main (int argc, char *argv[]) {
         vector<double> eigenValues;
         stringstream threadstream;
 
-        optKS[i].setEnergy (optKS[i].sumOverAllInteractions(p));
+        optKS[i].setEnergy(potential->calcEnergy(optKS[i]));
 
         hessian = potential->calcHessian(optKS[i]);
         eigenValues = diag(hessian);
