@@ -46,4 +46,6 @@ core
 getxyz
 apps/app-N14
 apps/app-bondvariance
-
+apps/app-Nc
+apps/app-shortestbond
+apps/app-GN
