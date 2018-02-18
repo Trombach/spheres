@@ -8,6 +8,10 @@
 #include "lina.h"
 #include "parameter.h"
 
+
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> undirectedGraph;
+
+
 class structure {    
     
 private:
@@ -21,6 +25,7 @@ private:
     std::vector< std::vector<double> > _distMatrix;
     std::vector<int> _bondVector;
     std::vector<double> _adjMatrix_eigenvalues;
+    undirectedGraph _uGraph;
 
 public:   
     structure() :   _energy(0), 
@@ -56,7 +61,6 @@ public:
     }
 
     
-    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> undirectedGraph;
 
     int getNumber() const { return _number; }
     double getEnergy() const { return _energy; }
@@ -68,6 +72,7 @@ public:
     std::vector<int> getBondVector() const { return _bondVector; }
     std::vector<double> getAdjMatrix_eigenvalues() const { return _adjMatrix_eigenvalues; }
     std::vector< std::vector<double> > getDistMatrix() const { return _distMatrix; }
+    undirectedGraph getGraph() const { return _uGraph; }
 
     void setNumber (int number) { _number = number; }
     void setEnergy (double energy) { _energy = energy; }
@@ -93,11 +98,13 @@ public:
     void setBondVector (std::vector<int> bondVector) { _bondVector = bondVector; }
     void setAdjMatrix_eigenvalues (std::vector<double> eigenvalues) { _adjMatrix_eigenvalues = eigenvalues; }
     void setDistMatrix (std::vector< std::vector<double> > distMatrix) { _distMatrix = distMatrix; }
+    void setGraph (undirectedGraph uGraph) { _uGraph = uGraph; }
 
 
     void propertyInterPartDist();
     void propertyAdjMatrix (std::vector<double> &p);
     void propertyDistMatrix();
+    void propertyGraph();
 
     int nAtoms() { return (this->getCoordinates()).size(); }
 
@@ -113,6 +120,11 @@ public:
     bool operator< (const structure y) const { return (this->getEnergy() < y.getEnergy()); }
     bool compareCoordinates (structure &y) const;
 
+
+/*--------------------------------------------------------------------------------------*/
+/*                           old optimizer stuff                                        */
+/*--------------------------------------------------------------------------------------*/
+
     //function to sum over all sphere interactions, change later to work with different potentials
     double sumOverAllInteractions (const std::vector<double> &p);
     //function to sum over all gradients to get gradient for each sphere
@@ -122,6 +134,7 @@ public:
 
     std::vector< std::vector<double> > hessian (const std::vector<double> &p);
 
+/*--------------------------------------------------------------------------------------*/
 
 
     coord3d centreOfMass ();
@@ -136,7 +149,7 @@ public:
 
 
     std::vector< std::vector<int> > createAdjMatrix (std::vector<double> &p);
-    undirectedGraph createGraph (std::vector<double> &p);
+    undirectedGraph createGraph (double rm = 1, double eps = 1e-10);
     std::vector<int> createBondVector ();
     std::vector<double> createAdjMatrix_egenvalues ();
 

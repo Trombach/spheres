@@ -148,20 +148,23 @@ int structure::countNegativeEval ()
 }
 
 
-structure::undirectedGraph structure::createGraph (vector<double> &p) {
-    vector<coord3d> currentCoord = this->getCoordinates();
+undirectedGraph structure::createGraph (double rm, double eps) 
+{
+    vector< vector<double> > distMatrix = this->getDistMatrix();
+
     typedef pair<int, int> edge;
     vector<edge> edgeVec;
-    for (vector<coord3d>::size_type i = 0; i < currentCoord.size(); i++) {
-        for (vector<coord3d>::size_type j = i + 1; j < currentCoord.size(); j++) {
-            double diff = fabs(coord3d::dist (currentCoord[i], currentCoord[j]) - p[1]);
-            if (diff < 0.05) edgeVec.push_back(edge(i,j));
+    for (vector< vector<double> >::size_type i = 0; i < distMatrix.size(); i++) 
+    {
+        for (vector< vector<double> >::size_type j = i + 1; j < distMatrix.size(); j++) 
+        {
+            double diff = fabs(distMatrix[i][j] - rm);
+            if (diff < eps) edgeVec.push_back(edge(i,j));
         }
     }
 
     undirectedGraph g (edgeVec.begin(), edgeVec.end(), this->nAtoms());
-
-    //cout << num_edges(g) << " " << num_vertices(g) << endl;
+    cout << num_edges(g) << " " << num_vertices(g) << endl;
 
     return g;
 }
@@ -262,6 +265,12 @@ void structure::propertyDistMatrix()
         }
         _distMatrix.push_back(currentRow);
     }
+}
+
+void structure::propertyGraph()
+{
+    undirectedGraph G = this->createGraph();
+    _uGraph = G;
 }
 
 
