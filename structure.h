@@ -104,7 +104,8 @@ public:
     void propertyInterPartDist();
     void propertyAdjMatrix (std::vector<double> &p);
     void propertyDistMatrix();
-    void propertyGraph();
+    void propertyGraph(double rm = 1, double eps = 1e-10);
+    void propertyGraph_ignoreCenter(double rm = 1, double eps = 1e-10);
 
     int nAtoms() { return (this->getCoordinates()).size(); }
 
@@ -150,6 +151,7 @@ public:
 
     std::vector< std::vector<int> > createAdjMatrix (std::vector<double> &p);
     undirectedGraph createGraph (double rm = 1, double eps = 1e-10);
+    undirectedGraph createGraph_ignoreCenter (double rm = 1, double eps = 1e-10);
     std::vector<int> createBondVector ();
     std::vector<double> createAdjMatrix_egenvalues ();
 

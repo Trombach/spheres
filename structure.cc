@@ -164,12 +164,45 @@ undirectedGraph structure::createGraph (double rm, double eps)
     }
 
     undirectedGraph g (edgeVec.begin(), edgeVec.end(), this->nAtoms());
-    cout << num_edges(g) << " " << num_vertices(g) << endl;
+    //cout << num_edges(g) << " " << num_vertices(g) << endl;
 
     return g;
 }
 
 
+undirectedGraph structure::createGraph_ignoreCenter (double rm, double eps) 
+{
+    vector< vector<double> > distMatrix = this->getDistMatrix();
+
+    unsigned long centerIndex(0);
+    for (vector< vector<double> >::size_type i = 0; i < distMatrix.size(); i++)
+    {
+        int nc(0);
+        for (vector<double>::size_type j = 0; j < distMatrix[i].size(); j++)
+        {
+            if (fabs(distMatrix[i][j] - rm) < eps) nc++;
+        }
+        if (nc == 12) centerIndex = i;
+    }
+
+    typedef pair<int, int> edge;
+    vector<edge> edgeVec;
+    for (vector< vector<double> >::size_type i = 0; i < distMatrix.size(); i++) 
+    {
+        if (i == centerIndex) continue;
+        for (vector< vector<double> >::size_type j = i + 1; j < distMatrix.size(); j++) 
+        {
+            if (j == centerIndex) continue;
+            double diff = fabs(distMatrix[i][j] - rm);
+            if (diff < eps) edgeVec.push_back(edge(i,j));
+        }
+    }
+
+    undirectedGraph g (edgeVec.begin(), edgeVec.end(), this->nAtoms() - 1);
+    //cout << num_edges(g) << " " << num_vertices(g) << endl;
+
+    return g;
+}
 
 vector< vector<int> > structure::createAdjMatrix (vector<double> &p) {
     vector< vector<int> > adjMatrix;
@@ -267,13 +300,18 @@ void structure::propertyDistMatrix()
     }
 }
 
-void structure::propertyGraph()
+void structure::propertyGraph(double rm, double eps)
 {
-    undirectedGraph G = this->createGraph();
+    undirectedGraph G = this->createGraph(rm, eps);
     _uGraph = G;
 }
 
 
+void structure::propertyGraph_ignoreCenter(double rm, double eps)
+{
+    undirectedGraph G = this->createGraph_ignoreCenter(rm, eps);
+    _uGraph = G;
+}
 
 //symmetry
 //sig mirror; i: 0=yz 1=xz, 2=xy
