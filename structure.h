@@ -9,7 +9,11 @@
 #include "parameter.h"
 
 
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> undirectedGraph;
+typedef boost::adjacency_list<  boost::vecS, 
+                                boost::vecS, 
+                                boost::undirectedS, 
+                                boost::property<boost::vertex_index_t, int>, 
+                                boost::property<boost::edge_index_t, int> > undirectedGraph;
 
 
 class structure {    
