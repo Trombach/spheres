@@ -1,5 +1,6 @@
 #include "structure.h"
 #include "lina.h"
+#include "graph.h"
 
 using namespace std;
 using namespace boost;

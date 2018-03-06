@@ -1,19 +1,11 @@
 #ifndef STRUCTURE
 #define STRUCTURE
 
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
 #include <vector>
 #include "geometry.h"
 #include "lina.h"
 #include "parameter.h"
-
-
-typedef boost::adjacency_list<  boost::vecS, 
-                                boost::vecS, 
-                                boost::undirectedS, 
-                                boost::property<boost::vertex_index_t, int>, 
-                                boost::property<boost::edge_index_t, int> > undirectedGraph;
+#include "graph.h"
 
 
 class structure {    

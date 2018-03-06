@@ -8,7 +8,6 @@
 #include <map>
 #include <functional>
 #include <cassert>
-#include <boost/graph/isomorphism.hpp>
 #include "structure.h"
 #include "iop.h"
 #include "lina.h"

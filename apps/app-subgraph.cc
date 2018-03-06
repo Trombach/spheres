@@ -8,78 +8,10 @@
 #include "../iop.h"
 #include "../geometry.h"
 #include "../structure.h"
+#include "../graph.h"
 
 using namespace std;
 using namespace boost;
-
-typedef pair<double,double> GraphCoords;
-
-struct output_visitor : public planar_face_traversal_visitor
-{
-    void begin_face() { cout << "New face: "; }
-    template <typename Vertex> void next_vertex(Vertex v) { cout << v << " "; }
-    void end_face() { cout << endl; }
-};
-
-class pos_writer
-{
-    public:
-        pos_writer(vector<GraphCoords> pos) : _positions(pos)
-        {}
-        template <class Vertex> 
-            void operator()(ostream &out, const Vertex &v) const
-            {
-                out << " [shape=circle, pos=\"" << _positions[v].first << "," << _positions[v].second << "!\"]";
-            }
-    private:
-        vector<GraphCoords> _positions;
-};
-
-
-
-template <typename GraphFirst, typename GraphSecond> struct print_callback
-{
-    print_callback( const GraphFirst &graph1, 
-                    const GraphSecond &graph2, 
-                    vector<int> &allMatches, 
-                    vector<int> &mapping) :     m_graph1(graph1),
-                                                m_graph2(graph2),
-                                                _allMatches(allMatches),
-                                                _mapping(mapping)
-    {}
-
-
-    template <typename CorrespondenceMapFirstToSecond, typename CorrespondenceMapSecondToFirst>
-    bool operator() (   CorrespondenceMapFirstToSecond correspondence_map_1_to_2,
-                        CorrespondenceMapSecondToFirst correspondence_map_2_to_1)
-                        //typename boost::graph_traits<GraphFirst>::vertices_size_type subgraph_size)
-    {
-        unsigned int match(0);
-        BGL_FORALL_VERTICES_T(vertex1, m_graph1, GraphFirst)
-        {
-            if (get(correspondence_map_1_to_2, vertex1) != boost::graph_traits<GraphSecond>::null_vertex())
-            {
-                //cout << vertex1 << " <-> " << get(correspondence_map_1_to_2, vertex1) << endl;
-                _mapping[vertex1] = get(correspondence_map_1_to_2, vertex1);
-                match++;
-            }
-        }
-        _allMatches.push_back(match);
-        //cout << "---" << endl;
-
-        return (true);
-    }
-
-
-
-    private:
-        vector<int> &_allMatches;
-        vector<int> &_mapping;
-        const GraphFirst &m_graph1;
-        const GraphSecond &m_graph2;
-};
-
-
 
 
 int main (int argc, char *argv[])
@@ -214,15 +146,8 @@ int main (int argc, char *argv[])
 
         typedef vector<graph_traits<undirectedGraph>::edge_descriptor > vec_t;
         vector<vec_t> embedding(num_vertices(graph1));
-        if (boyer_myrvold_planarity_test(   boyer_myrvold_params::graph = graph1,
-                                        boyer_myrvold_params::embedding = &embedding[0]))
-        {
-            cout << "planar" << endl;
-        }
-        else
-        {
-            cout << "not planar" << endl;
-        }
+        boyer_myrvold_planarity_test(   boyer_myrvold_params::graph = graph1,
+                                        boyer_myrvold_params::embedding = &embedding[0]);
 
         planar_face_traversal(graph1, &embedding[0], my_visitor);
 
