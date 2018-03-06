@@ -11,13 +11,14 @@ using namespace std;
 
 struct NxCollection
 {
-    unsigned int _totalnc, _nc3, _nc4, _nc5, _nc6, _nc12;
+    unsigned int _totalnc, _nc3, _nc4, _nc5, _nc6, _nc7, _nc12;
 
     NxCollection() :    _totalnc(0),
                         _nc3(0),
                         _nc4(0),
                         _nc5(0),
                         _nc6(0),
+                        _nc7(0),
                         _nc12(0)
     {}
 };
@@ -55,7 +56,7 @@ int main (int argc, char *argv[])
     for (vector<structure>::size_type i = 0; i < optKS.size(); i++)
     {
         unsigned int totalnc(0);
-        unsigned int nc3(0), nc4(0), nc5(0), nc6(0), nc12(0);
+        unsigned int nc3(0), nc4(0), nc5(0), nc6(0), nc7(0), nc12(0);
         NxCollection Nx;
         vector< vector<double> > distMatrix = optKS[i].getDistMatrix();
         for (vector< vector<double> >::size_type j = 0; j < distMatrix.size(); j++)
@@ -74,8 +75,10 @@ int main (int argc, char *argv[])
             if (nc == 4) nc4++;
             if (nc == 5) nc5++;
             if (nc == 6) nc6++;
+            if (nc == 7) nc7++;
         }
         Nx._totalnc = totalnc / 2;
+        Nx._nc7 = nc7;
         Nx._nc6 = nc6;
         Nx._nc5 = nc5;
         Nx._nc4 = nc4;
@@ -136,7 +139,7 @@ int main (int argc, char *argv[])
     
     for (vector< vector<NxCollection> >::size_type i = 0; i < mapping.size(); i++)
     {
-        cout << mapping[i][0]._totalnc << " " << mapping[i][0]._nc6 << " " << mapping[i][0]._nc5 << " " << mapping[i][0]._nc4 << " " << mapping[i][0]._nc3 << "   " << mapping[i].size() << endl;
+        cout << mapping[i][0]._totalnc << " " << mapping[i][0]._nc7 << " " << mapping[i][0]._nc6 << " " << mapping[i][0]._nc5 << " " << mapping[i][0]._nc4 << " " << mapping[i][0]._nc3 << "   " << mapping[i].size() << endl;
     }
 
 
