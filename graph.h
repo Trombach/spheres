@@ -1,12 +1,9 @@
 #ifndef GRAPH
 #define GRAPH
 
-#include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/planar_face_traversal.hpp>
-#include <boost/graph/boyer_myrvold_planar_test.hpp>
 
 
 typedef std::pair<double,double> GraphCoords;
