@@ -14,6 +14,72 @@ using namespace std;
 using namespace boost;
 
 
+struct DegreeCollection
+{
+    unsigned int v2, v3, v4, v5, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12;
+
+    bool isVertexEqual(DegreeCollection D) const
+    {
+        if (this->v2 == D.v2 && 
+            this->v3 == D.v3 && 
+            this->v4 == D.v4 && 
+            this->v5 == D.v5) return true;
+        return false;
+    }
+
+    bool isFaceEqual(DegreeCollection D) const
+    {
+        if (this->f3 == D.f3 &&
+            this->f4 == D.f4 &&
+            this->f5 == D.f5 &&
+            this->f6 == D.f6 &&
+            this->f7 == D.f7 &&
+            this->f8 == D.f8 &&
+            this->f9 == D.f9 &&
+            this->f10 == D.f10 &&
+            this->f11 == D.f11 &&
+            this->f12 == D.f12) return true;
+        return false;
+    }
+
+    void setFaces(  unsigned int F3,
+                    unsigned int F4,
+                    unsigned int F5,
+                    unsigned int F6,
+                    unsigned int F7,
+                    unsigned int F8,
+                    unsigned int F9,
+                    unsigned int F10,
+                    unsigned int F11,
+                    unsigned int F12)
+    {
+        this->f3 = F3;
+        this->f4 = F4;
+        this->f5 = F5;
+        this->f6 = F6;
+        this->f7 = F7;
+        this->f8 = F8;
+        this->f9 = F9;
+        this->f10 = F10;
+        this->f11 = F11;
+        this->f12 = F12;
+    }
+
+    void setVertices(   unsigned int V2,
+                        unsigned int V3,
+                        unsigned int V4,
+                        unsigned int V5)
+    {
+        this->v2 = V2;
+        this->v3 = V3;
+        this->v4 = V4;
+        this->v5 = V5;
+    }
+
+};
+
+
+
 int main (int argc, char *argv[])
 {
 
@@ -98,6 +164,8 @@ int main (int argc, char *argv[])
     write_graphviz(icoOut, graph2);//, pos_writer(graph2_coords));
     icoOut.close();
     
+
+    vector<DegreeCollection> allGraphs;
     for (vector<structure>::size_type i = 0; i < KS.size(); i++)
     {
         cout << "(" << KS[i].getNumber() << ")" << " ";
@@ -133,7 +201,9 @@ int main (int argc, char *argv[])
         write_graphviz(graphOut, print_graph1);//, pos_writer(graph1_coords));
         graphOut.close();
 
-        output_visitor my_visitor;
+
+        DegreeCollection graphDegrees;
+        output_visitor<DegreeCollection> my_visitor(graphDegrees);
 
         //initialize edge index
         property_map<undirectedGraph, edge_index_t>::type e_index = get(edge_index, graph1);
@@ -151,7 +221,117 @@ int main (int argc, char *argv[])
 
         planar_face_traversal(graph1, &embedding[0], my_visitor);
 
+        unsigned int v2(0), v3(0), v4(0), v5(0);
+        BGL_FORALL_VERTICES_T(vertex, graph1, undirectedGraph)
+        {
+            if (degree(vertex, graph1) == 2) v2++;
+            if (degree(vertex, graph1) == 3) v3++;
+            if (degree(vertex, graph1) == 4) v4++;
+            if (degree(vertex, graph1) == 5) v5++;
+        }
+        graphDegrees.setVertices(v2,v3,v4,v5);
+        
+        allGraphs.push_back(graphDegrees);
     }
+
+
+    vector< vector< vector< DegreeCollection > > > vertex_face_Degrees_equality_classes;
+    //sort by vertices first
+    for (vector<DegreeCollection>::size_type i = 0; i < allGraphs.size(); i++)
+    {
+        if (vertex_face_Degrees_equality_classes.size() == 0)
+        {
+            vector<DegreeCollection> face_eqClass;
+            vector< vector< DegreeCollection > > vertex_eqClass;
+            face_eqClass.push_back(allGraphs[i]);
+            vertex_eqClass.push_back(face_eqClass);
+            vertex_face_Degrees_equality_classes.push_back(vertex_eqClass);
+        }
+        else
+        {
+            bool matched_vertices(false);
+            bool matched_faces(false);
+            for (vector< vector< vector< DegreeCollection > > >::size_type j = 0; j < vertex_face_Degrees_equality_classes.size(); j++)
+            {
+                for (vector< vector< DegreeCollection > >::size_type k = 0; k < vertex_face_Degrees_equality_classes[j].size(); k++)
+                {
+                    if (allGraphs[i].isVertexEqual(vertex_face_Degrees_equality_classes[j][k][0]))
+                    {
+                        matched_vertices = true;
+                        if (allGraphs[i].isFaceEqual(vertex_face_Degrees_equality_classes[j][k][0]))
+                        {
+                            matched_faces = true;
+                            vertex_face_Degrees_equality_classes[j][k].push_back(allGraphs[i]);
+                            //cout << i << " " << j << " " << k << " 1" << endl;
+                            break;
+                        }
+                    }
+                }
+                if (matched_vertices && matched_faces == false)
+                {
+                    vector<DegreeCollection> face_newEqClass;
+                    face_newEqClass.push_back(allGraphs[i]);
+                    vertex_face_Degrees_equality_classes[j].push_back(face_newEqClass);
+                    //cout << i << " " << j << " 2" << endl;
+                    break;
+                }
+            }
+            if (matched_vertices == false && matched_faces == false)
+            {
+                vector<DegreeCollection> A;
+                vector< vector< DegreeCollection > > B;
+                A.push_back(allGraphs[i]);
+                B.push_back(A);
+                vertex_face_Degrees_equality_classes.push_back(B);
+                //cout << i << " 3" << endl;
+            }
+            //cout << i << " " << matched_vertices << " " << matched_faces << endl;
+        }
+    }
+
+    auto compare_faces = [&] (DegreeCollection a, DegreeCollection b)
+    {
+        if (a.f3 > b.f3) return true;
+        if (a.f3 == b.f3 && a.f4 > b.f4) return true;
+        if (a.f3 == b.f3 && a.f4 == b.f4 && a.f5 > b.f5) return true; 
+        if (a.f3 == b.f3 && a.f4 == b.f4 && a.f5 == b.f5 && a.f6 > b.f6) return true; 
+        if (a.f3 == b.f3 && a.f4 == b.f4 && a.f5 == b.f5 && a.f6 == b.f6 && a.f7 > b.f7) return true; 
+        if (a.f3 == b.f3 && a.f4 == b.f4 && a.f5 == b.f5 && a.f6 == b.f6 && a.f7 == b.f7 && a.f8 > b.f8) return true; 
+        if (a.f3 == b.f3 && a.f4 == b.f4 && a.f5 == b.f5 && a.f6 == b.f6 && a.f7 == b.f7 && a.f8 == b.f8 && a.f9 > b.f9) return true; 
+        if (a.f3 == b.f3 && a.f4 == b.f4 && a.f5 == b.f5 && a.f6 == b.f6 && a.f7 == b.f7 && a.f8 == b.f8 && a.f9 == b.f9 && a.f10 > b.f10) return true; 
+        if (a.f3 == b.f3 && a.f4 == b.f4 && a.f5 == b.f5 && a.f6 == b.f6 && a.f7 == b.f7 && a.f8 == b.f8 && a.f9 == b.f9 && a.f10 == b.f10 && a.f11 > b.f11) return true; 
+        if (a.f3 == b.f3 && a.f4 == b.f4 && a.f5 == b.f5 && a.f6 == b.f6 && a.f7 == b.f7 && a.f8 == b.f8 && a.f9 == b.f9 && a.f10 == b.f10 && a.f11 == b.f11 && a.f12 > b.f12) return true; 
+        return false;
+    };
+
+    for (vector< vector< vector< DegreeCollection > > >::size_type i = 0; i < vertex_face_Degrees_equality_classes.size(); i++)
+    {
+        sort(vertex_face_Degrees_equality_classes[i][0].begin(), vertex_face_Degrees_equality_classes[i][0].end(), compare_faces);
+    }
+
+    for (vector< vector< vector< DegreeCollection > > >::size_type i = 0; i < vertex_face_Degrees_equality_classes.size(); i++)
+    {
+        for (vector< vector< DegreeCollection > >::size_type j = 0; j < vertex_face_Degrees_equality_classes[i].size(); j++)
+        {
+            cout << "V " << vertex_face_Degrees_equality_classes[i][j][0].v2 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].v3 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].v4 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].v5 << " F "
+                << vertex_face_Degrees_equality_classes[i][j][0].f3 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f4 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f5 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f6 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f7 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f8 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f9 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f10 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f11 << " "
+                << vertex_face_Degrees_equality_classes[i][j][0].f12 << " " 
+                << vertex_face_Degrees_equality_classes[i][j].size() << endl;
+        }
+    }
+                    
+
 
 
     return 0;

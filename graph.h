@@ -14,18 +14,21 @@ typedef boost::adjacency_list<  boost::vecS,
                                 boost::property<boost::vertex_index_t, int>, 
                                 boost::property<boost::edge_index_t, int> > undirectedGraph;
 
-struct output_visitor : public boost::planar_face_traversal_visitor 
+template <class T> struct output_visitor : public boost::planar_face_traversal_visitor 
 {
     unsigned int _F;
     unsigned int _F3, _F4, _F5, _F6, _F7, _F8, _F9, _F10, _F11, _F12;
+    T &_collector;
 
-    output_visitor() : _F(0), _F3(0), _F4(0), _F5(0), _F6(0), _F7(0), _F8(0), _F9(0), _F10(0), _F11(0), _F12(0) {}
+    output_visitor(T &collector) : _F(0), _F3(0), _F4(0), _F5(0), _F6(0), _F7(0), _F8(0), _F9(0), _F10(0), _F11(0), _F12(0), _collector(collector) {}
 
     void begin_face() { _F = 0; }
+
     template <typename Vertex> void next_vertex(Vertex v)
     { 
         _F++;
     }
+
     void end_face() 
     {
         switch (_F)
@@ -55,21 +58,23 @@ struct output_visitor : public boost::planar_face_traversal_visitor
         }
         _F = 0;
     }
+
     void end_traversal()
     {
-        std::cout << _F3 << " " << _F4 << " " << _F5 << " " << _F6 << " " << _F7 << " " << _F8 << " " << _F9 << " " << _F10 << " " << _F11 << " " << _F12 << std::endl;
+        _collector.setFaces(_F3,_F4,_F5,_F6,_F7,_F8,_F9,_F10,_F11,_F12);
+        //std::cout << _F3 << " " << _F4 << " " << _F5 << " " << _F6 << " " << _F7 << " " << _F8 << " " << _F9 << " " << _F10 << " " << _F11 << " " << _F12 << std::endl;
     }
-    };
+};
 
 template <typename GraphFirst, typename GraphSecond> struct print_callback 
 {
     print_callback( const GraphFirst &graph1, 
                     const GraphSecond &graph2, 
                     std::vector<int> &allMatches, 
-                    std::vector<int> &mapping) :     m_graph1(graph1),
-                                                m_graph2(graph2),
-                                                _allMatches(allMatches),
-                                                _mapping(mapping)
+                    std::vector<int> &mapping) :    m_graph1(graph1),
+                                                    m_graph2(graph2),
+                                                    _allMatches(allMatches),
+                                                    _mapping(mapping)
     {}
     template <typename CorrespondenceMapFirstToSecond, typename CorrespondenceMapSecondToFirst>
     bool operator() (   CorrespondenceMapFirstToSecond correspondence_map_1_to_2,
