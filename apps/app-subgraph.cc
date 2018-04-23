@@ -369,16 +369,17 @@ int main (int argc, char *argv[])
                 write_graphviz(sorted_graphOut, print_graph1);
                 sorted_graphOut.close();
 
-                num++;
 
+                ofstream sorted_coordOut;
+                sorted_coordOut.open("output/coords/coord" + to_string(num) + "-" + to_string(Nc) + ".xyz");
                 int number = vertex_face_Degrees_equality_classes[i][j][k].number;
-                sorted_KS.push_back(KS[number - 1]);
+                xyzout(KS[number - 1], "coords/coord" + to_string(num) + "-" + to_string(Nc) + ".xyz");
+                num++;
             }
         }
     }
 
 
-    xyzoutall(sorted_KS);
                     
 
 
