@@ -184,10 +184,12 @@ int main (int argc, char *argv[])
         graphDegrees.printGraph = print_graph1;
 
         ofstream graphOut;
-        graphOut.open("output/graphs/graph" + to_string(KS[i].getNumber()) + "-" + to_string(num_edges(print_graph1)) + ".dot");
+        graphOut.open("output/graphs/graph" 
+                + to_string(KS[i].getNumber()) + "-" + to_string(num_edges(print_graph1)) + ".dot");
         write_graphviz(graphOut, print_graph1);
         graphOut.close();
 
+        //counting faces and vertices
 
         output_visitor<DegreeCollection> my_visitor(graphDegrees);
 
@@ -220,6 +222,7 @@ int main (int argc, char *argv[])
         allGraphs.push_back(graphDegrees);
     }
 
+    //analysis
 
     vector< vector< vector< DegreeCollection > > > vertex_face_Degrees_equality_classes;
     //sort by vertices first
@@ -237,9 +240,13 @@ int main (int argc, char *argv[])
         {
             bool matched_vertices(false);
             bool matched_faces(false);
-            for (vector< vector< vector< DegreeCollection > > >::size_type j = 0; j < vertex_face_Degrees_equality_classes.size(); j++)
+            for (   vector< vector< vector< DegreeCollection > > >::size_type j = 0; 
+                    j < vertex_face_Degrees_equality_classes.size(); 
+                    j++)
             {
-                for (vector< vector< DegreeCollection > >::size_type k = 0; k < vertex_face_Degrees_equality_classes[j].size(); k++)
+                for (   vector< vector< DegreeCollection > >::size_type k = 0; 
+                        k < vertex_face_Degrees_equality_classes[j].size(); 
+                        k++)
                 {
                     if (allGraphs[i].isVertexEqual(vertex_face_Degrees_equality_classes[j][k][0]))
                     {
@@ -300,16 +307,26 @@ int main (int argc, char *argv[])
         return false;
     };
 
-    sort(vertex_face_Degrees_equality_classes.begin(), vertex_face_Degrees_equality_classes.end(), compare_vertex);
+    sort(   vertex_face_Degrees_equality_classes.begin(), 
+            vertex_face_Degrees_equality_classes.end(), 
+            compare_vertex);
 
-    for (vector< vector< vector< DegreeCollection > > >::size_type i = 0; i < vertex_face_Degrees_equality_classes.size(); i++)
+    for (   vector< vector< vector< DegreeCollection > > >::size_type i = 0; 
+            i < vertex_face_Degrees_equality_classes.size(); 
+            i++)
     {
-        sort(vertex_face_Degrees_equality_classes[i][0].begin(), vertex_face_Degrees_equality_classes[i][0].end(), compare_faces);
+        sort(   vertex_face_Degrees_equality_classes[i][0].begin(), 
+                vertex_face_Degrees_equality_classes[i][0].end(), 
+                compare_faces);
     }
 
-    for (vector< vector< vector< DegreeCollection > > >::size_type i = 0; i < vertex_face_Degrees_equality_classes.size(); i++)
+    for (   vector< vector< vector< DegreeCollection > > >::size_type i = 0; 
+            i < vertex_face_Degrees_equality_classes.size(); 
+            i++)
     {
-        for (vector< vector< DegreeCollection > >::size_type j = 0; j < vertex_face_Degrees_equality_classes[i].size(); j++)
+        for (   vector< vector< DegreeCollection > >::size_type j = 0; 
+                j < vertex_face_Degrees_equality_classes[i].size(); 
+                j++)
         {
             cout << "Nc " << vertex_face_Degrees_equality_classes[i][j][0].Nc << " "
                 << "V " << vertex_face_Degrees_equality_classes[i][j][0].v5 << " "
@@ -332,26 +349,36 @@ int main (int argc, char *argv[])
 
     unsigned int num(1);
     vector<structure> sorted_KS;
-    for (vector< vector< vector< DegreeCollection > > >::size_type i = 0; i < vertex_face_Degrees_equality_classes.size(); i++)
+    for (   vector< vector< vector< DegreeCollection > > >::size_type i = 0; 
+            i < vertex_face_Degrees_equality_classes.size(); 
+            i++)
     {
-        for (vector< vector< DegreeCollection > >::size_type j = 0; j < vertex_face_Degrees_equality_classes[i].size(); j++)
+        for (   vector< vector< DegreeCollection > >::size_type j = 0; 
+                j < vertex_face_Degrees_equality_classes[i].size(); 
+                j++)
         {
-            for (vector< DegreeCollection >::size_type k = 0; k < vertex_face_Degrees_equality_classes[i][j].size(); k++)
+            for (   vector< DegreeCollection >::size_type k = 0; 
+                    k < vertex_face_Degrees_equality_classes[i][j].size(); 
+                    k++)
             {
                 int Nc = vertex_face_Degrees_equality_classes[i][j][k].Nc;
 
-                undirectedGraph print_graph1 = vertex_face_Degrees_equality_classes[i][j][k].printGraph;
+                undirectedGraph print_graph1 = 
+                    vertex_face_Degrees_equality_classes[i][j][k].printGraph;
 
                 ofstream sorted_graphOut;
-                sorted_graphOut.open("output/sorted-graphs/graph" + to_string(num) + "-" + to_string(Nc) + ".dot");
+                sorted_graphOut.open("output/sorted-graphs/graph" 
+                        + to_string(num) + "-" + to_string(Nc) + ".dot");
                 write_graphviz(sorted_graphOut, print_graph1);
                 sorted_graphOut.close();
 
 
                 ofstream sorted_coordOut;
-                sorted_coordOut.open("output/coords/coord" + to_string(num) + "-" + to_string(Nc) + ".xyz");
+                sorted_coordOut.open("output/coords/coord" 
+                        + to_string(num) + "-" + to_string(Nc) + ".xyz");
                 int number = vertex_face_Degrees_equality_classes[i][j][k].number;
-                xyzout(KS[number - 1], "coords/coord" + to_string(num) + "-" + to_string(Nc) + ".xyz");
+                xyzout(KS[number - 1], "coords/coord" 
+                        + to_string(num) + "-" + to_string(Nc) + ".xyz");
                 num++;
             }
         }
