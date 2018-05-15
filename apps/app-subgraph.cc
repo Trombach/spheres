@@ -133,22 +133,6 @@ int main (int argc, char *argv[])
     structure ico (0, ico_coord);
     ico.propertyGraph(2);
 
-    //coordinate pairs for ico graph
-    vector<GraphCoords> graph2_coords =
-    {
-        make_pair(0,0),
-        make_pair(500,454.6),
-        make_pair(500,115.5),
-        make_pair(573.5,331.435),
-        make_pair(500,866),
-        make_pair(650,201.435),
-        make_pair(350,370),
-        make_pair(500,240),
-        make_pair(1000,0),
-        make_pair(650,370),
-        make_pair(350,201.435),
-        make_pair(426.5,331.435)
-    };
 
     
     //comparison
@@ -184,12 +168,6 @@ int main (int argc, char *argv[])
         }
         else cout << "no" << endl;
 
-        vector<GraphCoords> graph1_coords(12);
-        for (vector<int>::size_type j = 0; j < mapping.size(); j++)
-        {
-            //cout << j << " - " << mapping[j] << endl;
-            graph1_coords[mapping[j]] = graph2_coords[j];
-        }
 
         undirectedGraph print_graph1(12);
         BGL_FORALL_EDGES_T(edge, graph1, undirectedGraph)
@@ -207,7 +185,7 @@ int main (int argc, char *argv[])
 
         ofstream graphOut;
         graphOut.open("output/graphs/graph" + to_string(KS[i].getNumber()) + "-" + to_string(num_edges(print_graph1)) + ".dot");
-        write_graphviz(graphOut, print_graph1);//, pos_writer(graph1_coords));
+        write_graphviz(graphOut, print_graph1);
         graphOut.close();
 
 
