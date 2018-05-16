@@ -19,6 +19,7 @@ struct DegreeCollection
     unsigned int v2, v3, v4, v5, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12;
     unsigned int number, Nc;
     undirectedGraph printGraph;
+    undirectedGraph removedEdgesGraph;
 
     bool isVertexEqual(DegreeCollection D) const
     {
@@ -159,7 +160,7 @@ int main (int argc, char *argv[])
         undirectedGraph graph1 = KS[i].getGraph();
 
         vector<int> matches;
-        vector<int> mapping(12, 0);
+        vector<int> mapping(12, 0);//mapping from vector index to value at that index
         print_callback<undirectedGraph, undirectedGraph> my_callback(graph1, graph2, matches, mapping);
         vf2_subgraph_mono(graph1, graph2, my_callback);
         if (isSubgraphIco(matches))
@@ -169,6 +170,7 @@ int main (int argc, char *argv[])
         else cout << "no" << endl;
 
 
+        //create graph matching the icosahedral graph
         undirectedGraph print_graph1(12);
         BGL_FORALL_EDGES_T(edge, graph1, undirectedGraph)
         {
@@ -176,12 +178,19 @@ int main (int argc, char *argv[])
             add_edge(mapping[source(edge, graph1)], mapping[target(edge, graph1)], print_graph1);
         }
 
+        //create graph of removed edges collection by removing edges from icosahedral graph
+        undirectedGraph removed_edges_graph = graph2;
+        BGL_FORALL_EDGES_T(edge, print_graph1, undirectedGraph)
+        {
+            remove_edge(source(edge, print_graph1), target(edge, print_graph1), removed_edges_graph);
+        }
+
         //save mapped graph to DegreeCollection for later use
         
-
         DegreeCollection graphDegrees;
         graphDegrees.number = KS[i].getNumber();
         graphDegrees.printGraph = print_graph1;
+        graphDegrees.removedEdgesGraph = removed_edges_graph;
 
         ofstream graphOut;
         graphOut.open("output/graphs/graph" 
@@ -347,8 +356,8 @@ int main (int argc, char *argv[])
         }
     }
 
+    //print output files
     unsigned int num(1);
-    vector<structure> sorted_KS;
     for (   vector< vector< vector< DegreeCollection > > >::size_type i = 0; 
             i < vertex_face_Degrees_equality_classes.size(); 
             i++)
@@ -379,6 +388,21 @@ int main (int argc, char *argv[])
                 int number = vertex_face_Degrees_equality_classes[i][j][k].number;
                 xyzout(KS[number - 1], "coords/coord" 
                         + to_string(num) + "-" + to_string(Nc) + ".xyz");
+                
+
+                undirectedGraph removed_edges_graph 
+                    = vertex_face_Degrees_equality_classes[i][j][k].removedEdgesGraph;
+
+                cout << num << " " << vertex_face_Degrees_equality_classes[i][j][k].Nc << " ";
+                BGL_FORALL_EDGES_T(edge, removed_edges_graph, undirectedGraph)
+                {
+                    cout << "(" << source(edge, removed_edges_graph) << "," 
+                        << target(edge, removed_edges_graph) << ")";
+
+
+                }
+                cout << endl;
+
                 num++;
             }
         }
