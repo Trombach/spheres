@@ -314,6 +314,32 @@ void structure::propertyGraph_ignoreCenter(double rm, double eps)
     _uGraph = G;
 }
 
+template <unsigned int n> double structure::longest_nearest_neighbour_distance ()
+{
+    double distance(0);
+
+    
+    for (vector<coord3d>::size_type i = 0; i < _coordinates.size(); i++)
+    {
+        vector<double> allDistances;
+        for (vector<coord3d>::size_type j = i + 1; j < _coordinates.size(); j++)
+        {
+            allDistances.push_back(coord3d::dist(_coordinates[i],_coordinates[j]));
+        }
+        sort (allDistances.begin(), allDistances.end());
+        allDistances.resize(n);
+
+        if (allDistances.back() > distance)
+        {
+            distance = allDistances.back();
+        }
+    }
+
+
+    return distance;
+}
+
+
 //symmetry
 //sig mirror; i: 0=yz 1=xz, 2=xy
 vector<coord3d> structure::sig (int a) {

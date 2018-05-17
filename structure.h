@@ -144,13 +144,15 @@ public:
     matrix3d m3d_principalAxis ();
     void rotateToPrincipalAxis (matrix3d &principalAxis);
 
-
+    //graph stuff
     std::vector< std::vector<int> > createAdjMatrix (std::vector<double> &p);
     undirectedGraph createGraph (double rm = 1, double eps = 1e-10);
     undirectedGraph createGraph_ignoreCenter (double rm = 1, double eps = 1e-10);
     std::vector<int> createBondVector ();
     std::vector<double> createAdjMatrix_egenvalues ();
 
+    //nearest neighbours
+    template <unsigned int n> double longest_nearest_neighbour_distance ();
 
     //symmetry
     std::vector<coord3d> sig (int a);
