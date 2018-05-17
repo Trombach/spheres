@@ -314,7 +314,7 @@ void structure::propertyGraph_ignoreCenter(double rm, double eps)
     _uGraph = G;
 }
 
-template <unsigned int n> double structure::longest_nearest_neighbour_distance ()
+double structure::longest_nearest_neighbour_distance (unsigned int n)
 {
     double distance(0);
 
@@ -322,12 +322,17 @@ template <unsigned int n> double structure::longest_nearest_neighbour_distance (
     for (vector<coord3d>::size_type i = 0; i < _coordinates.size(); i++)
     {
         vector<double> allDistances;
-        for (vector<coord3d>::size_type j = i + 1; j < _coordinates.size(); j++)
+        for (vector<coord3d>::size_type j = 0; j < _coordinates.size(); j++)
         {
+            if (i == j) continue;
             allDistances.push_back(coord3d::dist(_coordinates[i],_coordinates[j]));
         }
         sort (allDistances.begin(), allDistances.end());
         allDistances.resize(n);
+        //for (vector<double>::size_type a = 0; a < allDistances.size(); a++)
+        //{
+        //    cout << allDistances[a] << endl;
+        //}
 
         if (allDistances.back() > distance)
         {

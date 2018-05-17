@@ -152,7 +152,7 @@ public:
     std::vector<double> createAdjMatrix_egenvalues ();
 
     //nearest neighbours
-    template <unsigned int n> double longest_nearest_neighbour_distance ();
+    double longest_nearest_neighbour_distance (unsigned int n);
 
     //symmetry
     std::vector<coord3d> sig (int a);
