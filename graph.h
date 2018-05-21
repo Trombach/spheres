@@ -4,14 +4,22 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/planar_face_traversal.hpp>
+#include "geometry.h"
 
+struct vertex_info
+{
+    unsigned int index;
+    coord3d coordinate;
+};
 
 typedef std::pair<double,double> GraphCoords;
 
 typedef boost::adjacency_list<  boost::vecS, 
                                 boost::vecS, 
                                 boost::undirectedS, 
-                                boost::property<boost::vertex_index_t, int>, 
+                                //boost::property<boost::vertex_index_t, int>,
+                                //boost::property<boost::vertex_coordinate_t, coord3d>,
+                                vertex_info,
                                 boost::property<boost::edge_index_t, int> > undirectedGraph;
 
 template <class T> struct output_visitor : public boost::planar_face_traversal_visitor 

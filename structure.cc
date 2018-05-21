@@ -165,6 +165,13 @@ undirectedGraph structure::createGraph (double rm, double eps)
     }
 
     undirectedGraph g (edgeVec.begin(), edgeVec.end(), this->nAtoms());
+    unsigned int i(0);
+    BGL_FORALL_VERTICES_T(vertex, g, undirectedGraph)
+    {
+        g[vertex].coordinate = _coordinates[i];
+        g[vertex].index = i;
+        i++;
+    }
     //cout << num_edges(g) << " " << num_vertices(g) << endl;
 
     return g;
@@ -200,6 +207,13 @@ undirectedGraph structure::createGraph_ignoreCenter (double rm, double eps)
     }
 
     undirectedGraph g (edgeVec.begin(), edgeVec.end(), this->nAtoms() - 1);
+    unsigned int i(0);
+    BGL_FORALL_VERTICES_T(vertex, g, undirectedGraph)
+    {
+        g[vertex].coordinate = _coordinates[i];
+        g[vertex].index = i;
+        i++;
+    }
     //cout << num_edges(g) << " " << num_vertices(g) << endl;
 
     return g;
