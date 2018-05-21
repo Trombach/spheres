@@ -20,6 +20,7 @@ struct DegreeCollection
     unsigned int number, Nc;
     undirectedGraph printGraph;
     undirectedGraph removedEdgesGraph;
+    vector<int> mapping;
 
     bool isVertexEqual(DegreeCollection D) const
     {
@@ -178,6 +179,15 @@ int main (int argc, char *argv[])
             add_edge(mapping[source(edge, graph1)], mapping[target(edge, graph1)], print_graph1);
         }
 
+        //add coordinate properties to print_graph1
+        BGL_FORALL_VERTICES_T(vertex, graph1, undirectedGraph)
+        {
+            unsigned int index = graph1[vertex].index;
+            coord3d coord = graph1[vertex].coordinate;
+
+            print_graph1[mapping[index]].coordinate = coord;
+        }
+
         //create graph of removed edges collection by removing edges from icosahedral graph
         undirectedGraph removed_edges_graph = graph2;
         BGL_FORALL_EDGES_T(edge, print_graph1, undirectedGraph)
@@ -191,6 +201,7 @@ int main (int argc, char *argv[])
         graphDegrees.number = KS[i].getNumber();
         graphDegrees.printGraph = print_graph1;
         graphDegrees.removedEdgesGraph = removed_edges_graph;
+        graphDegrees.mapping = mapping;
 
         ofstream graphOut;
         graphOut.open("output/graphs/graph" 
@@ -374,7 +385,8 @@ int main (int argc, char *argv[])
 
                 undirectedGraph print_graph1 = 
                     vertex_face_Degrees_equality_classes[i][j][k].printGraph;
-
+    
+                //output graph file
                 ofstream sorted_graphOut;
                 sorted_graphOut.open("output/sorted-graphs/graph" 
                         + to_string(num) + "-" + to_string(Nc) + ".dot");
@@ -382,6 +394,7 @@ int main (int argc, char *argv[])
                 sorted_graphOut.close();
 
 
+                //output coord file
                 ofstream sorted_coordOut;
                 sorted_coordOut.open("output/coords/coord" 
                         + to_string(num) + "-" + to_string(Nc) + ".xyz");
@@ -390,6 +403,7 @@ int main (int argc, char *argv[])
                         + to_string(num) + "-" + to_string(Nc) + ".xyz");
                 
 
+                //output list of removed edges
                 undirectedGraph removed_edges_graph 
                     = vertex_face_Degrees_equality_classes[i][j][k].removedEdgesGraph;
 
@@ -399,8 +413,21 @@ int main (int argc, char *argv[])
                     cout << "(" << source(edge, removed_edges_graph) << "," 
                         << target(edge, removed_edges_graph) << ")";
 
-
                 }
+
+                double distance(0);
+                BGL_FORALL_EDGES_T(edge, removed_edges_graph, undirectedGraph)
+                {
+                    double dist 
+                        = coord3d::dist(print_graph1[source(edge, removed_edges_graph)].coordinate,
+                                        print_graph1[target(edge, removed_edges_graph)].coordinate);
+
+                if (dist > distance) distance = dist;
+                }
+                cout << " " << distance;
+
+                //double nnDistance = KS[number - 1].longest_nearest_neighbour_distance(7);
+                //cout << " " << nnDistance << endl;
                 cout << endl;
 
                 num++;
