@@ -13,6 +13,7 @@
 using namespace std;
 using namespace boost;
 
+typedef pair<unsigned int, double> distancePair;
 
 struct DegreeCollection
 {
@@ -152,17 +153,16 @@ int main (int argc, char *argv[])
     icoOut.open("output/graphs/graph_ico_test.dot");
     write_graphviz(icoOut, graph2);//, pos_writer(graph2_coords));
     icoOut.close();
-    
 
     vector<DegreeCollection> allGraphs;
     for (vector<structure>::size_type i = 0; i < KS.size(); i++)
     {
         cout << "(" << KS[i].getNumber() << ")" << " ";
         undirectedGraph graph1 = KS[i].getGraph();
-
+        
         vector<int> matches;
-        vector<int> mapping(12, 0);//mapping from vector index to value at that index
-        print_callback<undirectedGraph, undirectedGraph> my_callback(graph1, graph2, matches, mapping);
+        vector< vector<int> > all_mappings;//mapping from vector index to value at that index
+        print_callback<undirectedGraph, undirectedGraph> my_callback(graph1, graph2, matches, all_mappings);
         vf2_subgraph_mono(graph1, graph2, my_callback);
         if (isSubgraphIco(matches))
         {
@@ -170,30 +170,78 @@ int main (int argc, char *argv[])
         }
         else cout << "no" << endl;
 
+        //find best mapping
+        vector<int> mapping;
+        double rms(2);
+        undirectedGraph print_graph1(12);
+        undirectedGraph removed_edges_graph = graph2;
+        for (vector< vector<int> >::size_type m = 0; m < all_mappings.size(); m++)
+        {
+            vector<int> current_mapping = all_mappings[m];
+            
+            //create graph matching ico graph from current mapping
+            undirectedGraph testGraph(12);
+            BGL_FORALL_EDGES_T(edge, graph1, undirectedGraph)
+            {
+                add_edge(current_mapping[source(edge, graph1)], current_mapping[target(edge, graph1)], testGraph);
+            }
+
+            //add coordinate properties
+            BGL_FORALL_VERTICES_T(vertex, graph1, undirectedGraph)
+            {
+                unsigned int index = graph1[vertex].index;
+                coord3d coord = graph1[vertex].coordinate;
+
+                testGraph[current_mapping[index]].coordinate = coord;
+            }
+
+            //create graph of removed edges
+            undirectedGraph test_removed_edges_graph = graph2;
+
+            BGL_FORALL_EDGES_T(edge, testGraph, undirectedGraph) 
+            {
+                remove_edge(source(edge, testGraph), target(edge, testGraph), test_removed_edges_graph);
+            }
+
+            //calculate rms distance
+            double d(0);
+            BGL_FORALL_EDGES_T(edge, test_removed_edges_graph, undirectedGraph)
+            {
+                d += pow (coord3d::dist(  testGraph[source(edge, testGraph)].coordinate,
+                                        testGraph[target(edge, testGraph)].coordinate), 2);
+            }
+
+            double this_rms = sqrt(d / 12);
+            if (this_rms < rms) 
+            {
+                rms = this_rms;
+                mapping = current_mapping;
+                print_graph1 = testGraph;
+                removed_edges_graph = test_removed_edges_graph;
+            }
+        }
 
         //create graph matching the icosahedral graph
-        undirectedGraph print_graph1(12);
-        BGL_FORALL_EDGES_T(edge, graph1, undirectedGraph)
-        {
-            //cout << source(edge, graph1) << " - " << target(edge, graph1) << endl;
-            add_edge(mapping[source(edge, graph1)], mapping[target(edge, graph1)], print_graph1);
-        }
+        //BGL_FORALL_EDGES_T(edge, graph1, undirectedGraph)
+        //{
+        //    //cout << source(edge, graph1) << " - " << target(edge, graph1) << endl;
+        //    add_edge(mapping[source(edge, graph1)], mapping[target(edge, graph1)], print_graph1);
+        //}
 
         //add coordinate properties to print_graph1
-        BGL_FORALL_VERTICES_T(vertex, graph1, undirectedGraph)
-        {
-            unsigned int index = graph1[vertex].index;
-            coord3d coord = graph1[vertex].coordinate;
+        //BGL_FORALL_VERTICES_T(vertex, graph1, undirectedGraph)
+        //{
+        //    unsigned int index = graph1[vertex].index;
+        //    coord3d coord = graph1[vertex].coordinate;
 
-            print_graph1[mapping[index]].coordinate = coord;
-        }
+        //    print_graph1[mapping[index]].coordinate = coord;
+        //}
 
         //create graph of removed edges collection by removing edges from icosahedral graph
-        undirectedGraph removed_edges_graph = graph2;
-        BGL_FORALL_EDGES_T(edge, print_graph1, undirectedGraph)
-        {
-            remove_edge(source(edge, print_graph1), target(edge, print_graph1), removed_edges_graph);
-        }
+        //BGL_FORALL_EDGES_T(edge, print_graph1, undirectedGraph)
+        //{
+        //    remove_edge(source(edge, print_graph1), target(edge, print_graph1), removed_edges_graph);
+        //}
 
         //save mapped graph to DegreeCollection for later use
         
@@ -369,6 +417,7 @@ int main (int argc, char *argv[])
 
     //print output files
     unsigned int num(1);
+    vector<distancePair> vector_distancePair;              
     for (   vector< vector< vector< DegreeCollection > > >::size_type i = 0; 
             i < vertex_face_Degrees_equality_classes.size(); 
             i++)
@@ -424,6 +473,8 @@ int main (int argc, char *argv[])
 
                 if (dist > distance) distance = dist;
                 }
+                distancePair pair = make_pair(num, distance);
+                vector_distancePair.push_back(pair);
                 cout << " " << distance;
 
                 //double nnDistance = KS[number - 1].longest_nearest_neighbour_distance(7);
@@ -435,7 +486,18 @@ int main (int argc, char *argv[])
         }
     }
 
+    auto sort_vector_distancePair = [&] (distancePair p1, distancePair p2)
+    {
+        if (p1.second < p2.second) return true;
+        else return false;
+    };
 
+    sort(vector_distancePair.begin(), vector_distancePair.end(), sort_vector_distancePair);
+
+    for (vector<distancePair>::size_type a = 0; a < vector_distancePair.size(); a++)
+    {
+        cout << setprecision(9) << vector_distancePair[a].first << " " << vector_distancePair[a].second << endl;
+    }
                     
 
 
