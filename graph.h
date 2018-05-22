@@ -79,10 +79,10 @@ template <typename GraphFirst, typename GraphSecond> struct print_callback
     print_callback( const GraphFirst &graph1, 
                     const GraphSecond &graph2, 
                     std::vector<int> &allMatches, 
-                    std::vector<int> &mapping) :    m_graph1(graph1),
-                                                    m_graph2(graph2),
-                                                    _allMatches(allMatches),
-                                                    _mapping(mapping)
+                    std::vector<std::vector<int> > &mapping) :  m_graph1(graph1),
+                                                                m_graph2(graph2),
+                                                                _allMatches(allMatches),
+                                                                _mapping(mapping)
     {}
     template <typename CorrespondenceMapFirstToSecond, typename CorrespondenceMapSecondToFirst>
     bool operator() (   CorrespondenceMapFirstToSecond correspondence_map_1_to_2,
@@ -90,15 +90,17 @@ template <typename GraphFirst, typename GraphSecond> struct print_callback
                         //typename boost::graph_traits<GraphFirst>::vertices_size_type subgraph_size)
     {
     unsigned int match(0);
+    std::vector<int> single_mapping(12, 0);
     BGL_FORALL_VERTICES_T(vertex1, m_graph1, GraphFirst)
     {
         if (get(correspondence_map_1_to_2, vertex1) != boost::graph_traits<GraphSecond>::null_vertex())
         {
             //cout << vertex1 << " <-> " << get(correspondence_map_1_to_2, vertex1) << endl;
-            _mapping[vertex1] = get(correspondence_map_1_to_2, vertex1);
+            single_mapping[vertex1] = get(correspondence_map_1_to_2, vertex1);
             match++;
         }
     }
+    _mapping.push_back(single_mapping);
     _allMatches.push_back(match);
     //cout << "---" << endl;
 
@@ -107,7 +109,7 @@ template <typename GraphFirst, typename GraphSecond> struct print_callback
                         
     private:
         std::vector<int> &_allMatches;
-        std::vector<int> &_mapping;
+        std::vector<std::vector<int> > &_mapping;
         const GraphFirst &m_graph1;
         const GraphSecond &m_graph2;
 };
