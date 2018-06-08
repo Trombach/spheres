@@ -44,6 +44,7 @@ potential
 core
 .dep
 getxyz
+ico-subgraph
 apps/app-N14
 apps/app-bondvariance
 apps/app-Nc

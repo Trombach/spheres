@@ -5,10 +5,10 @@
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/planar_face_traversal.hpp>
 #include <boost/graph/boyer_myrvold_planar_test.hpp>
-#include "../iop.h"
-#include "../geometry.h"
-#include "../structure.h"
-#include "../graph.h"
+#include "iop.h"
+#include "geometry.h"
+#include "structure.h"
+#include "graph.h"
 
 using namespace std;
 using namespace boost;
@@ -220,28 +220,6 @@ int main (int argc, char *argv[])
                 removed_edges_graph = test_removed_edges_graph;
             }
         }
-
-        //create graph matching the icosahedral graph
-        //BGL_FORALL_EDGES_T(edge, graph1, undirectedGraph)
-        //{
-        //    //cout << source(edge, graph1) << " - " << target(edge, graph1) << endl;
-        //    add_edge(mapping[source(edge, graph1)], mapping[target(edge, graph1)], print_graph1);
-        //}
-
-        //add coordinate properties to print_graph1
-        //BGL_FORALL_VERTICES_T(vertex, graph1, undirectedGraph)
-        //{
-        //    unsigned int index = graph1[vertex].index;
-        //    coord3d coord = graph1[vertex].coordinate;
-
-        //    print_graph1[mapping[index]].coordinate = coord;
-        //}
-
-        //create graph of removed edges collection by removing edges from icosahedral graph
-        //BGL_FORALL_EDGES_T(edge, print_graph1, undirectedGraph)
-        //{
-        //    remove_edge(source(edge, print_graph1), target(edge, print_graph1), removed_edges_graph);
-        //}
 
         //save mapped graph to DegreeCollection for later use
         
