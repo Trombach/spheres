@@ -150,7 +150,7 @@ int main (int argc, char *argv[])
 
     undirectedGraph graph2 = ico.getGraph();
     ofstream icoOut;
-    icoOut.open("output/graphs/graph_ico_test.dot");
+    icoOut.open("output/sorted-graphs/graph_ico.dot");
     write_graphviz(icoOut, graph2);//, pos_writer(graph2_coords));
     icoOut.close();
 
