@@ -5,6 +5,7 @@
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/planar_face_traversal.hpp>
 #include <boost/graph/boyer_myrvold_planar_test.hpp>
+#include <boost/graph/connected_components.hpp>
 #include "iop.h"
 #include "geometry.h"
 #include "structure.h"
@@ -430,17 +431,30 @@ int main (int argc, char *argv[])
                         + to_string(num) + "-" + to_string(Nc) + ".xyz");
                 
 
-                //output list of removed edges
+                //read graph of removed edges 
                 undirectedGraph removed_edges_graph 
                     = vertex_face_Degrees_equality_classes[i][j][k].removedEdgesGraph;
+                
+                //calculate number of isolated vertices in removed edges graph
+                int num_isolated_vertices(0);
+                for (auto vd : removed_edges_graph.vertex_set())
+                {
+                    if (removed_edges_graph.out_edge_list(vd).empty()) num_isolated_vertices++;
+                }
+                
+                //calculate components of removed edges graph
+                std::vector<int> component(num_vertices(removed_edges_graph)); 
+                int num_connected_components = boost::connected_components(removed_edges_graph, &component[0]);
 
-                cout << num << " " << vertex_face_Degrees_equality_classes[i][j][k].Nc << " ";
+                cout << num << " " << vertex_face_Degrees_equality_classes[i][j][k].Nc << " " << num_connected_components << " " << num_isolated_vertices << " " << num_connected_components - num_isolated_vertices << " ";
+                //ouput list of removed edges
                 BGL_FORALL_EDGES_T(edge, removed_edges_graph, undirectedGraph)
                 {
                     cout << "(" << source(edge, removed_edges_graph) << "," 
                         << target(edge, removed_edges_graph) << ")";
 
                 }
+
 
                 double distance(0);
                 BGL_FORALL_EDGES_T(edge, removed_edges_graph, undirectedGraph)
