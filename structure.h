@@ -35,25 +35,17 @@ public:
     {}
 
     /* constructor calculates several properties based on coordinates on creation */    
-    structure (int number, std::vector<coord3d> coordinates) :  _energy(0),
-                                                                _number(number), 
-                                                                _coordinates(coordinates), 
-                                                                _hessian(0),
-                                                                _interPartDist(),
-                                                                _bondVector(),
-                                                                _adjMatrix_eigenvalues()
+    structure ( int number, 
+                std::vector<coord3d> coordinates, 
+                bool calcProp = true) : _energy(0),
+                                        _number(number), 
+                                        _hessian(0),
+                                        _interPartDist(),
+                                        _bondVector(),
+                                        _adjMatrix_eigenvalues()
     { 
-        this->shiftToCoM();
-
-        std::vector< std::vector<double> > inertiaTensor = this->momentOfInertia();
-        _momentOfInertia = diag(inertiaTensor);
-
-        matrix3d axis = this->m3d_principalAxis ();
-        this->rotateToPrincipalAxis(axis);
-
-        this->propertyInterPartDist();
-
-        this->propertyDistMatrix();
+        if (calcProp) this->setCoordinates(coordinates);
+        else _coordinates = coordinates;
     }
 
     
@@ -105,7 +97,7 @@ public:
 
     int nAtoms() { return (this->getCoordinates()).size(); }
 
-    void push_back(coord3d spheres) { _coordinates.push_back(spheres); }
+    //void push_back(coord3d spheres) { _coordinates.push_back(spheres); }
 
     structure &operator*= (const double &y) 
     {

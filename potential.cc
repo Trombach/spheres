@@ -22,12 +22,13 @@ pairPotential::pairPotential (void) {}
 
 double pairPotential::calcEnergy (const column_vector &v)
 {
-    structure S;
+    vector<coord3d> coordinates;
     for (long i = 0; i < v.size() / 3; ++i) 
     {
         coord3d sphere(v(3 * i), v(3 * i + 1), v(3 * i + 2));
-        S.push_back(sphere);
+        coordinates.push_back(sphere);
     }
+    structure S(0, coordinates, false);
     double f(0);
     for (int i = 0; i < S.nAtoms(); ++i) {
         for (int j = i + 1; j < S.nAtoms(); ++j) {
@@ -55,12 +56,13 @@ double pairPotential::calcEnergy (structure &S)
 
 const column_vector pairPotential::calcGradient (const column_vector &v)
 {
-    structure S;
+    vector<coord3d> coordinates;
     for (long i = 0; i < v.size() / 3; ++i) 
     {
         coord3d sphere(v(3 * i), v(3 * i + 1), v(3 * i + 2));
-        S.push_back(sphere);
+        coordinates.push_back(sphere);
     }
+    structure S(0, coordinates, false);
     vector<coord3d> gradients (S.nAtoms(), coord3d());
     for (int i = 0; i < S.nAtoms(); i++)
     {
