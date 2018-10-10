@@ -79,14 +79,7 @@ public:
 
         this->propertyDistMatrix();
     }
-    void setMomentOfInertia (std::vector<double> inertiaEigenvalues) { _momentOfInertia = inertiaEigenvalues; }
     void setHessian (std::vector<double> hessianEigenvalues) {_hessian = hessianEigenvalues; }
-    void setInterPartDist (std::vector<double> distances) { _interPartDist = distances;}
-    void setAdjMatrix (std::vector< std::vector<int> > adjMatrix) { _adjMatrix = adjMatrix; }
-    void setBondVector (std::vector<int> bondVector) { _bondVector = bondVector; }
-    void setAdjMatrix_eigenvalues (std::vector<double> eigenvalues) { _adjMatrix_eigenvalues = eigenvalues; }
-    void setDistMatrix (std::vector< std::vector<double> > distMatrix) { _distMatrix = distMatrix; }
-    void setGraph (undirectedGraph uGraph) { _uGraph = uGraph; }
 
 
     void propertyInterPartDist();
@@ -97,7 +90,6 @@ public:
 
     int nAtoms() { return (this->getCoordinates()).size(); }
 
-    //void push_back(coord3d spheres) { _coordinates.push_back(spheres); }
 
     structure &operator*= (const double &y) 
     {
