@@ -351,7 +351,52 @@ ELJ *ELJ::readPotential ()
     return potential;
 }
 
+/*--------------------------------------------------------------------------------------*/
+//                          LJ potential with range cutoff derived class
+/*--------------------------------------------------------------------------------------*/
 
+
+double RangeLJ::E (double distance)
+{
+    if (distance > (_rm * _range)) return 0;
+    return (_epsilon / (_exp1/_exp2 - 1)) * ( (pow (_rm / distance, _exp1)) - (_exp1/_exp2) * (pow (_rm / distance, _exp2)) );
+}
+
+double RangeLJ::dE_dr (double distance)
+{
+    if (distance > (_rm * _range)) return 0;
+    return - (( _epsilon / (_rm * (_exp1/_exp2 - 1)) ) * ( _exp1 * (pow (_rm / distance, _exp1 + 1)) - _exp1 * (pow (_rm / distance, _exp2 + 1)) ));
+}
+
+double RangeLJ::d2E_dr2 (double distance)
+{
+    if (distance > (_rm * _range)) return 0;
+    return _epsilon / (pow (_rm, 2) * (_exp1/_exp2-1)) * ( (pow (_exp1, 2) + _exp1) * pow (_rm / distance, _exp1 + 2) - (_exp1 * _exp2 + _exp1) * pow (_rm / distance, _exp2 + 2) );
+}
+
+RangeLJ *RangeLJ::readPotential ()
+{
+    libconfig::Config cfg;
+    try {
+        cfg.readFile("settings");
+    }
+    catch(const libconfig::FileIOException &fioex) {
+        cerr << "\tI/O error while reading file." << endl;
+    }
+    catch(const libconfig::ParseException &pex) {
+        cerr << "\tParse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
+    }
+    double epsilon, rm, exp1, exp2, range;
+    cfg.lookupValue("potential.epsilon", epsilon);
+    cfg.lookupValue("potential.rm", rm);
+    cfg.lookupValue("potential.exp1", exp1);
+    cfg.lookupValue("potential.exp2", exp2);
+    cfg.lookupValue("potential.range", range);
+
+    RangeLJ *potential = new RangeLJ(epsilon, rm, exp1, exp2, range); 
+
+    return potential;
+}
 /*--------------------------------------------------------------------------------------*/
 //                          main function for testing
 /*--------------------------------------------------------------------------------------*/

@@ -178,6 +178,10 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
         {
             potential_switch = 2;
         }
+        else if (potential == "RangeLJ")
+        {
+            potential_switch = 3;
+        }
         else
         {
             cerr << potential << " is not a valid name for a potential." << endl;

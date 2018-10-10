@@ -85,5 +85,37 @@ class ELJ : public pairPotential
 };
 
 
+/*--------------------------------------------------------------------------------------*/
+//                          LJ potential with range cutoff derived class
+/*--------------------------------------------------------------------------------------*/
 
+class RangeLJ : public pairPotential
+{
+    private:
+        double _epsilon;
+        double _rm;
+        double _exp1;
+        double _exp2;
+        double _range; //in units of _rm
+        double E (double distance);
+        double dE_dr (double distance);
+        double d2E_dr2 (double distance);
+
+    public:
+        RangeLJ() : _epsilon(1),
+                    _rm(1),
+                    _exp1(12),
+                    _exp2(6),
+                    _range(1)
+        {}
+
+        RangeLJ (double epsilon, double rm, double exp1, double exp2, double range) :   _epsilon(epsilon),
+                                                                                        _rm(rm),
+                                                                                        _exp1(exp1),
+                                                                                        _exp2(exp2),
+                                                                                        _range(range)
+        {}
+
+        static RangeLJ *readPotential ();
+};
 #endif

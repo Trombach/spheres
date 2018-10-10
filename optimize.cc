@@ -99,7 +99,12 @@ int main (int argc, char *argv[]) {
         case 2:
             potential.reset( ELJ::readPotential() );
             break;
-
+        case 3:
+            potential.reset( RangeLJ::readPotential() );
+            break;
+        default:
+            cerr << "readsettings returned an unknown status" << endl;
+            return 1;
     }
 
     
