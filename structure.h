@@ -118,20 +118,6 @@ public:
     bool compareCoordinates (structure &y) const;
 
 
-/*--------------------------------------------------------------------------------------*/
-/*                           old optimizer stuff                                        */
-/*--------------------------------------------------------------------------------------*/
-
-    //function to sum over all sphere interactions, change later to work with different potentials
-    double sumOverAllInteractions (const std::vector<double> &p);
-    //function to sum over all gradients to get gradient for each sphere
-    std::vector<coord3d> sumOverAllGradients (const std::vector<double> &p);
-    //initialize minimizer function
-    structure optimize (std::ostream &min, parameter<int> switches, std::vector<double> parameters, parameter<double> opt);
-
-    std::vector< std::vector<double> > hessian (const std::vector<double> &p);
-
-/*--------------------------------------------------------------------------------------*/
 
 
     coord3d centreOfMass ();
