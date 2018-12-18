@@ -14,12 +14,12 @@ typedef dlib::matrix<double,0,1> column_vector;
 class pairPotential 
 {
     private:
-        virtual double E (double distance) {return distance;};
-        virtual double dE_dr (double distance) {return distance;};
-        virtual double d2E_dr2 (double distance) {return distance;};
+        virtual double E (double distance) = 0;
+        virtual double dE_dr (double distance) = 0;
+        virtual double d2E_dr2 (double distance) = 0;
 
     public:
-        pairPotential();
+        virtual ~pairPotential() {};
         double calcEnergy (const column_vector &v);
         double calcEnergy (structure &S);
         const column_vector calcGradient (const column_vector &v);
