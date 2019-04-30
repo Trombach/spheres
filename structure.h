@@ -2,6 +2,7 @@
 #define STRUCTURE
 
 #include <vector>
+#include <random>
 #include "geometry.h"
 #include "lina.h"
 #include "parameter.h"
@@ -48,8 +49,30 @@ public:
         else _coordinates = coordinates;
     }
 
-    
+    structure ( int number) : _number(number)
+    {
+        this->randomize(_number);
+    }    
 
+    void randomize(int number)
+    {
+        std::vector<coord3d> coordinates;
+        std::random_device r;
+        std::default_random_engine generator{r()};
+        for (int i = 0; i < number; i++)
+        {
+            double x[3];
+            for (int j = 0; j < 3; j++)
+            {
+                std::uniform_real_distribution<double> distribution(-1.0,1.0);
+                x[j] = distribution(generator);
+            }
+            coord3d coord(x);
+            coordinates.push_back(coord);
+        }
+        this->setCoordinates(coordinates);
+    }
+    
     int getNumber() const { return _number; }
     double getEnergy() const { return _energy; }
     std::vector<coord3d> getCoordinates() const { return _coordinates; }
