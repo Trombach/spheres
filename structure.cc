@@ -1,3 +1,4 @@
+#include <random>
 #include "structure.h"
 #include "lina.h"
 #include "graph.h"
@@ -332,4 +333,23 @@ vector<coord3d> structure::inv () {
         coord[i] = - _coordinates[i];
     }
     return coord;
+}
+
+void structure::randomize(int number)
+{
+        vector<coord3d> coordinates;
+        random_device r;
+        default_random_engine generator{r()};
+        for (int i = 0; i < number; i++)
+        {
+            double x[3];
+            for (int j = 0; j < 3; j++)
+            {
+                uniform_real_distribution<double> distribution(-1.0,1.0);
+                x[j] = distribution(generator);
+            }
+            coord3d coord(x);
+            coordinates.push_back(coord);
+        }
+        this->setCoordinates(coordinates);
 }
