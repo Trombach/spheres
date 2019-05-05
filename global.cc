@@ -20,7 +20,7 @@ int main ()
 
     hop.run(accept);
 
-    cout << T.total_timing() << endl;
+    cout << "Time: " << T.total_timing() << " s" << endl;
 
     return 0;
 }

@@ -69,15 +69,17 @@ int BasinHopping::run (unique_ptr<AcceptanceTest>& accept)
         }
         else
         {
-            cerr << "Cluster not within spherical container" << endl;
+            //cerr << "Cluster not within spherical container" << endl;
             _currentStep = _previousStep;
         }
 
-        cout << setfill(' ') << setw(10) << left <<
-            _iteration << setw(10) << left <<
-            _previousStep.getEnergy() << setw(10) << left <<
-            _currentStep.getEnergy() << setw(10) << left <<
-            boolalpha << accepted <<
+        cout.precision(5);
+        cout << fixed << left << setprecision(10);
+        cout << setfill(' ')  << left <<
+            _iteration << left <<
+            " oldE = " << left << _previousStep.getEnergy() <<  left <<
+            " newE = " << left << _currentStep.getEnergy() << left <<
+            " accepted = " << boolalpha << accepted <<
             endl;
 
         this->propagate();
