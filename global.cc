@@ -10,15 +10,19 @@ int main ()
 {
     timer T;
 
-    structure cluster(10); 
+    structure cluster(8); 
 
-    BasinHopping hop(cluster);
 
-    unique_ptr<AcceptanceTest> accept;
+    shared_ptr<AcceptanceTest> accept_shared;
     Metropolis* metro = new Metropolis(10);
-    accept.reset(metro);
+    accept_shared.reset(metro);
 
-    hop.run(accept);
+    BasinHopping hop(cluster,accept_shared,1000);
+
+    hop.run();
+
+    cout << hop.nStructures() << endl;
+
 
     cout << "Time: " << T.total_timing() << " s" << endl;
 

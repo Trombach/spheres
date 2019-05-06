@@ -4,25 +4,31 @@
 #include "structure.h"
 #include "potential.h"
 #include "acceptanceTest.h"
+#include "storage.h"
 
 class BasinHopping
 {
     public:
         BasinHopping(   structure initialCoordinates,
+                        std::shared_ptr<AcceptanceTest>& accept, 
                         int nsteps = 1000) :  
             _initialCoordinates(initialCoordinates),
             _previousStep(initialCoordinates),
             _currentStep(initialCoordinates),
             _size(initialCoordinates.nAtoms()),
             _iteration(0),
-            _nsteps(nsteps)
+            _accept(accept),
+            _nsteps(nsteps),
+            _uniqueStructures()
         {}
 
-        int run (std::unique_ptr<AcceptanceTest>& accept);
+        int nStructures() {return _uniqueStructures.getSize();}
+
+        int run ();
 
     private:
         bool checkConf();
-        bool acceptStep (double oldE, double newE, std::unique_ptr<AcceptanceTest>& accept);
+        bool acceptStep (double oldE, double newE);
         void propagate();
 
         const structure _initialCoordinates;
@@ -31,6 +37,8 @@ class BasinHopping
         const int _size;
         int _iteration;
         const int _nsteps;
+        std::shared_ptr<AcceptanceTest> _accept;
+        Storage _uniqueStructures;
 };
 
 #endif

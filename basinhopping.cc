@@ -7,11 +7,12 @@
 #include "potential.h"
 #include "iop.h"
 #include "parameter.h"
+#include "lina.h"
 
 using namespace std;
 
 
-int BasinHopping::run (unique_ptr<AcceptanceTest>& accept) 
+int BasinHopping::run () 
 {
 
     vector<double> p;
@@ -49,29 +50,33 @@ int BasinHopping::run (unique_ptr<AcceptanceTest>& accept)
         _currentStep.setEnergy(potential->calcEnergy(_currentStep)); 
 
         ofstream dummy;
+        dummy.open("out");
         _currentStep = potential->optimize(dummy, _currentStep, switches, opt); 
+        dummy.close();
+        
+        vector< vector<double> >hessian = potential->calcHessian(_currentStep);
+        vector<double> eigenValues = diag(hessian);
+        _currentStep.setHessian(eigenValues);
 
-        if (this->checkConf())
+        if (_currentStep.isMinimum()) //check for true minimum
         {
-            double oldE, newE = _currentStep.getEnergy();
-
-            if (_iteration == 1) {oldE = newE;}
-            else {oldE = _previousStep.getEnergy();}
-
-            if (this->acceptStep(oldE, newE, accept)) 
+            if (this->checkConf()) //check spherical container
             {
-                accepted = true;
+                double oldE, newE = _currentStep.getEnergy();
+
+                if (_iteration == 1) {oldE = newE;}
+                else {oldE = _previousStep.getEnergy();}
+
+                if (this->acceptStep(oldE, newE)) //accept the step
+                {
+                    accepted = true;
+                    _uniqueStructures.addCluster(_currentStep);
+                }
+                else {_currentStep = _previousStep;} //rejected
             }
-            else
-            {
-                _currentStep = _previousStep;
-            }
+            else{_currentStep = _previousStep;} //rejected because spherical container
         }
-        else
-        {
-            //cerr << "Cluster not within spherical container" << endl;
-            _currentStep = _previousStep;
-        }
+
 
         cout.precision(5);
         cout << fixed << left << setprecision(10);
@@ -85,6 +90,15 @@ int BasinHopping::run (unique_ptr<AcceptanceTest>& accept)
         this->propagate();
 
     }
+
+    int n(0);
+    for (auto& i : _uniqueStructures)
+    {
+        cout << i.first << endl;
+        xyzout(i.second, to_string(n) + ".xyz");
+        n++;
+    }
+
 
     return 0;
 }
@@ -109,9 +123,9 @@ void BasinHopping::propagate()
     _currentStep.setCoordinates(coordinates);
 }
 
-bool BasinHopping::acceptStep (double oldE, double newE, unique_ptr<AcceptanceTest>& accept)
+bool BasinHopping::acceptStep (double oldE, double newE)
 {
-    return (*accept)(oldE, newE);
+    return (*_accept)(oldE, newE);
 }
 
 
