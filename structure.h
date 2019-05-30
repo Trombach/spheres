@@ -22,6 +22,7 @@ private:
     std::vector<int> _bondVector;
     std::vector<double> _adjMatrix_eigenvalues;
     undirectedGraph _uGraph;
+    bool _converged;
 
 public:   
     structure() :   _energy(0), 
@@ -31,7 +32,8 @@ public:
                     _hessian(0),
                     _interPartDist(),
                     _bondVector(),
-                    _adjMatrix_eigenvalues()
+                    _adjMatrix_eigenvalues(),
+                    _converged(false)
     {}
 
     /* constructor calculates several properties based on coordinates on creation */    
@@ -42,18 +44,31 @@ public:
                                         _hessian(0),
                                         _interPartDist(),
                                         _bondVector(),
-                                        _adjMatrix_eigenvalues()
+                                        _adjMatrix_eigenvalues(),
+                                        _converged(false)
     { 
         if (calcProp) this->setCoordinates(coordinates);
-        else _coordinates = coordinates;
+        else 
+        {
+            _coordinates = coordinates;
+            _converged = false;
+        }
     }
 
-    structure ( int number) : _number(number)
+    structure ( int number) :   _energy(0),
+                                _number(number),
+                                _hessian(0),
+                                _interPartDist(),
+                                _bondVector(),
+                                _adjMatrix_eigenvalues(),
+                                _converged(false)
     {
         this->randomize(_number);
     }    
 
     void randomize(int number);
+    bool isConverged() {return _converged;}
+    void setConverged() {_converged = true;}
     
     int getNumber() const { return _number; }
     double getEnergy() const { return _energy; }
@@ -72,6 +87,8 @@ public:
     void setCoordinates (std::vector<coord3d> coordinates) 
     { 
         _coordinates = coordinates; 
+        _converged = false;
+
         this->shiftToCoM();
 
         std::vector< std::vector<double> > inertiaTensor = this->momentOfInertia();

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "storage.h"
 #include "structure.h"
+#include "iop.h"
 
 using namespace std;
 
@@ -17,4 +18,19 @@ bool Storage::addCluster (structure &S)
     }
 
     return false;
+}
+
+void Storage::printEnergies(ostream& out)
+{
+    for (auto& i : _mapping) out << i.first << endl; 
+}
+
+void Storage::printStructures()
+{
+    int n(0);
+    for (auto& i : _mapping) 
+    {
+        xyzout (i.second, to_string(n) + ".xyz");
+        n++;
+    }
 }

@@ -71,6 +71,7 @@ namespace dlib {
                     if (_max_iter != 0 && _cur_iter > _max_iter)
                     {
                         *output << "nsteps reached" << std::endl;
+                        throw error("steps exceeded");
                         return false;
                     }
 

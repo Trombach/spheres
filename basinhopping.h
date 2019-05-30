@@ -1,6 +1,7 @@
 #ifndef BASINHOPPING
 #define BASINHOPPING
 
+#include <iostream>
 #include "structure.h"
 #include "potential.h"
 #include "acceptanceTest.h"
@@ -23,6 +24,7 @@ class BasinHopping
         {}
 
         int nStructures() {return _uniqueStructures.getSize();}
+        void printEnergies(std::ostream& out) {_uniqueStructures.printEnergies(out);}
 
         int run ();
 

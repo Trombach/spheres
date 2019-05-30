@@ -27,7 +27,6 @@ class pairPotential
         std::vector< std::vector<double> > calcHessian (structure &S);
         
         structure optimize (std::ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt);
-
 };
 
 

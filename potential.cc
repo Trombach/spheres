@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <libconfig.h++>
+#include <cstring>
 #include "geometry.h"
 #include "structure.h"
 #include "parameter.h"
@@ -194,7 +195,7 @@ structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &s
                 }
                 catch (std::exception &e)
                 {
-                    cerr << "Structure " << S.getNumber() << ": " << e.what() << endl;
+                    //cerr << "Structure " << S.getNumber() << ": " << e.what() << endl;
                     structure newS(S.getNumber(), S.getCoordinates());
                     return newS;
                 }
@@ -210,7 +211,7 @@ structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &s
                 }
                 catch (std::exception &e)
                 {
-                    cerr << "Structure " << S.getNumber() << ": " << e.what() << endl;
+                    //cerr << "Structure " << S.getNumber() << ": " << e.what() << endl;
                     structure newS(S.getNumber(), S.getCoordinates());
                     return newS;
                 }
@@ -240,6 +241,7 @@ structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &s
     min << "g: " << scientific << dlib::length(finalGradient) << endl;
 
     newS.setEnergy(finalEnergy);
+    newS.setConverged();
 
 
     return newS;

@@ -42,6 +42,11 @@ int BasinHopping::run ()
             return 1;
     }
     
+    ofstream dummy;
+    //dummy.open("out");
+
+    float progress;
+
     for (int i = 0; i < _nsteps; i++)
     {
         bool accepted(false);
@@ -49,55 +54,71 @@ int BasinHopping::run ()
         _previousStep.setEnergy(potential->calcEnergy(_previousStep)); 
         _currentStep.setEnergy(potential->calcEnergy(_currentStep)); 
 
-        ofstream dummy;
-        dummy.open("out");
         _currentStep = potential->optimize(dummy, _currentStep, switches, opt); 
-        dummy.close();
-        
-        vector< vector<double> >hessian = potential->calcHessian(_currentStep);
-        vector<double> eigenValues = diag(hessian);
-        _currentStep.setHessian(eigenValues);
 
-        if (_currentStep.isMinimum()) //check for true minimum
+        if (!_currentStep.isConverged()) 
         {
-            if (this->checkConf()) //check spherical container
+            _currentStep = _previousStep; //rejected because optimisation not converged
+        }
+        else
+        {
+            vector< vector<double> >hessian = potential->calcHessian(_currentStep);
+            vector<double> eigenValues = diag(hessian);
+            _currentStep.setHessian(eigenValues);
+
+            if (_currentStep.isMinimum()) //check for true minimum
             {
-                double oldE, newE = _currentStep.getEnergy();
-
-                if (_iteration == 1) {oldE = newE;}
-                else {oldE = _previousStep.getEnergy();}
-
-                if (this->acceptStep(oldE, newE)) //accept the step
+                if (this->checkConf()) //check spherical container
                 {
-                    accepted = true;
-                    _uniqueStructures.addCluster(_currentStep);
+                    double oldE, newE = _currentStep.getEnergy();
+
+                    if (_iteration == 1) {oldE = newE;}
+                    else {oldE = _previousStep.getEnergy();}
+
+                    if (this->acceptStep(oldE, newE)) //accept the step
+                    {
+                        accepted = true;
+                        _uniqueStructures.addCluster(_currentStep);
+                    }
+                    else {_currentStep = _previousStep;} //rejected
                 }
-                else {_currentStep = _previousStep;} //rejected
+                else{_currentStep = _previousStep;} //rejected because spherical container
             }
-            else{_currentStep = _previousStep;} //rejected because spherical container
+            else {_currentStep = _previousStep;} //rejected because of hessian
         }
 
 
-        cout.precision(5);
-        cout << fixed << left << setprecision(10);
-        cout << setfill(' ')  << left <<
-            _iteration << left <<
-            " oldE = " << left << _previousStep.getEnergy() <<  left <<
-            " newE = " << left << _currentStep.getEnergy() << left <<
-            " accepted = " << boolalpha << accepted <<
-            endl;
+        //cout.precision(5);
+        //cout << fixed << left << setprecision(10);
+        //cout << setfill(' ')  << left <<
+        //    _iteration << left <<
+        //    " oldE = " << left << _previousStep.getEnergy() <<  left <<
+        //    " newE = " << left << _currentStep.getEnergy() << left <<
+        //    " accepted = " << boolalpha << accepted <<
+        //    endl;
+        
+
+        int barWidth = 70;
+        progress = i / static_cast<double>(_nsteps);
+        cout << "[";
+        int pos = barWidth * progress;
+        for (int j = 0; j < barWidth; j++)
+        {
+            if (j < pos) cout << "=";
+            else if (j == pos) cout << ">";
+            else cout << " ";
+        }
+        cout << "] " << static_cast<int>(progress * 100.0) << " % N: " << this->nStructures() << "\r";
+        cout.flush();
 
         this->propagate();
 
     }
+    cout << endl;
 
-    int n(0);
-    for (auto& i : _uniqueStructures)
-    {
-        cout << i.first << endl;
-        xyzout(i.second, to_string(n) + ".xyz");
-        n++;
-    }
+    //dummy.close();
+
+    _uniqueStructures.printStructures();
 
 
     return 0;
@@ -116,7 +137,7 @@ void BasinHopping::propagate()
         for (int j = 0; j < 3; j++)
         {
             uniform_real_distribution<double> distribution(-1.0,1.0);
-            i[j] += distribution(generator);
+            i[j] += 0.2 * distribution(generator);
         }
     }
 
