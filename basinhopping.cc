@@ -8,6 +8,7 @@
 #include "iop.h"
 #include "parameter.h"
 #include "lina.h"
+#include "storage.h"
 
 using namespace std;
 
@@ -49,7 +50,7 @@ int BasinHopping::run ()
 
     for (int i = 0; i < _nsteps; i++)
     {
-        bool accepted(false);
+        _accepted = false;
         _iteration++;
         _previousStep.setEnergy(potential->calcEnergy(_previousStep)); 
         _currentStep.setEnergy(potential->calcEnergy(_currentStep)); 
@@ -77,7 +78,7 @@ int BasinHopping::run ()
 
                     if (this->acceptStep(oldE, newE)) //accept the step
                     {
-                        accepted = true;
+                        _accepted = true;
                         _uniqueStructures.addCluster(_currentStep);
                     }
                     else {_currentStep = _previousStep;} //rejected
@@ -108,10 +109,12 @@ int BasinHopping::run ()
             else if (j == pos) cout << ">";
             else cout << " ";
         }
-        cout << "] " << static_cast<int>(progress * 100.0) << " % N: " << this->nStructures() << "\r";
+        cout << "] " << static_cast<int>(progress * 100.0) << " % N: " << this->nStructures() << " step: " << _stepScale << " T: " << _accept->getT() << "\r";
         cout.flush();
 
+        this->updateStep();
         this->propagate();
+
 
     }
     cout << endl;
@@ -137,11 +140,60 @@ void BasinHopping::propagate()
         for (int j = 0; j < 3; j++)
         {
             uniform_real_distribution<double> distribution(-1.0,1.0);
-            i[j] += 0.2 * distribution(generator);
+            i[j] += _stepScale * distribution(generator);
         }
     }
 
     _currentStep.setCoordinates(coordinates);
+}
+
+void BasinHopping::updateStep()
+{
+    if (_iteration == 1) return; 
+
+    _nattempts++;
+    if (_accepted) _naccept++;
+
+    if ( fabs(_currentStep.getEnergy() - _previousStep.getEnergy()) < 1e-4) _nsame++;
+
+    if (_nattempts % _interval == 0)
+    {
+        adjustStep();
+        adjustTemp();
+        resetUpdateStep(); 
+    }
+
+}
+
+void BasinHopping::adjustStep ()
+{
+    double f = 1 - (static_cast<double>(_nsame) / _nattempts);
+    if (f < 0.8) _stepScale *= 1. / 0.95; 
+    else _stepScale *= 0.95; 
+}
+
+
+void BasinHopping::adjustTemp ()
+{
+    double temp = _accept->getT();
+    int ndiff = _nattempts - _nsame;
+    int ndiff_accept = _naccept - _nsame;
+
+    double f(0);
+    if (ndiff == 0) f = 0; 
+    else f = static_cast<double>(ndiff_accept) / ndiff;
+
+    if (f > 0.3) _accept->setT(temp * 0.95);
+    else _accept->setT(temp / 0.95);
+}
+
+
+
+void BasinHopping::resetUpdateStep ()
+{
+    _nattempts = 0;
+    _naccept = 0;
+    _nsame = 0;
 }
 
 bool BasinHopping::acceptStep (double oldE, double newE)
