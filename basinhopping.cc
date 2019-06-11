@@ -162,13 +162,12 @@ void BasinHopping::updateStep()
         adjustTemp();
         resetUpdateStep(); 
     }
-
 }
 
 void BasinHopping::adjustStep ()
 {
     double f = 1 - (static_cast<double>(_nsame) / _nattempts);
-    if (f < 0.8) _stepScale *= 1. / 0.95; 
+    if (f < 0.71) _stepScale /= 0.95; 
     else _stepScale *= 0.95; 
 }
 
@@ -180,10 +179,10 @@ void BasinHopping::adjustTemp ()
     int ndiff_accept = _naccept - _nsame;
 
     double f(0);
-    if (ndiff == 0) f = 0; 
+    if (ndiff == 0) f = 1; 
     else f = static_cast<double>(ndiff_accept) / ndiff;
 
-    if (f > 0.3) _accept->setT(temp * 0.95);
+    if (f > 0.71) _accept->setT(temp * 0.95);
     else _accept->setT(temp / 0.95);
 }
 

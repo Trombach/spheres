@@ -20,7 +20,7 @@ int main (int argc, char *argv[])
     //for (auto& i : coordinates) cout << i << endl;
 
     shared_ptr<AcceptanceTest> accept_shared;
-    Metropolis* metro = new Metropolis(10);
+    Metropolis* metro = new Metropolis();
     accept_shared.reset(metro);
 
     BasinHopping hop(cluster,accept_shared,steps);

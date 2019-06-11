@@ -18,7 +18,7 @@ class AcceptanceTest
 class Metropolis : public AcceptanceTest
 {
     public:
-        Metropolis(double temp) : AcceptanceTest(temp) {}
+        Metropolis(double temp = 5) : AcceptanceTest(temp) {}
         bool operator() (double oldEnergy, double newEnergy);
 };
 
