@@ -27,6 +27,7 @@ class pairPotential
         std::vector< std::vector<double> > calcHessian (structure &S);
         
         structure optimize (std::ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt);
+        std::vector<double> getLowestEvec (std::vector< std::pair< double,std::vector<double> > > V);
 };
 
 

@@ -157,6 +157,18 @@ vector< vector<double> > pairPotential::calcHessian (structure &S)
     return hessianMatrix;
 }
 
+vector<double> pairPotential::getLowestEvec (vector< pair< double,vector<double> > > V)
+{
+    vector<double> evec;
+    sort(V.begin(),V.end());
+    for (auto& i : V)
+    {
+        cout << i.first << endl;
+    }
+    evec = V[6].second;
+        
+    return evec;
+}
 
 /*----------------------------------Optimization----------------------------------------*/
 
