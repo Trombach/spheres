@@ -164,22 +164,24 @@ vector<double> pairPotential::getLowestEvec (vector< pair< double,vector<double>
     for (auto& i : V)
     {
         cout << i.first << endl;
+        if (i.first > 0.001) 
+        {
+            evec = i.second;
+            break;
+        }
     }
-    evec = V[6].second;
         
     return evec;
 }
 
 /*----------------------------------Optimization----------------------------------------*/
 
-structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt)
+structure pairPotential::optimize (ostream &min, structure &S)
 {
     min.precision(16);
 
-    const size_t nsteps = static_cast<const size_t>(opt.get("nsteps"));
-    const double stop_crit = opt.get("convergence");
+    const size_t nsteps = static_cast<const size_t>(_nsteps);
 
-    const int algo_switch = switches.get("algo");
 
     column_vector x((S.nAtoms()) * 3);
     for (int i = 0; i < S.nAtoms(); i++)
@@ -195,14 +197,14 @@ structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &s
     auto df = [this] (column_vector v) -> column_vector { return this->calcGradient(v); };
 
 
-    switch (algo_switch)
+    switch (_algo_switch)
     {
         case 1:
             {
                 try
                 {
                     dlib::find_min( dlib::bfgs_search_strategy(),
-                                    dlib::stop_strategy(stop_crit, nsteps).be_verbose(min),
+                                    dlib::stop_strategy(_stop_crit, nsteps).be_verbose(min),
                                     f, df, x, -(S.nAtoms()) * 1000);
                 }
                 catch (std::exception &e)
@@ -218,7 +220,7 @@ structure pairPotential::optimize (ostream &min, structure &S, parameter<int> &s
                 try
                 {
                     dlib::find_min( dlib::cg_search_strategy(),
-                                    dlib::stop_strategy(stop_crit, nsteps).be_verbose(min),
+                                    dlib::stop_strategy(_stop_crit, nsteps).be_verbose(min),
                                     f, df, x, -(S.nAtoms()) * 1000);
                 }
                 catch (std::exception &e)
@@ -293,12 +295,21 @@ LJ *LJ::readPotential ()
         cerr << "\tParse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
     }
     double epsilon, rm, exp1, exp2;
+    int algo_switch, nsteps;
+    double stop_crit;
+    string algo;
     cfg.lookupValue("potential.epsilon", epsilon);
     cfg.lookupValue("potential.rm", rm);
     cfg.lookupValue("potential.exp1", exp1);
     cfg.lookupValue("potential.exp2", exp2);
+    cfg.lookupValue("opt.nsteps", nsteps);
+    cfg.lookupValue("opt.convergence", stop_crit);
+    cfg.lookupValue("opt.name", algo);
+    if (algo == "BFGS") algo_switch = 1;
+    if (algo == "CG") algo_switch = 2;
 
-    LJ *potential = new LJ(epsilon, rm, exp1, exp2); 
+
+    LJ *potential = new LJ(epsilon, rm, exp1, exp2, algo_switch, stop_crit, nsteps); 
 
     return potential;
 }
@@ -356,7 +367,27 @@ ELJ *ELJ::readPotential ()
         c[n] = c_value;
     }
 
-    ELJ *potential = new ELJ(c);
+    libconfig::Config cfg;
+    try {
+        cfg.readFile("settings");
+    }
+    catch(const libconfig::FileIOException &fioex) {
+        cerr << "\tI/O error while reading file." << endl;
+    }
+    catch(const libconfig::ParseException &pex) {
+        cerr << "\tParse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
+    }
+
+    int algo_switch, nsteps;
+    double stop_crit;
+    string algo;
+    cfg.lookupValue("opt.nsteps", nsteps);
+    cfg.lookupValue("opt.convergence", stop_crit);
+    cfg.lookupValue("opt.name", algo);
+    if (algo == "BFGS") algo_switch = 1;
+    if (algo == "CG") algo_switch = 2;
+
+    ELJ *potential = new ELJ(c, algo_switch, stop_crit, nsteps);
 
     return potential;
 }
@@ -397,13 +428,21 @@ RangeLJ *RangeLJ::readPotential ()
         cerr << "\tParse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << endl;
     }
     double epsilon, rm, exp1, exp2, range;
+    int algo_switch, nsteps;
+    double stop_crit;
+    string algo;
     cfg.lookupValue("potential.epsilon", epsilon);
     cfg.lookupValue("potential.rm", rm);
     cfg.lookupValue("potential.exp1", exp1);
     cfg.lookupValue("potential.exp2", exp2);
     cfg.lookupValue("potential.range", range);
+    cfg.lookupValue("opt.nsteps", nsteps);
+    cfg.lookupValue("opt.convergence", stop_crit);
+    cfg.lookupValue("opt.name", algo);
+    if (algo == "BFGS") algo_switch = 1;
+    if (algo == "CG") algo_switch = 2;
 
-    RangeLJ *potential = new RangeLJ(epsilon, rm, exp1, exp2, range); 
+    RangeLJ *potential = new RangeLJ(epsilon, rm, exp1, exp2, range, algo_switch, stop_crit, nsteps); 
 
     return potential;
 }

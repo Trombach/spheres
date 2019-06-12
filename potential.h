@@ -18,6 +18,19 @@ class pairPotential
         virtual double dE_dr (double distance) = 0;
         virtual double d2E_dr2 (double distance) = 0;
 
+    protected:
+        pairPotential (
+                        const int algo_switch = 1, 
+                        const double stop_crit = 1e-3,
+                        const int nsteps = 1000         ) 
+                        : 
+                        _algo_switch(algo_switch), 
+                        _stop_crit(stop_crit),
+                        _nsteps(nsteps) {}
+        const int _algo_switch;
+        const double _stop_crit;
+        const int _nsteps;
+
     public:
         virtual ~pairPotential() {};
         double calcEnergy (const column_vector &v);
@@ -26,7 +39,7 @@ class pairPotential
         const column_vector calcGradient (structure &S);
         std::vector< std::vector<double> > calcHessian (structure &S);
         
-        structure optimize (std::ostream &min, structure &S, parameter<int> &switches, parameter<double> &opt);
+        structure optimize (std::ostream &min, structure &S);
         std::vector<double> getLowestEvec (std::vector< std::pair< double,std::vector<double> > > V);
 };
 
@@ -50,13 +63,23 @@ class LJ : public pairPotential
         LJ() :  _epsilon(1),
                 _rm(1),
                 _exp1(12),
-                _exp2(6)
+                _exp2(6),
+                pairPotential()
         {}
 
-        LJ (double epsilon, double rm, double exp1, double exp2) : _epsilon(epsilon),
-                                                                   _rm(rm),
-                                                                   _exp1(exp1),
-                                                                   _exp2(exp2)
+        LJ (
+                double epsilon, 
+                double rm, double exp1, 
+                double exp2, 
+                const int algo_switch, 
+                const double stop_crit,
+                const int nsteps        ) 
+                : 
+                _epsilon(epsilon),
+                _rm(rm),
+                _exp1(exp1),
+                _exp2(exp2),
+                pairPotential(algo_switch,stop_crit,nsteps)
         {}
 
         static LJ *readPotential ();
@@ -75,10 +98,17 @@ class ELJ : public pairPotential
         double d2E_dr2 (double distance);
 
     public:
-        ELJ() : _c(30)
+        ELJ() : _c(30), pairPotential()
         {}
 
-        ELJ(std::vector<double> c) : _c(c)
+        ELJ (
+                std::vector<double> c, 
+                const int algo_switch, 
+                const double stop_crit,
+                const int nsteps       ) 
+                : 
+                _c(c),
+                pairPotential(algo_switch,stop_crit,nsteps)
         {} 
 
         static ELJ *readPotential ();
@@ -106,14 +136,26 @@ class RangeLJ : public pairPotential
                     _rm(1),
                     _exp1(12),
                     _exp2(6),
-                    _range(1)
+                    _range(1),
+                    pairPotential()
         {}
 
-        RangeLJ (double epsilon, double rm, double exp1, double exp2, double range) :   _epsilon(epsilon),
-                                                                                        _rm(rm),
-                                                                                        _exp1(exp1),
-                                                                                        _exp2(exp2),
-                                                                                        _range(range)
+        RangeLJ (
+                    double epsilon, 
+                    double rm, 
+                    double exp1, 
+                    double exp2, 
+                    double range,
+                    const int algo_switch,
+                    const double stop_crit, 
+                    const int nsteps       ) 
+                    :   
+                    _epsilon(epsilon),
+                    _rm(rm),
+                    _exp1(exp1),
+                    _exp2(exp2),
+                    _range(range),
+                    pairPotential(algo_switch,stop_crit,nsteps)
         {}
 
         static RangeLJ *readPotential ();

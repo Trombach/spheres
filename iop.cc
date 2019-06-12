@@ -154,8 +154,8 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
     const Setting &root = cfg.getRoot();
 
     string potential, algo;
-    double accuracy(0.1), dforce(1e-3), stepsize(0.01);
-    int potential_switch(0), algo_switch, scaling_switch, output_switch(1);
+    double convergence(1e-3);
+    int potential_switch(0), algo_switch, scaling_switch;
     int nsteps(100);
 
 
@@ -247,26 +247,14 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
         return 0;
     }
 
-    if (cfg.lookupValue("opt.accuracy", accuracy)) {
-        cout << "\t\tAccuracy: " << accuracy << endl;
+
+    if (cfg.lookupValue("opt.convergence", convergence)) {
+        cout << "\t\tConvergence:  " << convergence << endl;
     }
     else {
-        cout << "\t\tAccuracy: " << accuracy << endl;
+        cout << "\t\tConvergence:  " << convergence << endl;
     }
 
-    if (cfg.lookupValue("opt.dforce", dforce)) {
-        cout << "\t\tDforce:  " << dforce << endl;
-    }
-    else {
-        cout << "\t\tDforce:  " << dforce << endl;
-    }
-
-    if (cfg.lookupValue("opt.stepsize", stepsize)) {
-        cout << "\t\tStepsize: " << stepsize << endl;
-    }
-    else {
-        cout << "\t\tStepsize: " << stepsize << endl;
-    }
 
     if (cfg.lookupValue("opt.nsteps", nsteps)) {
         cout << "\t\tNsteps: " << nsteps << endl;
@@ -274,15 +262,12 @@ int readsettings (parameter<double> &opt, vector<double> &p, parameter<int> &swi
     else {
         cout << "\t\tNsteps: " << nsteps << endl;
     }
-    opt.set("accuracy", accuracy); //opt[0] should not be touched, not very important for opt
-    opt.set("convergence", dforce);   //opt[1] 
-    opt.set("stepsize", stepsize); //opt[2]
+    opt.set("convergence", convergence);   //opt[1] 
     opt.set("nsteps", nsteps);   //opt[3]
 
     switches.set("potential", potential_switch); 
     switches.set("algo", algo_switch);
     switches.set("scaling", scaling_switch);
-    switches.set("output", output_switch);
 
     cout << endl;
 

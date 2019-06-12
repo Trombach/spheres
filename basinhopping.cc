@@ -55,7 +55,7 @@ int BasinHopping::run ()
         _previousStep.setEnergy(potential->calcEnergy(_previousStep)); 
         _currentStep.setEnergy(potential->calcEnergy(_currentStep)); 
 
-        _currentStep = potential->optimize(dummy, _currentStep, switches, opt); 
+        _currentStep = potential->optimize(dummy, _currentStep); 
 
         if (!_currentStep.isConverged()) 
         {

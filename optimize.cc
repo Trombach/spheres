@@ -159,7 +159,7 @@ int main (int argc, char *argv[]) {
         threadstream << "Optimization for structure no " << allKS[i].getNumber() << endl;
 
         //threadKS = allKS[i].optimize(threadstream, switches, p, opt);
-        threadKS = potential->optimize(threadstream, allKS[i], switches, opt);
+        threadKS = potential->optimize(threadstream, allKS[i]);
         threadKS.setNumber( allKS[i].getNumber() );
 
 
@@ -259,7 +259,7 @@ int main (int argc, char *argv[]) {
 
             KS.setCoordinates(displacement);
 
-            newKS = potential->optimize(threadstream, KS, switches, opt);
+            newKS = potential->optimize(threadstream, KS);
 
             hessian = potential->calcHessian(newKS);
             eigenValues = diag(hessian);
@@ -330,7 +330,7 @@ int main (int argc, char *argv[]) {
 
             KS.setCoordinates(displacement);
 
-            newKS = potential->optimize(threadstream, KS, switches, opt);
+            newKS = potential->optimize(threadstream, KS);
 
             hessian = potential->calcHessian(newKS);
             eigenValues = diag(hessian);

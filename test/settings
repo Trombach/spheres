@@ -13,12 +13,7 @@ potential: {
 //}
 opt: {
     name = "BFGS";
-    dforce = 1e-16;
-    stepsize = 0.05;
+    convergence = 1e-16;
     nsteps = 1500;
 };
-//output: {
-//	number = [228];
-//	input = true;
-//};
 	
