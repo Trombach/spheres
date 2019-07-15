@@ -2,6 +2,7 @@
 #define POTENTIAL
 
 #include <dlib/optimization.h>
+#include "stop_strategy.h"
 #include "structure.h"
 
 
@@ -21,7 +22,7 @@ class pairPotential
     protected:
         pairPotential (
                         const int algo_switch = 1, 
-                        const double stop_crit = 1e-3,
+                        const double stop_crit = 1e-15,
                         const int nsteps = 1000         ) 
                         : 
                         _algo_switch(algo_switch), 
@@ -38,9 +39,13 @@ class pairPotential
         const column_vector calcGradient (const column_vector &v);
         const column_vector calcGradient (structure &S);
         std::vector< std::vector<double> > calcHessian (structure &S);
+
+        const int getAlgoSwitch() const {return _algo_switch;}
+        const double getStopCrit() const {return _stop_crit;}
+        const int getNsteps() const {return _nsteps;}
         
         structure optimize (std::ostream &min, structure &S);
-        std::vector<double> getLowestEvec (std::vector< std::pair< double,std::vector<double> > > V);
+        std::pair<double,std::vector<double> > getLowestEvec (std::vector< std::pair< double,std::vector<double> > > &V);
 };
 
 

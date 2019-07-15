@@ -157,21 +157,17 @@ vector< vector<double> > pairPotential::calcHessian (structure &S)
     return hessianMatrix;
 }
 
-vector<double> pairPotential::getLowestEvec (vector< pair< double,vector<double> > > V)
+pair<double,vector<double> > pairPotential::getLowestEvec (vector< pair< double,vector<double> > > &V)
 {
-    vector<double> evec;
     sort(V.begin(),V.end());
     for (auto& i : V)
     {
-        cout << i.first << endl;
-        if (i.first > 0.001) 
+        if (i.first > 0.001 || i.first < -0.001) 
         {
-            evec = i.second;
+            return i;
             break;
         }
     }
-        
-    return evec;
 }
 
 /*----------------------------------Optimization----------------------------------------*/
@@ -179,9 +175,6 @@ vector<double> pairPotential::getLowestEvec (vector< pair< double,vector<double>
 structure pairPotential::optimize (ostream &min, structure &S)
 {
     min.precision(16);
-
-    const size_t nsteps = static_cast<const size_t>(_nsteps);
-
 
     column_vector x((S.nAtoms()) * 3);
     for (int i = 0; i < S.nAtoms(); i++)
@@ -204,7 +197,7 @@ structure pairPotential::optimize (ostream &min, structure &S)
                 try
                 {
                     dlib::find_min( dlib::bfgs_search_strategy(),
-                                    dlib::stop_strategy(_stop_crit, nsteps).be_verbose(min),
+                                    dlib::stop_strategy(_stop_crit, _nsteps).be_verbose(min),
                                     f, df, x, -(S.nAtoms()) * 1000);
                 }
                 catch (std::exception &e)
@@ -220,7 +213,7 @@ structure pairPotential::optimize (ostream &min, structure &S)
                 try
                 {
                     dlib::find_min( dlib::cg_search_strategy(),
-                                    dlib::stop_strategy(_stop_crit, nsteps).be_verbose(min),
+                                    dlib::stop_strategy(_stop_crit, _nsteps).be_verbose(min),
                                     f, df, x, -(S.nAtoms()) * 1000);
                 }
                 catch (std::exception &e)
@@ -256,7 +249,6 @@ structure pairPotential::optimize (ostream &min, structure &S)
 
     newS.setEnergy(finalEnergy);
     newS.setConverged();
-
 
     return newS;
 }
