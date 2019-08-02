@@ -5,11 +5,13 @@
 
 using namespace std;
 
-bool Storage::addCluster (structure &S)
+
+template<>
+bool Storage<compareEnergy>::addCluster (structure &S)
 {
     double energy = S.getEnergy();
 
-    energyStructureMap::iterator iter = _mapping.find(energy);
+    typename storageMap<compareEnergy>::iterator iter = _mapping.find(energy);
 
     if (iter == _mapping.end())
     {
@@ -20,12 +22,31 @@ bool Storage::addCluster (structure &S)
     return false;
 }
 
-void Storage::printEnergies(ostream& out)
+template<>
+bool Storage<compareInterPartDist>::addCluster (structure &S)
+{
+    S.propertyInterPartDist();
+    vector<double> dist = S.getInterPartDist();
+
+    typename storageMap<compareInterPartDist>::iterator iter = _mapping.find(dist);
+
+    if (iter == _mapping.end())
+    {
+        _mapping[dist] = S;
+        return true;
+    }
+
+    return false;
+}
+
+template<typename T>
+void Storage<T>::printKeys(ostream& out)
 {
     for (auto& i : _mapping) out << i.first << endl; 
 }
 
-void Storage::printStructures()
+template<typename T>
+void Storage<T>::printStructures()
 {
     int n(0);
     for (auto& i : _mapping) 
@@ -34,3 +55,6 @@ void Storage::printStructures()
         n++;
     }
 }
+
+template class Storage<compareEnergy>;
+template class Storage<compareInterPartDist>;
