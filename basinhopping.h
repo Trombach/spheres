@@ -46,7 +46,6 @@ class BasinHopping
         const int _size;
         const int _nsteps;
         std::shared_ptr<AcceptanceTest> _accept;
-        //StorageByEnergy _uniqueStructures;
         T _uniqueStructures;
 
         bool _accepted;
@@ -62,5 +61,4 @@ class BasinHopping
         void adjustTemp();
         void resetUpdateStep();
 };
-
 #endif
