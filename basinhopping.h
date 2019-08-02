@@ -7,6 +7,7 @@
 #include "acceptanceTest.h"
 #include "storage.h"
 
+template <typename T>
 class BasinHopping
 {
     public:
@@ -30,7 +31,7 @@ class BasinHopping
         {}
 
         int nStructures() {return _uniqueStructures.getSize();}
-        void printEnergies(std::ostream& out) {_uniqueStructures.printEnergies(out);}
+        void printEnergies(std::ostream& out) {_uniqueStructures.printKeys(out);}
 
         int run ();
 
@@ -45,7 +46,8 @@ class BasinHopping
         const int _size;
         const int _nsteps;
         std::shared_ptr<AcceptanceTest> _accept;
-        Storage _uniqueStructures;
+        //StorageByEnergy _uniqueStructures;
+        T _uniqueStructures;
 
         bool _accepted;
         unsigned int _iteration;

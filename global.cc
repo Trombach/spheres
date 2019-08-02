@@ -11,8 +11,15 @@ int main (int argc, char *argv[])
 {
     timer T;
 
+    if (argc < 3)
+    {
+        cerr << "Please provide system size and number of steps. Terminating program." << endl;
+        return 1;
+    }
+
     int n = atoi(argv[1]);
     int steps = atoi(argv[2]);
+    
 
     structure cluster(n); 
 
@@ -23,7 +30,7 @@ int main (int argc, char *argv[])
     Metropolis* metro = new Metropolis();
     accept_shared.reset(metro);
 
-    BasinHopping hop(cluster,accept_shared,steps);
+    BasinHopping<StorageByEnergy> hop(cluster,accept_shared,steps);
 
     hop.run();
 

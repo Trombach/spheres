@@ -12,8 +12,8 @@
 
 using namespace std;
 
-
-int BasinHopping::run () 
+template <typename T>
+int BasinHopping<T>::run () 
 {
 
     vector<double> p;
@@ -127,7 +127,8 @@ int BasinHopping::run ()
     return 0;
 }
 
-void BasinHopping::propagate()
+template <typename T>
+void BasinHopping<T>::propagate()
 {
     _previousStep = _currentStep;
     vector<coord3d> coordinates = _currentStep.getCoordinates();
@@ -147,7 +148,8 @@ void BasinHopping::propagate()
     _currentStep.setCoordinates(coordinates);
 }
 
-void BasinHopping::updateStep()
+template <typename T>
+void BasinHopping<T>::updateStep()
 {
     if (_iteration == 1) return; 
 
@@ -164,7 +166,8 @@ void BasinHopping::updateStep()
     }
 }
 
-void BasinHopping::adjustStep ()
+template <typename T>
+void BasinHopping<T>::adjustStep ()
 {
     double f = 1 - (static_cast<double>(_nsame) / _nattempts);
     if (f < 0.71) _stepScale /= 0.95; 
@@ -172,7 +175,8 @@ void BasinHopping::adjustStep ()
 }
 
 
-void BasinHopping::adjustTemp ()
+template <typename T>
+void BasinHopping<T>::adjustTemp ()
 {
     double temp = _accept->getT();
     int ndiff = _nattempts - _nsame;
@@ -188,21 +192,24 @@ void BasinHopping::adjustTemp ()
 
 
 
-void BasinHopping::resetUpdateStep ()
+template <typename T>
+void BasinHopping<T>::resetUpdateStep ()
 {
     _nattempts = 0;
     _naccept = 0;
     _nsame = 0;
 }
 
-bool BasinHopping::acceptStep (double oldE, double newE)
+template <typename T>
+bool BasinHopping<T>::acceptStep (double oldE, double newE)
 {
     return (*_accept)(oldE, newE);
 }
 
 
 
-bool BasinHopping::checkConf()
+template <typename T>
+bool BasinHopping<T>::checkConf()
 {   
     vector<coord3d> coordinates = _currentStep.getCoordinates();
     
@@ -213,3 +220,6 @@ bool BasinHopping::checkConf()
 
     return true;
 }
+
+template class BasinHopping<StorageByEnergy>;
+template class BasinHopping<StorageByInterPartDist>;
