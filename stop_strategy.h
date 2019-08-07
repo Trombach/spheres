@@ -6,6 +6,10 @@
 #include <dlib/matrix.h>
 #include <dlib/algs.h>
 
+/*
+    This class implements a slightly modified stop strategy for the dlib mnimiser.
+*/
+
 namespace dlib {
 
     class stop_strategy {
@@ -70,14 +74,14 @@ namespace dlib {
                 {
                     if (_max_iter != 0 && _cur_iter > _max_iter)
                     {
-                        *output << "nsteps reached" << std::endl;
+                        if (_verbose) *output << "nsteps reached" << std::endl;
                         throw error("steps exceeded");
                         return false;
                     }
 
                     if (std::abs(funct_value - _prev_funct_value) < _min_delta)
                     {
-                        *output << "Stationary point found" << std::endl;
+                        if (_verbose) *output << "Stationary point found" << std::endl;
                         return false;
                     }
                 }

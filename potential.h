@@ -4,12 +4,72 @@
 #include <dlib/optimization.h>
 #include "stop_strategy.h"
 #include "structure.h"
+#include "globals.h"
 
+/*
+This class handles potentials that depend on the interatomic distance r.
 
-typedef dlib::matrix<double,0,1> column_vector;
+Implementations can be found in the code file "potential.cc".
+
+To implement a new potential a child class has to be derived from the base
+class "pairPotential". This should be done in the header file, while function
+declarations can be moved to the code file.
+
+The base class implements the calculation of energy, gradient and hessian in
+such a way, that the derived classes only need to implement the potential
+specific parameters and distance dependant functions for energy, gradient and
+hessian.
+
+Base class parameters
+---------------------
+
+_algo_switch :
+    Switch optimisation algorithm.
+        1 - BFGS
+        2 - conjugate gradient
+_stop_crit :
+    convergence criterion for energy.
+_nsteps :
+    number of max steps for optimisation.
+
+Base class methods
+------------------
+
+double calcEnergy (const column_vector)
+double calcEnergy (structure) :
+    calculates energy of structure object or column_vector of coordinates.
+const column_vector calcGradient (const column_vector)
+const column_vector calcGradient (structure) :
+    calculates gradient of structure object or column_vector of coordinates.
+std::vector<std::vector<double>> calcHessian (structure) :
+    calculates hessian of structure object.
+structure optimize (std::ostream, structure) :
+    
+
+Virtual methods
+---------------
+!!These methods need to be implemented in the derived class!!
+
+E (double) :
+    calculates the energy for a given distance.
+dE_dr (double) :
+    calculates the first derivative for a given distance.
+d2E_dr2 (double) :
+    calculates the second derivative for a given distance.
+
+Implementation example for Lennard-Jones potential:
+
+    double LJ::E (double distance)
+    {
+        return (_epsilon / (_exp1/_exp2 - 1)) * 
+            ( (pow (_rm / distance, _exp1)) - 
+            (_exp1/_exp2) * (pow (_rm / distance, _exp2)) );
+    }
+*/
+
 
 /*--------------------------------------------------------------------------------------*/
-//                          pair potential base class
+//                          pair potential base class                                   //
 /*--------------------------------------------------------------------------------------*/
 
 class pairPotential 

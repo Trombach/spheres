@@ -8,6 +8,11 @@
 #include <string>
 #include <memory.h>
 
+/*
+These classes handle 3d coordinates (coord3d) and 3x3 matrices (matrix3d).
+
+Taken from FULLERENES program package and slightly modified.
+*/
 
 struct coord3d {
     double x[3];
