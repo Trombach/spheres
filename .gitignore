@@ -43,6 +43,7 @@ match
 potential
 core
 global
+eigenvectorFollowing
 .dep
 getxyz
 ico-subgraph
