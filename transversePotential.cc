@@ -5,6 +5,7 @@
 #include "transversePotential.h"
 #include "lina.h"
 #include "iop.h"
+#include "globals.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ column_vector TransversePotential::getTransverseGradient (structure &S)
     return g - dot(g, _vector) * _vector;
 }
 
-void TransversePotential::calcTransverseDirection( structure &S )
+void TransversePotential::calcTransverseDirection (structure &S)
 {
     vector< vector<double> > hessian = _potential->calcHessian(S);
     
@@ -58,16 +59,7 @@ void TransversePotential::calcTransverseDirection( structure &S )
 
 structure TransversePotential::optimize (structure &S)
 {
-    //calcTransverseDirection(S);
-
-    column_vector x((S.nAtoms()) * 3);
-    for (int i = 0; i < S.nAtoms(); i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            x(3 * i + j) = S[i][j];
-        }
-    }
+    column_vector x = S.getFlattenedCoordinates();
     
 
     auto f = [this] (column_vector v) -> const double {return this->getEnergy(v);};
@@ -80,7 +72,7 @@ structure TransversePotential::optimize (structure &S)
             case 1:
             {
                 dlib::find_min( dlib::bfgs_search_strategy(),
-                                dlib::stop_strategy(_potential->getStopCrit(), _potential->getNsteps()).be_verbose(),
+                                dlib::stop_strategy(_potential->getStopCrit(), _potential->getNsteps()),
                                 f, df, x, -(S.nAtoms()) * 1000);
                 break;
             }
@@ -105,14 +97,9 @@ structure TransversePotential::optimize (structure &S)
         return newS;
     }
 
-    vector<coord3d> newCoordinates;
-    for (long i = 0; i < x.size() / 3; i++)
-    {
-        coord3d sphere (x(3 * i), x(3 * i + 1), x(3 * i + 2));
-        newCoordinates.push_back(sphere);
-    }
+    vector<coord3d> newCoordinates = structure::unflattenCoordinates(x);
 
-    structure newS(S.getNumber(), newCoordinates);
+    structure newS(S.getNumber(), newCoordinates, true);
     double finalEnergy = this->getEnergy(x);
 
     newS.setEnergy(finalEnergy);
@@ -122,8 +109,8 @@ structure TransversePotential::optimize (structure &S)
     cout << "g: " << dlib::length(this->getTrueGradient(x)) << endl;
     vector< vector<double> > hessian = _potential->calcHessian(newS);
     vector<double> eval = diag(hessian);
-    for (auto& i : eval)
-        cout << "H: " << i << endl;
+    //for (auto& i : eval)
+    //    cout << "H: " << i << endl;
 
     return newS;
 }

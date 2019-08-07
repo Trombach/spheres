@@ -9,6 +9,7 @@
 #include "stop_strategy.h"
 #include "potential.h"
 #include "iop.h"
+#include "globals.h"
 
 using namespace std;
 
@@ -176,14 +177,7 @@ structure pairPotential::optimize (ostream &min, structure &S)
 {
     min.precision(16);
 
-    column_vector x((S.nAtoms()) * 3);
-    for (int i = 0; i < S.nAtoms(); i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            x(3 * i + j) = S[i][j];
-        }
-    }
+    column_vector x = S.getFlattenedCoordinates();
 
     
     auto f = [this] (column_vector v) -> const double { return this->calcEnergy(v); };
@@ -232,12 +226,12 @@ structure pairPotential::optimize (ostream &min, structure &S)
             }
     }
 
-    vector<coord3d> newCoordinates;
-    for (long i = 0; i < x.size() / 3; i++)
-    {
-        coord3d sphere (x(3 * i), x(3 * i + 1), x(3 * i + 2));
-        newCoordinates.push_back(sphere);
-    }
+    vector<coord3d> newCoordinates = structure::unflattenCoordinates(x);
+    //for (long i = 0; i < x.size() / 3; i++)
+    //{
+    //    coord3d sphere (x(3 * i), x(3 * i + 1), x(3 * i + 2));
+    //    newCoordinates.push_back(sphere);
+    //}
 
     structure newS(S.getNumber(), newCoordinates);
     double finalEnergy = this->calcEnergy(x);

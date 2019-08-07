@@ -2,6 +2,7 @@
 #include "structure.h"
 #include "lina.h"
 #include "graph.h"
+#include "globals.h"
 
 using namespace std;
 using namespace boost;
@@ -76,6 +77,26 @@ void structure::rotateToPrincipalAxis (matrix3d &principalAxis) {
     _coordinates = newCoord;    
 }   
 
+column_vector structure::getFlattenedCoordinates()
+{
+    column_vector x((this->nAtoms()) * 3);
+    for (int i = 0; i < this->nAtoms(); i++)
+        for (int j = 0; j < 3; j++)
+            x(3 * i + j) = (*this)[i][j];
+
+    return x;
+}
+
+vector<coord3d> structure::unflattenCoordinates (column_vector &v)
+{
+    vector<coord3d> newCoordinates;
+    for (int i = 0; i < v.size() / 3; i++)
+    {
+        coord3d sphere (v(3 * i), v(3 * i + 1), v(3 * i + 2));
+        newCoordinates.push_back(sphere);
+    }
+    return newCoordinates;
+}
 
 
 bool structure::isMinimum () {
