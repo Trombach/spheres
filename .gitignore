@@ -33,7 +33,6 @@ opt
 reopt
 optimize
 energies
-Makefile*
 energystats
 coord
 optCoord
