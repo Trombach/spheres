@@ -1,6 +1,7 @@
+#include <iostream>
 #include "potential.h"
 #include "structure.h"
-#include <iostream>
+#include "globals.h"
 
 class TransversePotential
 {
@@ -17,7 +18,7 @@ class TransversePotential
         void setVector(double &eval, column_vector &v);
         void setVector(double &eval, std::vector<double> &v);
         column_vector getVector() { return _vector; }
-        double get_eval() { return _eval; }
+        double getEval() { return _eval; }
 
         double getEnergy(structure S) {return _potential->calcEnergy(S);}
         double getEnergy(column_vector v) {return _potential->calcEnergy(v);}

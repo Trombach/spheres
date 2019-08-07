@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <dlib/matrix.h>
 #include "geometry.h"
+#include "globals.h"
 
 #define DLIB_USE_LAPACK
 
@@ -82,7 +83,6 @@ vector<pair<double, vector<double> > > diagv (vector< vector<double> > &matrix)
         }
         eval_evec.push_back(make_pair(eval(i), eigv));
     }
-
 
     return eval_evec;
 }

@@ -14,22 +14,10 @@
 #include "timer.h"
 #include "parameter.h"
 #include "potential.h"
+#include "globals.h"
 
 
 using namespace std; 
-
-#define container_output(container) \
-template <typename T> ostream& operator<<(ostream& s, const container<T>& v) \
-    { \
-    s << "{"; \
-    for(typename container<T>::const_iterator x(v.begin());x!=v.end();){ \
-        s << *x; \
-        if(++x!=v.end()) s << ","; \
-    } \
-    s << "}"; \
-    return s; \
-    }
-container_output(vector);
 
 
 //MAIN FUNCTION BEGINS HERE
