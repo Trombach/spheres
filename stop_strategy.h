@@ -7,7 +7,7 @@
 #include <dlib/algs.h>
 
 /*
-    This class implements a slightly modified stop strategy for the dlib mnimiser.
+This class implements a slightly modified stop strategy for the dlib mnimiser.
 */
 
 namespace dlib {

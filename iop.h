@@ -7,6 +7,11 @@
 #include "structure.h"
 #include "parameter.h"
 
+/*
+Functions concerning input and output.
+
+Implementations can be found in "iop.cc".
+*/
 
 void xyzout (structure &outputStructure, const std::string &name = "structure.xyz");
 void xyzoutall (std::vector<structure> &outputStructures, const std::string &name = "all.xyz");

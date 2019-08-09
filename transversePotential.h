@@ -3,6 +3,23 @@
 #include "structure.h"
 #include "globals.h"
 
+/*
+This class wraps a potential and removes the gradient in one direction.
+
+Implementations can be found in "transversePotential.cc".
+
+Parameters
+----------
+
+pairPotential* _potential :
+    potential object. "See potential.h". Should be passed as a shared_ptr.
+column_vector _vector :
+    direction to be removed from the gradient
+double _eval :
+    if _vector corresponds to an eigenvector of the hessian matrix, this can be
+    used to track store the eigenvalue.
+*/
+
 class TransversePotential
 {
     private:

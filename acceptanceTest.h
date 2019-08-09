@@ -1,6 +1,10 @@
 #ifndef ACCEPTANCETEST
 #define ACCEPTANCETEST
 
+/*
+Acceptance test for basinhopping step.  
+*/
+
 class AcceptanceTest
 {
     protected:

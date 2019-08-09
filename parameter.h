@@ -4,6 +4,10 @@
 #include <string>
 #include <map>
 
+/*
+Simple class to store parameters.
+*/
+
 template <typename T> class parameter
 {
     

@@ -3,6 +3,19 @@
 
 #include <ctime>
 
+/*
+Simple class to calculate program timings.
+
+Usage
+-----
+
+* call the constructor at the start of the function you want to time
+
+* to get the current runtime between timing()-calls call timing()
+
+* The total runtime can be accessed by calling total_timing()
+
+*/
 
 //creates object that can keep track of time in program
 class timer 
