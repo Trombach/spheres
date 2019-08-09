@@ -169,6 +169,7 @@ pair<double,vector<double> > pairPotential::getLowestEvec (vector< pair< double,
             break;
         }
     }
+    throw "This should never ever happen! Unreachable reached.";
 }
 
 /*----------------------------------Optimization----------------------------------------*/
