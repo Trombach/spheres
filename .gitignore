@@ -54,3 +54,5 @@ apps/app-GN
 apps/app-allNx
 apps/app-subgraph
 .vscode
+Makefile-*
+Makefile.*
