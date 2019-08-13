@@ -1,5 +1,5 @@
 CC = clang++-6.0
-CCFLAGS = -03 -std=c++11 -fopenmp=libiomp5 
+CCFLAGS = -O3 -std=c++11 -fopenmp=libiomp5 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 MATLIB = ~/dlib-19.2/
 
