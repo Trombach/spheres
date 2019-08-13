@@ -26,7 +26,7 @@ structure EigenvectorFollowing::stepUphill (structure &S)
 {
     double h;
     column_vector v = this->_tPot.getVector();
-        double eval = fabs(_tPot.get_eval());
+        double eval = fabs(_tPot.getEval());
     if (_currentIter == 0) h = 0.3;
     else
     {
