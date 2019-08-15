@@ -23,6 +23,7 @@ $(info APPS = $(APPS))
 OBJDIR = objects
 DEPDIR = .dep
 $(shell mkdir -p $(OBJDIR) >/dev/null)
+$(shell mkdir -p $(OBJDIR)/apps >/dev/null)
 $(shell mkdir -p $(DEPDIR) >/dev/null)
 $(shell mkdir -p $(DEPDIR)/apps >/dev/null)
 
