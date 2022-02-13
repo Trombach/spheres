@@ -1,4 +1,4 @@
-# Program SPHERES
+# Program SPHERES [![DOI](https://zenodo.org/badge/60585736.svg)](https://zenodo.org/badge/latestdoi/60585736)
 
 SPHERES is a program package written in C++ for optimising and analysing cluster structures.
 
