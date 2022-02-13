@@ -1,0 +1,22 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: spheres
+message: 'If you use this software, please cite it as below.'
+type: software
+authors:
+  - given-names: Lukas
+    family-names: Trombach
+    email: TrombachL@gmail.com
+    orcid: 'https://orcid.org/0000-0001-5316-9967'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.6066040
+repository-code: 'https://github.com/Trombach/spheres'
+keywords:
+  - 'optimisation, clusters, monte-carlo'
+license: GPL-3.0
+commit: ee74c3f
+version: '1.1'
+date-released: '2019-08-16'
